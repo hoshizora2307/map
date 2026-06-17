@@ -87,8 +87,8 @@
             </p>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <label style="font-size: 0.8rem; color: #00ff00;">SYS_ACCESS_KEY :</label>
-                <input type="password" id="passkey" style="text-align: center; font-size: 1.3rem; letter-spacing: 3px; border-color: #00ff00; color: #00ff00;" autofocus placeholder="********">
-                <button class="action-btn" onclick="requestSystemAccess()" style="margin-top: 10px; padding: 12px;">CONNECT_TO_CORE();</button>
+                <input type="text" id="passkey" style="text-align: center; font-size: 1.3rem; letter-spacing: 3px; border-color: #00ff00; color: #00ff00;" autofocus placeholder="mondocolo2026">
+                <button type="button" class="action-btn" id="connect-btn">CONNECT_TO_CORE();</button>
             </div>
             <div id="auth-log" style="color: #ff0055; font-size: 0.8rem; margin-top: 15px; text-align: center; font-family: monospace;"></div>
         </div>
@@ -162,26 +162,24 @@
         let map, currentMarkers = [], locationsData = [];
 
         function requestSystemAccess() {
-            const pass = document.getElementById('passkey').value.trim();
+            const pass = document.getElementById('passkey').value.trim().toLowerCase();
             const log = document.getElementById('auth-log');
             log.style.color = "#00ff00"; log.innerText = "AUTHENTICATING... PLEASE WAIT.";
 
-            setTimeout(() => {
-                if (pass === "mondocolo2026") { 
-                    log.innerText = "ACCESS GRANTED. FETCHING DATA...";
-                    setTimeout(() => {
-                        document.getElementById('auth-terminal').style.display = 'none';
-                        document.getElementById('app-root').style.display = 'flex';
-                        try {
-                            initMapSystem();
-                        } catch(mapErr) {}
-                    }, 400);
-                } else {
-                    log.style.color = "#ff0055"; log.innerText = "CRITICAL_ERROR: INVALID_KEY.";
-                    document.getElementById('passkey').value = "";
-                }
-            }, 300);
+            if (pass === "mondocolo2026") { 
+                log.innerText = "ACCESS GRANTED. FETCHING DATA...";
+                document.getElementById('auth-terminal').style.display = 'none';
+                document.getElementById('app-root').style.display = 'flex';
+                try {
+                    initMapSystem();
+                } catch(mapErr) {}
+            } else {
+                log.style.color = "#ff0055"; log.innerText = "CRITICAL_ERROR: INVALID_KEY.";
+                document.getElementById('passkey').value = "";
+            }
         }
+
+        document.getElementById('connect-btn').addEventListener('click', requestSystemAccess);
         document.getElementById('passkey').addEventListener('keypress', (e) => { if(e.key==='Enter') requestSystemAccess(); });
 
         function toggleSidebar() {
