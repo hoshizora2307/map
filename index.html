@@ -1,18 +1,249 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0f2040" />
-    <title>訪問マップ | hoshitokimi</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MONDOCOLO - Facility Map System</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; }
+        /* ハッカー風UIのベーススタイル */
+        body {
+            background-color: #050505;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 15px;
+            border-bottom: 1px solid #00ff00;
+            text-align: center;
+            background-color: #0a0a0a;
+            box-shadow: 0 0 10px #00ff0033;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        /* 検索・フィルターセクション */
+        .search-panel {
+            padding: 15px;
+            background-color: #000;
+            border-bottom: 1px solid #003300;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9rem;
+        }
+
+        select {
+            background-color: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            outline: none;
+            cursor: pointer;
+        }
+
+        select:focus {
+            box-shadow: 0 0 8px #00ff00;
+        }
+
+        /* マップコンテナ */
+        #map {
+            flex-grow: 1;
+            width: 100%;
+            background-color: #000;
+            z-index: 1;
+        }
+
+        /* ポップアップのハッカーカスタマイズ */
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background-color: #0a0a0a !important;
+            color: #00ff00 !important;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 10px #00ff0066;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .leaflet-popup-content {
+            margin: 15px;
+            line-height: 1.5;
+        }
+
+        /* フッター（クレジット） */
+        footer {
+            padding: 10px;
+            text-align: center;
+            background-color: #0a0a0a;
+            border-top: 1px solid #00ff00;
+            font-size: 0.8rem;
+        }
     </style>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+</head>
+<body>
+
+    <header>
+        <h1>[ SYSTEM.MAP_DASHBOARD ]</h1>
+    </header>
+
+    <div class="search-panel">
+        <div class="search-group">
+            <label>開催月 [MONTH]</label>
+            <select id="filter-month">
+                <option value="">ALL</option>
+                <option value="1">1月</option>
+                <option value="2">2月</option>
+                <option value="3">3月</option>
+                <option value="4">4月</option>
+                <option value="5">5月</option>
+                <option value="6">6月</option>
+                <option value="7">7月</option>
+                <option value="8">8月</option>
+                <option value="9">9月</option>
+                <option value="10">10月</option>
+                <option value="11">11月</option>
+                <option value="12">12月</option>
+            </select>
+        </div>
+        <div class="search-group">
+            <label>都道府県 [PREF]</label>
+            <select id="filter-pref">
+                <option value="">ALL</option>
+                <option value="東京都">東京都</option>
+                <option value="長野県">長野県</option>
+                <option value="大阪府">大阪府</option>
+                </select>
+        </div>
+        <div class="search-group">
+            <label>施設カテゴリ [CATEGORY]</label>
+            <select id="filter-category">
+                <option value="">ALL</option>
+                <option value="道の駅">道の駅</option>
+                <option value="JA">JA</option>
+                <option value="イベント">イベント</option>
+                <option value="その他">その他</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <footer>
+        Credit: 株式会社MONDOCOLO | Developer: hoshitokimi Project.
+    </footer>
+
+    <script>
+        // --- 1. マップの初期化 ---
+        // ダークテーマのタイル（CartoDB Dark Matter）を使用
+        const map = L.map('map').setView([36.0, 138.0], 6); // 日本中心付近
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // --- 2. データの定義 (後で手打ち・API連携する想定) ---
+        const locationsData = [
+            { id: 1, lat: 35.6895, lng: 139.6917, name: "新宿イベント会場", manager: "山田 太郎", phone: "03-1234-5678", date: "2026-07-15", month: "7", pref: "東京都", category: "イベント", sales: 1200000 },
+            { id: 2, lat: 36.6485, lng: 138.1942, name: "道の駅 オアシス長野", manager: "佐藤 花子", phone: "026-987-6543", date: "2026-08-10", month: "8", pref: "長野県", category: "道の駅", sales: 450000 },
+            { id: 3, lat: 34.6937, lng: 135.5023, name: "JA大阪ファーム", manager: "鈴木 一郎", phone: "06-1111-2222", date: "2026-07-22", month: "7", pref: "大阪府", category: "JA", sales: 80000 },
+            { id: 4, lat: 35.6580, lng: 139.7016, name: "渋谷ゲリラショップ", manager: "田中 次郎", phone: "03-9999-8888", date: "2026-06-05", month: "6", pref: "東京都", category: "その他", sales: 2500000 }
+        ];
+
+        let currentMarkers = [];
+
+        // --- 3. 売上高に応じたピンの色の決定 ---
+        function getPinColor(sales) {
+            // 売上金額による色の変化（例: 100万以上=赤, 50万以上=黄, それ未満=青）
+            // ハッカーUIに合わせてサイバーな色合いを採用
+            if (sales >= 1000000) return '#ff003c'; // ネオンレッド (高売上)
+            if (sales >= 500000)  return '#ffea00'; // ネオンイエロー (中売上)
+            return '#00e5ff';                       // ネオンシアン (低売上)
+        }
+
+        // --- 4. マップへのピン描画処理 ---
+        function renderMap(data) {
+            // 既存のピンをクリア
+            currentMarkers.forEach(marker => map.removeLayer(marker));
+            currentMarkers = [];
+
+            data.forEach(loc => {
+                const color = getPinColor(loc.sales);
+                
+                // SVGを利用して色を変更可能なカスタムピンを作成
+                const markerHtmlStyles = `
+                    background-color: ${color};
+                    width: 20px;
+                    height: 20px;
+                    display: block;
+                    border-radius: 50%;
+                    box-shadow: 0 0 10px ${color}, 0 0 20px ${color};
+                    border: 2px solid #fff;
+                `;
+                const customIcon = L.divIcon({
+                    className: "custom-pin",
+                    iconAnchor: [10, 10],
+                    popupAnchor: [0, -10],
+                    html: `<span style="${markerHtmlStyles}" />`
+                });
+
+                // マーカーの設置
+                const marker = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
+                
+                // ポップアップの内容設定 (売上高は表示しないが内部データとして保持)
+                const popupContent = `
+                    <strong>[ 施設名 ]</strong><br>${loc.name}<br><br>
+                    <strong>[ 担当者 ]</strong><br>${loc.manager}<br><br>
+                    <strong>[ 電話番号 ]</strong><br><a href="tel:${loc.phone}" style="color:#0f0;">${loc.phone}</a><br><br>
+                    <strong>[ 開催日 ]</strong><br>${loc.date}<br>
+                    <hr style="border-color:#003300;">
+                    <small>カテゴリ: ${loc.category} | 売上: ¥${loc.sales.toLocaleString()}</small>
+                `;
+                marker.bindPopup(popupContent);
+                currentMarkers.push(marker);
+            });
+        }
+
+        // --- 5. 検索（フィルター）機能 ---
+        function filterData() {
+            const monthVal = document.getElementById('filter-month').value;
+            const prefVal = document.getElementById('filter-pref').value;
+            const categoryVal = document.getElementById('filter-category').value;
+
+            const filtered = locationsData.filter(loc => {
+                const matchMonth = (monthVal === "" || loc.month === monthVal);
+                const matchPref = (prefVal === "" || loc.pref === prefVal);
+                const matchCategory = (categoryVal === "" || loc.category === categoryVal);
+                return matchMonth && matchPref && matchCategory;
+            });
+
+            renderMap(filtered);
+        }
+
+        // フィルターイベントのリスナー登録
+        document.getElementById('filter-month').addEventListener('change', filterData);
+        document.getElementById('filter-pref').addEventListener('change', filterData);
+        document.getElementById('filter-category').addEventListener('change', filterData);
+
+        // 初期表示
+        renderMap(locationsData);
+
+    </script>
+</body>
 </html>
