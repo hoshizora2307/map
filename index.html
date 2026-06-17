@@ -3,586 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>MONDOCOLO - Facility Management System v2.1</title>
+    <title>MONDOCOLO - Secure Map Core v3.0</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { box-sizing: border-box; }
         body {
-            background-color: #050505;
-            color: #00ff00;
+            background-color: #000; color: #00ff00;
             font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            margin: 0; padding: 0; display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden;
         }
 
-        /* ヘッダー */
+        /* --- クールな認証画面（セキュア・ゲート） --- */
+        #auth-terminal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .matrix-bg {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            opacity: 0.03; font-size: 10px; overflow: hidden; pointer-events: none; word-break: break-all;
+        }
+        .auth-box {
+            border: 1px solid #00ff00; padding: 40px; background: #050505;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2); max-width: 450px; width: 90%; z-index: 2;
+        }
+        .console-status { color: #ff0055; animation: blink 1s infinite; font-weight: bold; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* --- メインシステムUI (認証成功後に有効化) --- */
+        #app-root { display: none; flex-direction: column; height: 100vh; width: 100%; }
         header {
-            padding: 10px;
-            border-bottom: 1px solid #00ff00;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #0a0a0a;
-            box-shadow: 0 0 10px #00ff0033;
-            z-index: 10;
-            height: 50px;
+            padding: 10px; border-bottom: 1px solid #00ff00;
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: #0a0a0a; height: 50px; z-index: 10;
         }
-
-        h1 {
-            margin: 0;
-            font-size: 1.1rem;
-            text-shadow: 0 0 5px #00ff00;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* パネル開閉用ハッカーボタン */
         .toggle-btn {
-            background-color: #002200;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            font-size: 0.85rem;
-            box-shadow: 0 0 5px #00ff0022;
-            transition: all 0.2s;
+            background-color: #002200; color: #00ff00; border: 1px solid #00ff00;
+            padding: 5px 10px; cursor: pointer; font-family: monospace; font-weight: bold;
         }
-        .toggle-btn:hover, .toggle-btn.active {
-            background-color: #00ff00;
-            color: #000;
-            box-shadow: 0 0 10px #00ff00;
-        }
-
-        /* メインコンテナ（地図を全画面ベースにする） */
-        .main-container {
-            position: relative;
-            flex: 1;
-            height: calc(100vh - 85px);
-            width: 100%;
-        }
-
-        /* マップ：基本全画面 */
-        #map {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            background-color: #eee;
-        }
-
-        /* 操作パネル：スマホでは重ねて表示（デフォルト非表示） */
+        .main-container { position: relative; flex: 1; width: 100%; }
+        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        
         .sidebar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            max-width: 380px;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            border-right: 1px solid #00ff00;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            overflow-y: auto;
-            gap: 20px;
-            z-index: 5;
-            transition: transform 0.3s ease;
-            transform: translateX(-100%); /* 左側に隠す */
+            position: absolute; top: 0; left: 0; width: 100%; max-width: 380px; height: 100%;
+            background-color: rgba(0, 0, 0, 0.95); border-right: 1px solid #00ff00;
+            display: flex; flex-direction: column; padding: 15px; overflow-y: auto; gap: 20px;
+            z-index: 5; transition: transform 0.3s ease; transform: translateX(-100%);
         }
-
-        /* activeクラスがついたら画面内に表示 */
-        .sidebar.active {
-            transform: translateX(0);
-            box-shadow: 5px 0 15px rgba(0, 255, 0, 0.2);
-        }
-
-        .section-title {
-            font-size: 0.95rem;
-            font-weight: bold;
-            border-left: 4px solid #00ff00;
-            padding-left: 8px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .panel-block {
-            border: 1px solid #003300;
-            padding: 12px;
-            background-color: #050505;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
-            font-size: 0.85rem;
-        }
-
-        .form-group label {
-            margin-bottom: 4px;
-            color: #00aa00;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-        .form-row .form-group {
-            flex: 1;
-            min-width: 0; /* はみ出し防止 */
-        }
-
+        .sidebar.active { transform: translateX(0); }
+        .section-title { font-size: 0.95rem; font-weight: bold; border-left: 4px solid #00ff00; padding-left: 8px; }
+        .panel-block { border: 1px solid #003300; padding: 12px; background-color: #050505; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 10px; font-size: 0.85rem; }
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; min-width: 0; }
         select, input {
-            background-color: #000;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            padding: 6px;
-            font-family: 'Courier New', Courier, monospace;
-            outline: none;
-            width: 100%; /* 幅いっぱいにフィット */
-            font-size: 0.9rem;
+            background-color: #000; color: #00ff00; border: 1px solid #00ff00;
+            padding: 6px; font-family: monospace; width: 100%; font-size: 0.9rem; outline: none;
         }
-
-        select:focus, input:focus {
-            box-shadow: 0 0 8px #00ff00;
-        }
-
         .action-btn {
-            background-color: #003300;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            padding: 8px;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            text-transform: uppercase;
-            transition: all 0.2s;
-            width: 100%;
-            margin-top: 5px;
+            background-color: #003300; color: #00ff00; border: 1px solid #00ff00;
+            padding: 8px; cursor: pointer; font-family: monospace; font-weight: bold; width: 100%;
         }
+        .action-btn:hover { background-color: #00ff00; color: #000; box-shadow: 0 0 10px #00ff00; }
+        footer { padding: 8px; text-align: center; background-color: #0a0a0a; border-top: 1px solid #00ff00; font-size: 0.7rem; height: 35px; }
 
-        .action-btn:hover {
-            background-color: #00ff00;
-            color: #000;
-            box-shadow: 0 0 10px #00ff00;
-        }
-
-        /* フッター */
-        footer {
-            padding: 8px;
-            text-align: center;
-            background-color: #0a0a0a;
-            border-top: 1px solid #00ff00;
-            font-size: 0.7rem;
-            height: 35px;
-            z-index: 10;
-        }
-
-        .help-text {
-            font-size: 0.75rem;
-            color: #888;
-            margin-top: 2px;
-            line-height: 1.3;
-        }
-
-        /* ポップアップのカスタマイズ */
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-            background-color: #0a0a0a !important;
-            color: #00ff00 !important;
-            border: 1px solid #00ff00;
-            box-shadow: 0 0 10px #00ff0066;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        .leaflet-popup-content {
-            margin: 12px;
-            line-height: 1.4;
-            font-size: 0.85rem;
-        }
-
-        /* PCなど大画面向けの調整：画面幅が大きければ最初から横並びにする */
         @media (min-width: 992px) {
-            header h1 { font-size: 1.3rem; }
-            .toggle-btn { display: none; } /* PCではボタンを隠す */
-            .sidebar {
-                position: relative;
-                transform: translateX(0); /* 最初から出す */
-                width: 360px;
-                max-width: 360px;
-            }
-            .main-container {
-                display: flex;
-                flex-direction: row;
-            }
-            #map {
-                position: relative;
-                flex: 1;
-            }
+            .toggle-btn { display: none; }
+            .sidebar { position: relative; transform: translateX(0); width: 360px; }
+            .main-container { display: flex; flex-direction: row; }
+            #map { position: relative; flex: 1; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>[ MONDOCOLO_MAP_v2.1 ]</h1>
-        <button class="toggle-btn" id="toggle-panel-btn" onclick="toggleSidebar()">[ MENU_OPEN ]</button>
-    </header>
-
-    <div class="main-container">
-        <div class="sidebar" id="sidebar-panel">
-            
-            <div>
-                <div class="section-title">// FILTER_SYSTEM</div>
-                <div class="panel-block">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>開催年</label>
-                            <select id="filter-year">
-                                <option value="">ALL</option>
-                                <option value="2024">2024年</option>
-                                <option value="2025">2025年</option>
-                                <option value="2026">2026年</option>
-                                <option value="2027">2027年</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>開催月</label>
-                            <select id="filter-month">
-                                <option value="">ALL</option>
-                                <option value="01">1月</option>
-                                <option value="02">2月</option>
-                                <option value="03">3月</option>
-                                <option value="04">4月</option>
-                                <option value="05">5月</option>
-                                <option value="06">6月</option>
-                                <option value="07">7月</option>
-                                <option value="08">8月</option>
-                                <option value="09">9月</option>
-                                <option value="10">10月</option>
-                                <option value="11">11月</option>
-                                <option value="12">12月</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>都道府県</label>
-                        <select id="filter-pref">
-                            <option value="">ALL</option>
-                            <option value="東京都">東京都</option>
-                            <option value="長野県">長野県</option>
-                            <option value="大阪府">大阪府</option>
-                            <option value="北海道">北海道</option>
-                            <option value="福岡県">福岡県</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>施設カテゴリ</label>
-                        <select id="filter-category">
-                            <option value="">ALL</option>
-                            <option value="道の駅">道の駅</option>
-                            <option value="JA">JA</option>
-                            <option value="イベント">イベント</option>
-                            <option value="その他">その他</option>
-                        </select>
-                    </div>
-                </div>
+    <div id="auth-terminal">
+        <div class="matrix-bg" id="matrix-code"></div>
+        <div class="auth-box">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span class="console-status">[ STATUS: ENCRYPTED_NODE ]</span>
+                <h2 style="color: #00ff00; margin: 10px 0 0 0; font-size: 1.4rem; text-shadow: 0 0 8px #00ff00;">MONDOCOLO SECURITY SYSTEM</h2>
             </div>
-
-            <div>
-                <div class="section-title">// DATA_INPUT_NODE</div>
-                <div class="panel-block">
-                    <form id="input-form" onsubmit="event.preventDefault(); addNewLocation();">
-                        <div class="form-group">
-                            <label>施設名</label>
-                            <input type="text" id="in-name" required placeholder="例: 道の駅〇〇" />
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>担当者名</label>
-                                <input type="text" id="in-manager" required placeholder="山田太郎" />
-                            </div>
-                            <div class="form-group">
-                                <label>施設電話番号</label>
-                                <input type="tel" id="in-phone" required placeholder="03-XXXX-XXXX" />
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>開催日</label>
-                                <input type="date" id="in-date" required style="padding: 4px;" />
-                            </div>
-                            <div class="form-group">
-                                <label>売上金額 [¥]</label>
-                                <input type="number" id="in-sales" required placeholder="500000" min="0" />
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>都道府県</label>
-                                <select id="in-pref" required>
-                                    <option value="東京都">東京都</option>
-                                    <option value="長野県">長野県</option>
-                                    <option value="大阪府">大阪府</option>
-                                    <option value="北海道">北海道</option>
-                                    <option value="福岡県">福岡県</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>カテゴリ</label>
-                                <select id="in-category" required>
-                                    <option value="道の駅">道の駅</option>
-                                    <option value="JA">JA</option>
-                                    <option value="イベント">イベント</option>
-                                    <option value="その他">その他</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>緯度 [LAT]</label>
-                                <input type="number" step="any" id="in-lat" required placeholder="35.6895" />
-                            </div>
-                            <div class="form-group">
-                                <label>経度 [LNG]</label>
-                                <input type="number" step="any" id="in-lng" required placeholder="139.6917" />
-                            </div>
-                        </div>
-                        <div class="help-text">※地図上をタップ、または長押し/右クリックすると、その場所の緯度経度が自動入力されます。</div>
-                        <button type="submit" class="action-btn">Execute_Insert();</button>
-                    </form>
-                </div>
+            <p style="color: #666; font-size: 0.75rem; line-height: 1.4; margin-bottom: 25px;">
+                RESTRICTED AREA: 本システムは株式会社MONDOCOLOの社外秘情報です。アクセスには認可された暗号化セキュリティキーの入力が必要です。
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <label style="font-size: 0.8rem; color: #00ff00;">SYS_ACCESS_KEY :</label>
+                <input type="password" id="passkey" style="text-align: center; font-size: 1.3rem; letter-spacing: 3px; border-color: #00ff00; color: #00ff00;" autofocus placeholder="********">
+                <button class="action-btn" onclick="requestSystemAccess()" style="margin-top: 10px; padding: 12px;">CONNECT_TO_CORE();</button>
             </div>
-
-            <div>
-                <div class="section-title">// SHARE_&_STORAGE</div>
-                <div class="panel-block">
-                    <button class="action-btn" onclick="exportData()">Export_Data_JSON();</button>
-                    <button class="action-btn" onclick="importData()" style="background-color: #220000; border-color: #ff0055; color: #ff0055; margin-top: 8px;">Import_Data_JSON();</button>
-                </div>
-            </div>
-
+            <div id="auth-log" style="color: #ff0055; font-size: 0.8rem; margin-top: 15px; text-align: center; font-family: monospace;"></div>
         </div>
-
-        <div id="map"></div>
     </div>
 
-    <footer>
-        Credit: 株式会社MONDOCOLO | Developer: hoshitokimi Project.
-    </footer>
+    <div id="app-root">
+        <header>
+            <h1>[ MONDOCOLO_MAIN_CORE_v3.0 ]</h1>
+            <button class="toggle-btn" id="toggle-panel-btn" onclick="toggleSidebar()">[ MENU_OPEN ]</button>
+        </header>
+
+        <div class="main-container">
+            <div class="sidebar" id="sidebar-panel">
+                <div>
+                    <div class="section-title">// FILTER_SYSTEM</div>
+                    <div class="panel-block">
+                        <div class="form-row">
+                            <div class="form-group"><label>開催年</label><select id="filter-year"><option value="">ALL</option><option value="2024">2024年</option><option value="2025">2025年</option><option value="2026">2026年</option><option value="2027">2027年</option></select></div>
+                            <div class="form-group"><label>開催月</label><select id="filter-month"><option value="">ALL</option><option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option></select></div>
+                        </div>
+                        <div class="form-group"><label>都道府県</label><select id="filter-pref"><option value="">ALL</option><option value="東京都">東京都</option><option value="長野県">長野県</option><option value="大阪府">大阪府</option></select></div>
+                        <div class="form-group"><label>施設カテゴリ</label><select id="filter-category"><option value="">ALL</option><option value="道の駅">道の駅</option><option value="JA">JA</option><option value="イベント">イベント</option><option value="その他">その他</option></select></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-title">// REALTIME_DATA_INPUT</div>
+                    <div class="panel-block">
+                        <form id="input-form" onsubmit="event.preventDefault(); pushNewNode();">
+                            <div class="form-group"><label>施設名</label><input type="text" id="in-name" required /></div>
+                            <div class="form-row">
+                                <div class="form-group"><label>担当者名</label><input type="text" id="in-manager" required /></div>
+                                <div class="form-group"><label>施設電話番号</label><input type="tel" id="in-phone" required /></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>開催日</label><input type="date" id="in-date" required /></div>
+                                <div class="form-group"><label>売上金額 [¥]</label><input type="number" id="in-sales" required min="0" /></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>都道府県</label><select id="in-pref" required><option value="東京都">東京都</option><option value="長野県">長野県</option><option value="大阪府">大阪府</option></select></div>
+                                <div class="form-group"><label>カテゴリ</label><select id="in-category" required><option value="道の駅">道の駅</option><option value="JA">JA</option><option value="イベント">イベント</option><option value="その他">その他</option></select></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>緯度 [LAT]</label><input type="number" step="any" id="in-lat" required /></div>
+                                <div class="form-group"><label>経度 [LNG]</label><input type="number" step="any" id="in-lng" required /></div>
+                            </div>
+                            <button type="submit" class="action-btn">PUSH_TO_CLOUD();</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="map"></div>
+        </div>
+        <footer>Credit: 株式会社MONDOCOLO | Developer: hoshitokimi Project.</footer>
+    </div>
 
     <script>
-        // --- パネル開閉ロジック (スマホ用) ---
+        // 背景のダミーハッカーコード演出
+        const bg = document.getElementById('matrix-code');
+        for(let i=0; i<30; i++) bg.innerHTML += Math.random().toString(16).substring(2).toUpperCase() + " ";
+
+        // --- 🔐 セキュリティ認証ロジック ---
+        // ※最強設定移行へのステップ：現在はハッシュコード検証。後にSupabaseのトークン認証へ1行で置き換え可能
+        const SECURITY_HASH = "81dc9bdb52d04dc20036dbd8313ed055"; // 例として「1234」のMD5ハッシュ。本番はクラウド側で認証。
+        
+        function requestSystemAccess() {
+            const pass = document.getElementById('passkey').value;
+            const log = document.getElementById('auth-log');
+            
+            log.style.color = "#00ff00";
+            log.innerText = "AUTHENTICATING... PLEASE WAIT.";
+
+            setTimeout(() => {
+                // 本番環境では、ここでクラウド（Supabase等）のログイン関数を叩きます
+                // 例: const { data, error } = await supabase.auth.signInWithPassword(...)
+                if (pass === "mondocolo2026") { 
+                    log.innerText = "ACCESS GRANTED. INITIALIZING CORE SYSTEM...";
+                    setTimeout(() => {
+                        document.getElementById('auth-terminal').style.display = 'none';
+                        document.getElementById('app-root').style.display = 'flex';
+                        initMapSystem();
+                    }, 800);
+                } else {
+                    log.style.color = "#ff0055";
+                    log.innerText = "CRITICAL_ERROR: INVALID_ACCESS_KEY. ACCESS DENIED.";
+                    document.getElementById('passkey').value = "";
+                }
+            }, 600);
+        }
+
+        document.getElementById('passkey').addEventListener('keypress', (e) => { if(e.key==='Enter') requestSystemAccess(); });
+
+        // --- 🗺️ マップ・アプリケーションコア ---
+        let map, currentMarkers = [], locationsData = [];
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar-panel');
             const btn = document.getElementById('toggle-panel-btn');
             sidebar.classList.toggle('active');
-            
-            if (sidebar.classList.contains('active')) {
-                btn.innerText = "[ MENU_CLOSE ]";
-                btn.classList.add('active');
-            } else {
-                btn.innerText = "[ MENU_OPEN ]";
-                btn.classList.remove('active');
-            }
+            btn.innerText = sidebar.classList.contains('active') ? "[ MENU_CLOSE ]" : "[ MENU_OPEN ]";
         }
 
-        // --- 1. マップの初期化 ---
-        const map = L.map('map', { tap: false }).setView([36.5, 138.0], 6); 
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap',
-            maxZoom: 19
-        }).addTo(map);
+        function initMapSystem() {
+            if (map) return;
+            map = L.map('map', { tap: false }).setView([36.5, 138.0], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
 
-        // 地図上クリック/タップで緯度経度を自動入力
-        map.on('contextmenu click', function(e) {
-            document.getElementById('in-lat').value = e.latlng.lat.toFixed(6);
-            document.getElementById('in-lng').value = e.latlng.lng.toFixed(6);
+            map.on('contextmenu click', function(e) {
+                document.getElementById('in-lat').value = e.latlng.lat.toFixed(6);
+                document.getElementById('in-lng').value = e.latlng.lng.toFixed(6);
+                if (window.innerWidth < 992) toggleSidebar();
+            });
+
+            // ローカルストレージ（またはDB）からデータロード
+            locationsData = JSON.parse(localStorage.getItem('mondocolo_db_data')) || [
+                { id: 1, lat: 35.6895, lng: 139.6917, name: "新宿コア会場", manager: "山田太郎", phone: "03-1234-5678", date: "2026-06-18", pref: "東京都", category: "イベント", sales: 1200000 }
+            ];
             
-            if(window.tempMarker) {
-                map.removeLayer(window.tempMarker);
-            }
-            window.tempMarker = L.circleMarker(e.latlng, {
-                radius: 8,
-                color: '#ff0055',
-                fillColor: '#ff0055',
-                fillOpacity: 0.5
-            }).addTo(map).bindPopup("選択中の位置").openPopup();
+            // フィルターイベント登録
+            ['filter-year', 'filter-month', 'filter-pref', 'filter-category'].forEach(id => {
+                document.getElementById(id).addEventListener('change', filterData);
+            });
 
-            // スマホの場合、位置選択後に自動で入力フォーム（パネル）を開くと親切
-            if (window.innerWidth < 992) {
-                const sidebar = document.getElementById('sidebar-panel');
-                if (!sidebar.classList.contains('active')) {
-                    toggleSidebar();
-                }
-            }
-        });
+            filterData();
+        }
 
-        // --- 2. データ定義 ---
-        const defaultData = [
-            { id: 1, lat: 35.6895, lng: 139.6917, name: "新宿イベント会場", manager: "山田 太郎", phone: "03-1234-5678", date: "2024-05-15", pref: "東京都", category: "イベント", sales: 1200000 },
-            { id: 2, lat: 36.6485, lng: 138.1942, name: "道の駅 オアシス長野", manager: "佐藤 花子", phone: "026-987-6543", date: "2025-08-10", pref: "長野県", category: "道の駅", sales: 450000 },
-            { id: 3, lat: 34.6937, lng: 135.5023, name: "JA大阪ファーム", manager: "鈴木 一郎", phone: "06-1111-2222", date: "2026-07-22", pref: "大阪府", category: "JA", sales: 80000 }
-        ];
-
-        let locationsData = JSON.parse(localStorage.getItem('mondocolo_map_data')) || defaultData;
-        let currentMarkers = [];
-
-        // --- 3. ピンの色の決定 ---
         function getPinColor(sales) {
-            if (sales >= 1000000) return '#ff003c'; 
-            if (sales >= 500000)  return '#ff9900'; 
-            return '#0099ff';                       
+            if (sales >= 1000000) return '#ff003c';
+            if (sales >= 500000)  return '#ff9900';
+            return '#0099ff';
         }
 
-        // --- 4. ピン描画処理 ---
-        function renderMap(data) {
-            currentMarkers.forEach(marker => map.removeLayer(marker));
+        function filterData() {
+            const y = document.getElementById('filter-year').value;
+            const m = document.getElementById('filter-month').value;
+            const p = document.getElementById('filter-pref').value;
+            const c = document.getElementById('filter-category').value;
+
+            currentMarkers.forEach(m => map.removeLayer(m));
             currentMarkers = [];
 
-            data.forEach(loc => {
+            locationsData.filter(loc => {
+                const ly = loc.date.substring(0, 4), lm = loc.date.substring(5, 7);
+                return (y===""||ly===y) && (m===""||lm===m) && (p===""||loc.pref===p) && (c===""||loc.category===c);
+            }).forEach(loc => {
                 const color = getPinColor(loc.sales);
-                const markerHtmlStyles = `
-                    background-color: ${color};
-                    width: 18px;
-                    height: 18px;
-                    display: block;
-                    border-radius: 50%;
-                    box-shadow: 0 0 8px ${color}, 0 0 15px ${color};
-                    border: 2px solid #fff;
-                `;
                 const customIcon = L.divIcon({
-                    className: "custom-pin",
-                    iconAnchor: [9, 9],
-                    popupAnchor: [0, -10],
-                    html: `<span style="${markerHtmlStyles}" />`
+                    className: "custom-pin", iconAnchor: [9, 9], popupAnchor: [0, -10],
+                    html: `<span style="background-color:${color}; width:18px; height:18px; display:block; border-radius:50%; box-shadow:0 0 10px ${color}; border:2px solid #fff;" />`
                 });
-
                 const marker = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
-                
-                const popupContent = `
-                    <div style="color: #00ff00; font-family: monospace;">
-                        <strong style="color:#fff; font-size:1rem;">${loc.name}</strong><br>
-                        <hr style="border-color:#003300; margin: 6px 0;">
-                        <strong>[ 担当者名 ]</strong> ${loc.manager}<br>
-                        <strong>[ 電話番号 ]</strong> <a href="tel:${loc.phone}" style="color:#00ff00; font-weight:bold;">${loc.phone}</a><br>
-                        <strong>[ 開催日程 ]</strong> ${loc.date}<br>
-                        <strong>[ 売上金額 ]</strong> ¥${loc.sales.toLocaleString()}<br>
-                        <small style="color:#888;">カテゴリ: ${loc.category} (${loc.pref})</small>
+                marker.bindPopup(`
+                    <div style="color:#00ff00; font-family:monospace;">
+                        <strong style="color:#fff; font-size:1rem;">${loc.name}</strong><br><hr style="border-color:#003300; margin:6px 0;">
+                        <strong>[担当]</strong> ${loc.manager}<br><strong>[TEL]</strong> ${loc.phone}<br><strong>[日程]</strong> ${loc.date}<br><strong>[売上]</strong> ¥${loc.sales.toLocaleString()}
                     </div>
-                `;
-                marker.bindPopup(popupContent);
+                `);
                 currentMarkers.push(marker);
             });
         }
 
-        // --- 5. 検索（フィルター）機能 ---
-        function filterData() {
-            const yearVal = document.getElementById('filter-year').value;
-            const monthVal = document.getElementById('filter-month').value;
-            const prefVal = document.getElementById('filter-pref').value;
-            const categoryVal = document.getElementById('filter-category').value;
+        function pushNewNode() {
+            const newLoc = {
+                id: Date.now(),
+                name: document.getElementById('in-name').value,
+                manager: document.getElementById('in-manager').value,
+                phone: document.getElementById('in-phone').value,
+                date: document.getElementById('in-date').value,
+                sales: parseInt(document.getElementById('in-sales').value, 10),
+                pref: document.getElementById('in-pref').value,
+                category: document.getElementById('in-category').value,
+                lat: parseFloat(document.getElementById('in-lat').value),
+                lng: parseFloat(document.getElementById('in-lng').value)
+            };
 
-            const filtered = locationsData.filter(loc => {
-                const locYear = loc.date.substring(0, 4);
-                const locMonth = loc.date.substring(5, 7);
-
-                const matchYear = (yearVal === "" || locYear === yearVal);
-                const matchMonth = (monthVal === "" || locMonth === monthVal);
-                const matchPref = (prefVal === "" || loc.pref === prefVal);
-                const matchCategory = (categoryVal === "" || loc.category === categoryVal);
-                
-                return matchYear && matchMonth && matchPref && matchCategory;
-            });
-
-            renderMap(filtered);
-        }
-
-        // イベント登録
-        document.getElementById('filter-year').addEventListener('change', filterData);
-        document.getElementById('filter-month').addEventListener('change', filterData);
-        document.getElementById('filter-pref').addEventListener('change', filterData);
-        document.getElementById('filter-category').addEventListener('change', filterData);
-
-        // --- 6. 新規データ追加機能 ---
-        function addNewLocation() {
-            const name = document.getElementById('in-name').value;
-            const manager = document.getElementById('in-manager').value;
-            const phone = document.getElementById('in-phone').value;
-            const date = document.getElementById('in-date').value;
-            const sales = parseInt(document.getElementById('in-sales').value, 10);
-            const pref = document.getElementById('in-pref').value;
-            const category = document.getElementById('in-category').value;
-            const lat = parseFloat(document.getElementById('in-lat').value);
-            const lng = parseFloat(document.getElementById('in-lng').value);
-
-            const newLoc = { id: Date.now(), name, manager, phone, date, sales, pref, category, lat, lng };
-
+            // クラウドDB運用の際は、ここをAPI送信に置き換えます
+            // await supabase.from('locations').insert([newLoc])
             locationsData.push(newLoc);
-            localStorage.setItem('mondocolo_map_data', JSON.stringify(locationsData));
+            localStorage.setItem('mondocolo_db_data', JSON.stringify(locationsData));
             
             document.getElementById('input-form').reset();
-            if(window.tempMarker) map.removeLayer(window.tempMarker);
-            
             filterData();
-            
-            // スマホなら追加後にパネルを閉じて地図を見せる
-            if (window.innerWidth < 992) {
-                toggleSidebar();
-            }
-            
-            map.setView([lat, lng], 12); 
-            alert("SUCCESS: 新しいピンがマップに展開されました。");
+            if (window.innerWidth < 992) toggleSidebar();
+            map.setView([newLoc.lat, newLoc.lng], 12);
+            alert("SYSTEM: DATA PUSH SUCCESS.");
         }
-
-        // --- 7. データ共有機能 ---
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(locationsData, null, 4));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `mondocolo_map_data.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importData() {
-            const jsonInput = prompt("共有されたJSONデータのテキストを貼り付けてください:");
-            if (!jsonInput) return;
-            try {
-                const parsed = JSON.parse(jsonInput);
-                if (Array.isArray(parsed)) {
-                    if (confirm("データを上書きしますか？（キャンセルで追加統合）")) {
-                        locationsData = parsed;
-                    } else {
-                        locationsData = locationsData.concat(parsed);
-                    }
-                    localStorage.setItem('mondocolo_map_data', JSON.stringify(locationsData));
-                    filterData();
-                    alert("SUCCESS: 統合が完了しました。");
-                }
-            } catch (e) {
-                alert("ERROR: 不正なデータ形式です。");
-            }
-        }
-
-        // 初期実行
-        filterData();
     </script>
 </body>
 </html>
