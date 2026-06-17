@@ -150,7 +150,6 @@
         for(let i=0; i<30; i++) bg.innerHTML += Math.random().toString(16).substring(2).toUpperCase() + " ";
 
         const SUPABASE_URL = "https://hmlwslnyyppjsuiomfxt.supabase.co";
-        // ⚠️ 下記の "" の中を、必ずSupabase画面のコピーボタンでコピーした「本当の長い文字列」に丸ごと置き換えてください！
         const SUPABASE_KEY = "sb_publishable_fotuWYpXEdjOjalQtkuhfA_g7CiiSmO";
         
         let supabase = null;
@@ -158,9 +157,7 @@
             if(window.supabase && SUPABASE_URL.indexOf("ここに") === -1) {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
-        } catch(e) {
-            console.error("Supabaseの初期化に失敗しました:", e);
-        }
+        } catch(e) { console.error(e); }
 
         let map, currentMarkers = [], locationsData = [];
 
@@ -212,25 +209,26 @@
 
         async function pullCloudData() {
             if(!supabase) {
-                alert("WARNING: Supabaseの設定URLが正しくないか、キーが不完全です。デモデータで起動します。");
-                locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "新宿コア(デモ)", manager: "山田", phone: "000", date: "2026-06-18", pref: "東京都", category: "イベント", sales: 1200000 }];
-                filterData();
+                showDemoData();
                 return;
             }
-
             try {
                 const { data, error } = await supabase.from('locations').select('*');
                 if (error) {
-                    alert("DATABASE ERROR: データの同期に失敗しました。キーが間違っているか、テーブル(locations)が存在しない可能性があります。: " + error.message);
+                    console.error(error);
+                    showDemoData();
                 } else {
                     locationsData = data || [];
                     filterData();
                 }
             } catch(e) {
-                alert("通信エラーが発生しました。デモモードに切り替えます。");
-                locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "通信エラー(デモ)", manager: "システム", phone: "000", date: "2026-06-18", pref: "東京都", category: "イベント", sales: 1200000 }];
-                filterData();
+                showDemoData();
             }
+        }
+
+        function showDemoData() {
+            locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "MONDOCOLOオフィス(デモ)", manager: "管理者", phone: "000-000-0000", date: "2026-06-18", pref: "東京都", category: "その他", sales: 1200000 }];
+            filterData();
         }
 
         function getPinColor(sales) {
@@ -285,7 +283,7 @@
             if(supabase) {
                 const { error } = await supabase.from('locations').insert([newLoc]);
                 if (error) {
-                    alert("PUSH FAILED: クラウドへの送信に失敗。 " + error.message);
+                    alert("PUSH FAILED: " + error.message);
                     return;
                 }
                 await pullCloudData();
