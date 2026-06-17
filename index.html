@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>MONDOCOLO - Secure Map Core v3.0</title>
+    <title>MONDOCOLO - Cloud Secure Map v3.5</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -15,8 +16,6 @@
             margin: 0; padding: 0; display: flex; flex-direction: column;
             height: 100vh; overflow: hidden;
         }
-
-        /* --- クールな認証画面（セキュア・ゲート） --- */
         #auth-terminal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 10000;
@@ -32,8 +31,6 @@
         }
         .console-status { color: #ff0055; animation: blink 1s infinite; font-weight: bold; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        /* --- メインシステムUI (認証成功後に有効化) --- */
         #app-root { display: none; flex-direction: column; height: 100vh; width: 100%; }
         header {
             padding: 10px; border-bottom: 1px solid #00ff00;
@@ -45,8 +42,7 @@
             padding: 5px 10px; cursor: pointer; font-family: monospace; font-weight: bold;
         }
         .main-container { position: relative; flex: 1; width: 100%; }
-        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        
+        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background-color: #eee; }
         .sidebar {
             position: absolute; top: 0; left: 0; width: 100%; max-width: 380px; height: 100%;
             background-color: rgba(0, 0, 0, 0.95); border-right: 1px solid #00ff00;
@@ -69,7 +65,6 @@
         }
         .action-btn:hover { background-color: #00ff00; color: #000; box-shadow: 0 0 10px #00ff00; }
         footer { padding: 8px; text-align: center; background-color: #0a0a0a; border-top: 1px solid #00ff00; font-size: 0.7rem; height: 35px; }
-
         @media (min-width: 992px) {
             .toggle-btn { display: none; }
             .sidebar { position: relative; transform: translateX(0); width: 360px; }
@@ -84,8 +79,8 @@
         <div class="matrix-bg" id="matrix-code"></div>
         <div class="auth-box">
             <div style="text-align: center; margin-bottom: 20px;">
-                <span class="console-status">[ STATUS: ENCRYPTED_NODE ]</span>
-                <h2 style="color: #00ff00; margin: 10px 0 0 0; font-size: 1.4rem; text-shadow: 0 0 8px #00ff00;">MONDOCOLO SECURITY SYSTEM</h2>
+                <span class="console-status">[ STATUS: CLOUD_ENCRYPTED ]</span>
+                <h2 style="color: #00ff00; margin: 10px 0 0 0; font-size: 1.4rem; text-shadow: 0 0 8px #00ff00;">MONDOCOLO CLOUD CORE</h2>
             </div>
             <p style="color: #666; font-size: 0.75rem; line-height: 1.4; margin-bottom: 25px;">
                 RESTRICTED AREA: 本システムは株式会社MONDOCOLOの社外秘情報です。アクセスには認可された暗号化セキュリティキーの入力が必要です。
@@ -101,7 +96,7 @@
 
     <div id="app-root">
         <header>
-            <h1>[ MONDOCOLO_MAIN_CORE_v3.0 ]</h1>
+            <h1>[ MONDOCOLO_MAIN_CORE_v3.5 ]</h1>
             <button class="toggle-btn" id="toggle-panel-btn" onclick="toggleSidebar()">[ MENU_OPEN ]</button>
         </header>
 
@@ -114,7 +109,7 @@
                             <div class="form-group"><label>開催年</label><select id="filter-year"><option value="">ALL</option><option value="2024">2024年</option><option value="2025">2025年</option><option value="2026">2026年</option><option value="2027">2027年</option></select></div>
                             <div class="form-group"><label>開催月</label><select id="filter-month"><option value="">ALL</option><option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option></select></div>
                         </div>
-                        <div class="form-group"><label>都道府県</label><select id="filter-pref"><option value="">ALL</option><option value="東京都">東京都</option><option value="長野県">長野県</option><option value="大阪府">大阪府</option></select></div>
+                        <div class="form-group"><label>都道府県</label><select id="filter-pref"><option value="">ALL</option><option value="東京都">東京都</option><option value="長野県">長野県</option><option value="大阪府">大阪府</option><option value="北海道">北海道</option><option value="福岡県">福岡県</option></select></div>
                         <div class="form-group"><label>施設カテゴリ</label><select id="filter-category"><option value="">ALL</option><option value="道の駅">道の駅</option><option value="JA">JA</option><option value="イベント">イベント</option><option value="その他">その他</option></select></div>
                     </div>
                 </div>
@@ -133,14 +128,14 @@
                                 <div class="form-group"><label>売上金額 [¥]</label><input type="number" id="in-sales" required min="0" /></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>都道府県</label><select id="in-pref" required><option value="東京都">東京都</option><option value="長野県">長野県</option><option value="大阪府">大阪府</option></select></div>
+                                <div class="form-group"><label>都道府県</label><select id="in-pref" required><option value="東京都">東京都</option><option value="長野県">長野県</option><option value="大阪府">大阪府</option><option value="北海道">北海道</option><option value="福岡県">福岡県</option></select></div>
                                 <div class="form-group"><label>カテゴリ</label><select id="in-category" required><option value="道の駅">道の駅</option><option value="JA">JA</option><option value="イベント">イベント</option><option value="その他">その他</option></select></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group"><label>緯度 [LAT]</label><input type="number" step="any" id="in-lat" required /></div>
                                 <div class="form-group"><label>経度 [LNG]</label><input type="number" step="any" id="in-lng" required /></div>
                             </div>
-                            <button type="submit" class="action-btn">PUSH_TO_CLOUD();</button>
+                            <button type="submit" class="action-btn">PUSH_TO_SUPABASE();</button>
                         </form>
                     </div>
                 </div>
@@ -151,43 +146,47 @@
     </div>
 
     <script>
-        // 背景のダミーハッカーコード演出
+        // 背景のダミーコード演出
         const bg = document.getElementById('matrix-code');
         for(let i=0; i<30; i++) bg.innerHTML += Math.random().toString(16).substring(2).toUpperCase() + " ";
 
-        // --- 🔐 セキュリティ認証ロジック ---
-        // ※最強設定移行へのステップ：現在はハッシュコード検証。後にSupabaseのトークン認証へ1行で置き換え可能
-        const SECURITY_HASH = "81dc9bdb52d04dc20036dbd8313ed055"; // 例として「1234」のMD5ハッシュ。本番はクラウド側で認証。
+        // ⚠️【最重要】ここにSupabaseで取得したあなたのURLとキーを貼り付けてください！
+        const SUPABASE_URL = "ここにYOUR_SUPABASE_URLを貼り付け";
+        const SUPABASE_KEY = "ここにYOUR_SUPABASE_ANON_KEYを貼り付け";
         
+        // Supabaseクライアントの初期化
+        const supabase = signup_or_init();
+        function signup_or_init(){
+            if(SUPABASE_URL.indexOf("ここに") === -1) {
+                return window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return null;
+        }
+
+        let map, currentMarkers = [], locationsData = [];
+
+        // 🔐 認証ゲート
         function requestSystemAccess() {
             const pass = document.getElementById('passkey').value;
             const log = document.getElementById('auth-log');
-            
-            log.style.color = "#00ff00";
-            log.innerText = "AUTHENTICATING... PLEASE WAIT.";
+            log.style.color = "#00ff00"; log.innerText = "AUTHENTICATING... PLEASE WAIT.";
 
             setTimeout(() => {
-                // 本番環境では、ここでクラウド（Supabase等）のログイン関数を叩きます
-                // 例: const { data, error } = await supabase.auth.signInWithPassword(...)
+                // パスワードチェック (社内共有パスワード)
                 if (pass === "mondocolo2026") { 
-                    log.innerText = "ACCESS GRANTED. INITIALIZING CORE SYSTEM...";
+                    log.innerText = "ACCESS GRANTED. FETCHING CLOUD DATA...";
                     setTimeout(() => {
                         document.getElementById('auth-terminal').style.display = 'none';
                         document.getElementById('app-root').style.display = 'flex';
                         initMapSystem();
-                    }, 800);
+                    }, 600);
                 } else {
-                    log.style.color = "#ff0055";
-                    log.innerText = "CRITICAL_ERROR: INVALID_ACCESS_KEY. ACCESS DENIED.";
+                    log.style.color = "#ff0055"; log.innerText = "CRITICAL_ERROR: INVALID_KEY.";
                     document.getElementById('passkey').value = "";
                 }
-            }, 600);
+            }, 500);
         }
-
         document.getElementById('passkey').addEventListener('keypress', (e) => { if(e.key==='Enter') requestSystemAccess(); });
-
-        // --- 🗺️ マップ・アプリケーションコア ---
-        let map, currentMarkers = [], locationsData = [];
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar-panel');
@@ -196,7 +195,8 @@
             btn.innerText = sidebar.classList.contains('active') ? "[ MENU_CLOSE ]" : "[ MENU_OPEN ]";
         }
 
-        function initMapSystem() {
+        // 🗺️ マップ初期化とクラウドデータ取得
+        async function initMapSystem() {
             if (map) return;
             map = L.map('map', { tap: false }).setView([36.5, 138.0], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
@@ -207,17 +207,30 @@
                 if (window.innerWidth < 992) toggleSidebar();
             });
 
-            // ローカルストレージ（またはDB）からデータロード
-            locationsData = JSON.parse(localStorage.getItem('mondocolo_db_data')) || [
-                { id: 1, lat: 35.6895, lng: 139.6917, name: "新宿コア会場", manager: "山田太郎", phone: "03-1234-5678", date: "2026-06-18", pref: "東京都", category: "イベント", sales: 1200000 }
-            ];
-            
-            // フィルターイベント登録
             ['filter-year', 'filter-month', 'filter-pref', 'filter-category'].forEach(id => {
                 document.getElementById(id).addEventListener('change', filterData);
             });
 
-            filterData();
+            // クラウドから最新データをリアルタイムロード
+            await pullCloudData();
+        }
+
+        async function pullCloudData() {
+            if(!supabase) {
+                alert("WARNING: Supabaseの設定URLが未入力です。デモデータで起動します。");
+                locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "新宿コア(デモ)", manager: "山田", phone: "000", date: "2026-06-18", pref: "東京都", category: "イベント", sales: 1200000 }];
+                filterData();
+                return;
+            }
+
+            // Supabaseから全データをセキュアに取得
+            const { data, error } = await supabase.from('locations').select('*');
+            if (error) {
+                alert("DATABASE ERROR: データの同期に失敗しました。" + error.message);
+            } else {
+                locationsData = data || [];
+                filterData();
+            }
         }
 
         function getPinColor(sales) {
@@ -255,9 +268,9 @@
             });
         }
 
-        function pushNewNode() {
+        // クラウドへデータを安全に送信・即時反映
+        async function pushNewNode() {
             const newLoc = {
-                id: Date.now(),
                 name: document.getElementById('in-name').value,
                 manager: document.getElementById('in-manager').value,
                 phone: document.getElementById('in-phone').value,
@@ -269,16 +282,24 @@
                 lng: parseFloat(document.getElementById('in-lng').value)
             };
 
-            // クラウドDB運用の際は、ここをAPI送信に置き換えます
-            // await supabase.from('locations').insert([newLoc])
-            locationsData.push(newLoc);
-            localStorage.setItem('mondocolo_db_data', JSON.stringify(locationsData));
+            if(supabase) {
+                // クラウドへ直接インサート（防壁を通過）
+                const { error } = await supabase.from('locations').insert([newLoc]);
+                if (error) {
+                    alert("PUSH FAILED: クラウドへの送信に失敗。 " + error.message);
+                    return;
+                }
+                await pullCloudData(); // 最新状態に同期
+            } else {
+                newLoc.id = Date.now();
+                locationsData.push(newLoc);
+                filterData();
+            }
             
             document.getElementById('input-form').reset();
-            filterData();
             if (window.innerWidth < 992) toggleSidebar();
             map.setView([newLoc.lat, newLoc.lng], 12);
-            alert("SYSTEM: DATA PUSH SUCCESS.");
+            alert("CLOUD SYSTEM: DATA PUSH SUCCESS.");
         }
     </script>
 </body>
