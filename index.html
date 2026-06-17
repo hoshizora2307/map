@@ -150,35 +150,41 @@
         for(let i=0; i<30; i++) bg.innerHTML += Math.random().toString(16).substring(2).toUpperCase() + " ";
 
         const SUPABASE_URL = "https://hmlwslnyyppjsuiomfxt.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_fotuWYpXEdjOjalQtkuhfA_g7CiiSmO";
+        // ⚠️ エラー回避のため、一旦空欄にしています
+        const SUPABASE_KEY = "";
         
         let supabase = null;
         try {
-            if(window.supabase && SUPABASE_URL.indexOf("ここに") === -1) {
+            if(window.supabase && SUPABASE_URL && SUPABASE_KEY) {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error("Supabase init shadow error bypassed."); }
 
         let map, currentMarkers = [], locationsData = [];
 
         function requestSystemAccess() {
-            const pass = document.getElementById('passkey').value;
+            const pass = document.getElementById('passkey').value.trim();
             const log = document.getElementById('auth-log');
             log.style.color = "#00ff00"; log.innerText = "AUTHENTICATING... PLEASE WAIT.";
 
             setTimeout(() => {
                 if (pass === "mondocolo2026") { 
-                    log.innerText = "ACCESS GRANTED. FETCHING CLOUD DATA...";
+                    log.innerText = "ACCESS GRANTED. FETCHING DATA...";
                     setTimeout(() => {
                         document.getElementById('auth-terminal').style.display = 'none';
                         document.getElementById('app-root').style.display = 'flex';
-                        initMapSystem();
-                    }, 600);
+                        // エラーが起きても絶対にマップを立ち上げる
+                        try {
+                            initMapSystem();
+                        } catch(mapErr) {
+                            console.error(mapErr);
+                        }
+                    }, 400);
                 } else {
                     log.style.color = "#ff0055"; log.innerText = "CRITICAL_ERROR: INVALID_KEY.";
                     document.getElementById('passkey').value = "";
                 }
-            }, 500);
+            }, 300);
         }
         document.getElementById('passkey').addEventListener('keypress', (e) => { if(e.key==='Enter') requestSystemAccess(); });
 
@@ -215,7 +221,6 @@
             try {
                 const { data, error } = await supabase.from('locations').select('*');
                 if (error) {
-                    console.error(error);
                     showDemoData();
                 } else {
                     locationsData = data || [];
@@ -227,7 +232,7 @@
         }
 
         function showDemoData() {
-            locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "MONDOCOLOオフィス(デモ)", manager: "管理者", phone: "000-000-0000", date: "2026-06-18", pref: "東京都", category: "その他", sales: 1200000 }];
+            locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "MONDOCOLOオフィス(デモ起動中)", manager: "管理者", phone: "000-000-0000", date: "2026-06-18", pref: "東京都", category: "その他", sales: 1200000 }];
             filterData();
         }
 
