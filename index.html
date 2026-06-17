@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>MONDOCOLO - Cloud Secure Map v3.5</title>
+    <title>信州マルシェ 開催マップ</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -79,11 +79,11 @@
         <div class="matrix-bg" id="matrix-code"></div>
         <div class="auth-box">
             <div style="text-align: center; margin-bottom: 20px;">
-                <span class="console-status">[ STATUS: CLOUD_ENCRYPTED ]</span>
-                <h2 style="color: #00ff00; margin: 10px 0 0 0; font-size: 1.4rem; text-shadow: 0 0 8px #00ff00;">MONDOCOLO CLOUD CORE</h2>
+                <span class="console-status">[ STATUS: SECURE_PORTAL ]</span>
+                <h2 style="color: #00ff00; margin: 10px 0 0 0; font-size: 1.4rem; text-shadow: 0 0 8px #00ff00;">信州マルシェ 開催マップ</h2>
             </div>
             <p style="color: #666; font-size: 0.75rem; line-height: 1.4; margin-bottom: 25px;">
-                RESTRICTED AREA: 本システムは株式会社MONDOCOLOの社外秘情報です。アクセスには認可された暗号化セキュリティキーの入力が必要です。
+                RESTRICTED AREA: 本システムは関係者専用の情報管理ポータルです。アクセスには認可されたセキュリティキーの入力が必要です。
             </p>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <label style="font-size: 0.8rem; color: #00ff00;">SYS_ACCESS_KEY :</label>
@@ -96,7 +96,7 @@
 
     <div id="app-root">
         <header>
-            <h1>[ MONDOCOLO_MAIN_CORE_v3.5 ]</h1>
+            <h1>[ 信州マルシェ 開催マップ ]</h1>
             <button class="toggle-btn" id="toggle-panel-btn" onclick="toggleSidebar()">[ MENU_OPEN ]</button>
         </header>
 
@@ -142,7 +142,7 @@
             </div>
             <div id="map"></div>
         </div>
-        <footer>Credit: 株式会社MONDOCOLO | Developer: hoshitokimi Project.</footer>
+        <footer>Credit: 信州マルシェ 開催マップポータル</footer>
     </div>
 
     <script>
@@ -150,7 +150,6 @@
         for(let i=0; i<30; i++) bg.innerHTML += Math.random().toString(16).substring(2).toUpperCase() + " ";
 
         const SUPABASE_URL = "https://hmlwslnyyppjsuiomfxt.supabase.co";
-        // ⚠️ エラー回避のため、一旦空欄にしています
         const SUPABASE_KEY = "";
         
         let supabase = null;
@@ -158,7 +157,7 @@
             if(window.supabase && SUPABASE_URL && SUPABASE_KEY) {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
-        } catch(e) { console.error("Supabase init shadow error bypassed."); }
+        } catch(e) {}
 
         let map, currentMarkers = [], locationsData = [];
 
@@ -173,12 +172,9 @@
                     setTimeout(() => {
                         document.getElementById('auth-terminal').style.display = 'none';
                         document.getElementById('app-root').style.display = 'flex';
-                        // エラーが起きても絶対にマップを立ち上げる
                         try {
                             initMapSystem();
-                        } catch(mapErr) {
-                            console.error(mapErr);
-                        }
+                        } catch(mapErr) {}
                     }, 400);
                 } else {
                     log.style.color = "#ff0055"; log.innerText = "CRITICAL_ERROR: INVALID_KEY.";
@@ -232,7 +228,7 @@
         }
 
         function showDemoData() {
-            locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "MONDOCOLOオフィス(デモ起動中)", manager: "管理者", phone: "000-000-0000", date: "2026-06-18", pref: "東京都", category: "その他", sales: 1200000 }];
+            locationsData = [{ id: 1, lat: 36.5, lng: 138.0, name: "長野県拠点(デモデータ)", manager: "管理者", phone: "000-000-0000", date: "2026-06-18", pref: "長野県", category: "その他", sales: 1200000 }];
             filterData();
         }
 
@@ -301,7 +297,7 @@
             document.getElementById('input-form').reset();
             if (window.innerWidth < 992) toggleSidebar();
             map.setView([newLoc.lat, newLoc.lng], 12);
-            alert("CLOUD SYSTEM: DATA PUSH SUCCESS.");
+            alert("SYSTEM: DATA PUSH SUCCESS.");
         }
     </script>
 </body>
