@@ -146,33 +146,30 @@
     </div>
 
     <script>
-        // 背景のダミーコード演出
         const bg = document.getElementById('matrix-code');
         for(let i=0; i<30; i++) bg.innerHTML += Math.random().toString(16).substring(2).toUpperCase() + " ";
 
-        // ⚠️【最重要】ここにSupabaseで取得したあなたのURLとキーを貼り付けてください！
         const SUPABASE_URL = "https://hmlwslnyyppjsuiomfxt.supabase.co";
+        // ⚠️ 下記の "" の中を、必ずSupabase画面のコピーボタンでコピーした「本当の長い文字列」に丸ごと置き換えてください！
         const SUPABASE_KEY = "sb_publishable_fotuWYpXEdjOjalQtkuhfA_g7CiiSmO";
         
-        // Supabaseクライアントの初期化
-        const supabase = signup_or_init();
-        function signup_or_init(){
-            if(SUPABASE_URL.indexOf("ここに") === -1) {
-                return window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabase = null;
+        try {
+            if(window.supabase && SUPABASE_URL.indexOf("ここに") === -1) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
-            return null;
+        } catch(e) {
+            console.error("Supabaseの初期化に失敗しました:", e);
         }
 
         let map, currentMarkers = [], locationsData = [];
 
-        // 🔐 認証ゲート
         function requestSystemAccess() {
             const pass = document.getElementById('passkey').value;
             const log = document.getElementById('auth-log');
             log.style.color = "#00ff00"; log.innerText = "AUTHENTICATING... PLEASE WAIT.";
 
             setTimeout(() => {
-                // パスワードチェック (社内共有パスワード)
                 if (pass === "mondocolo2026") { 
                     log.innerText = "ACCESS GRANTED. FETCHING CLOUD DATA...";
                     setTimeout(() => {
@@ -195,7 +192,6 @@
             btn.innerText = sidebar.classList.contains('active') ? "[ MENU_CLOSE ]" : "[ MENU_OPEN ]";
         }
 
-        // 🗺️ マップ初期化とクラウドデータ取得
         async function initMapSystem() {
             if (map) return;
             map = L.map('map', { tap: false }).setView([36.5, 138.0], 6);
@@ -211,24 +207,28 @@
                 document.getElementById(id).addEventListener('change', filterData);
             });
 
-            // クラウドから最新データをリアルタイムロード
             await pullCloudData();
         }
 
         async function pullCloudData() {
             if(!supabase) {
-                alert("WARNING: Supabaseの設定URLが未入力です。デモデータで起動します。");
+                alert("WARNING: Supabaseの設定URLが正しくないか、キーが不完全です。デモデータで起動します。");
                 locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "新宿コア(デモ)", manager: "山田", phone: "000", date: "2026-06-18", pref: "東京都", category: "イベント", sales: 1200000 }];
                 filterData();
                 return;
             }
 
-            // Supabaseから全データをセキュアに取得
-            const { data, error } = await supabase.from('locations').select('*');
-            if (error) {
-                alert("DATABASE ERROR: データの同期に失敗しました。" + error.message);
-            } else {
-                locationsData = data || [];
+            try {
+                const { data, error } = await supabase.from('locations').select('*');
+                if (error) {
+                    alert("DATABASE ERROR: データの同期に失敗しました。キーが間違っているか、テーブル(locations)が存在しない可能性があります。: " + error.message);
+                } else {
+                    locationsData = data || [];
+                    filterData();
+                }
+            } catch(e) {
+                alert("通信エラーが発生しました。デモモードに切り替えます。");
+                locationsData = [{ id: 1, lat: 35.6895, lng: 139.6917, name: "通信エラー(デモ)", manager: "システム", phone: "000", date: "2026-06-18", pref: "東京都", category: "イベント", sales: 1200000 }];
                 filterData();
             }
         }
@@ -249,6 +249,7 @@
             currentMarkers = [];
 
             locationsData.filter(loc => {
+                if(!loc.date) return false;
                 const ly = loc.date.substring(0, 4), lm = loc.date.substring(5, 7);
                 return (y===""||ly===y) && (m===""||lm===m) && (p===""||loc.pref===p) && (c===""||loc.category===c);
             }).forEach(loc => {
@@ -261,14 +262,13 @@
                 marker.bindPopup(`
                     <div style="color:#00ff00; font-family:monospace;">
                         <strong style="color:#fff; font-size:1rem;">${loc.name}</strong><br><hr style="border-color:#003300; margin:6px 0;">
-                        <strong>[担当]</strong> ${loc.manager}<br><strong>[TEL]</strong> ${loc.phone}<br><strong>[日程]</strong> ${loc.date}<br><strong>[売上]</strong> ¥${loc.sales.toLocaleString()}
+                        <strong>[担当]</strong> ${loc.manager}<br><strong>[TEL]</strong> ${loc.phone}<br><strong>[日程]</strong> ${loc.date}<br><strong>[売上]</strong> ¥${Number(loc.sales).toLocaleString()}
                     </div>
                 `);
                 currentMarkers.push(marker);
             });
         }
 
-        // クラウドへデータを安全に送信・即時反映
         async function pushNewNode() {
             const newLoc = {
                 name: document.getElementById('in-name').value,
@@ -283,13 +283,12 @@
             };
 
             if(supabase) {
-                // クラウドへ直接インサート（防壁を通過）
                 const { error } = await supabase.from('locations').insert([newLoc]);
                 if (error) {
                     alert("PUSH FAILED: クラウドへの送信に失敗。 " + error.message);
                     return;
                 }
-                await pullCloudData(); // 最新状態に同期
+                await pullCloudData();
             } else {
                 newLoc.id = Date.now();
                 locationsData.push(newLoc);
