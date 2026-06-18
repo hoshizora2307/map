@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>MONDOCOLO CLOUD CORE</title>
+    <title>信州マルシェ 開催マップ</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -16,23 +16,7 @@
             margin: 0; padding: 0; display: flex; flex-direction: column;
             height: 100vh; overflow: hidden;
         }
-        #auth-terminal {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 10000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .matrix-bg {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            opacity: 0.03; font-size: 10px; overflow: hidden; pointer-events: none; word-break: break-all;
-        }
-        .auth-box {
-            border: 1px solid #00ff00; padding: 40px; background: #050505;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3); max-width: 450px; width: 90%; z-index: 2;
-            border-radius: 4px;
-        }
-        .console-status { color: #ff0055; animation: blink 1s infinite; font-weight: bold; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        #app-root { display: none; flex-direction: column; height: 100vh; width: 100%; }
+        #app-root { display: flex; flex-direction: column; height: 100vh; width: 100%; }
         header {
             padding: 10px; border-bottom: 1px solid #00ff00;
             display: flex; justify-content: space-between; align-items: center;
@@ -62,7 +46,7 @@
             border-radius: 4px;
         }
         .action-btn {
-            background-color: #00ff00; color: #00; border: 1px solid #00ff00;
+            background-color: #00ff00; color: #000; border: 1px solid #00ff00;
             padding: 14px; cursor: pointer; font-family: monospace; font-weight: bold; width: 100%;
             font-size: 1.1rem; border-radius: 4px; transition: all 0.2s;
         }
@@ -77,25 +61,6 @@
     </style>
 </head>
 <body>
-
-    <div id="auth-terminal">
-        <div class="matrix-bg" id="matrix-code"></div>
-        <div class="auth-box">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <span class="console-status">[ STATUS: CLOUD_ENCRYPTED ]</span>
-                <h2 style="color: #00ff00; margin: 10px 0 0 0; font-size: 1.6rem; text-shadow: 0 0 10px #00ff00; letter-spacing: 1px;">MONDOCOLO CLOUD CORE</h2>
-            </div>
-            <p style="color: #888; font-size: 0.8rem; line-height: 1.5; margin-bottom: 25px;">
-                RESTRICTED AREA: 本システムは株式会社MONDOCOLOの社外秘情報です。アクセスには認可された暗号化セキュリティキーの入力が必要です。
-            </p>
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                <label style="font-size: 0.85rem; color: #00ff00; font-weight: bold;">SYS_ACCESS_KEY :</label>
-                <input type="text" id="passkey" style="text-align: center; font-size: 1.3rem; letter-spacing: 2px;" autofocus placeholder="mondocolo2026">
-                <button type="button" class="action-btn" id="connect-btn" onclick="requestSystemAccess()">CONNECT_TO_CORE();</button>
-            </div>
-            <div id="auth-log" style="color: #ff0055; font-size: 0.85rem; margin-top: 15px; text-align: center; font-family: monospace; min-height: 20px;"></div>
-        </div>
-    </div>
 
     <div id="app-root">
         <header>
@@ -149,11 +114,8 @@
     </div>
 
     <script>
-        const bg = document.getElementById('matrix-code');
-        for(let i=0; i<30; i++) bg.innerHTML += Math.random().toString(16).substring(2).toUpperCase() + " ";
-
         const SUPABASE_URL = "https://nmfwsiihyyppjsuiomxt.supabase.co";
-        const SUPABASE_KEY = "";
+        const SUPABASE_KEY = "sb_publishable_fotuWYpXEdjOjalQtkuhfA_g7CiiQ";
         
         let supabase = null;
         try {
@@ -164,24 +126,9 @@
 
         let map, currentMarkers = [], locationsData = [];
 
-        function requestSystemAccess() {
-            const pass = document.getElementById('passkey').value.trim();
-            const log = document.getElementById('auth-log');
-
-            if (pass === "mondocolo2026") { 
-                document.getElementById('auth-terminal').style.display = 'none';
-                document.getElementById('app-root').style.display = 'flex';
-                try {
-                    initMapSystem();
-                } catch(mapErr) {}
-            } else {
-                log.style.color = "#ff0055"; 
-                log.innerText = "CRITICAL_ERROR: INVALID_KEY.";
-                document.getElementById('passkey').value = "";
-            }
-        }
-
-        document.getElementById('passkey').addEventListener('keypress', (e) => { if(e.key==='Enter') requestSystemAccess(); });
+        window.addEventListener('DOMContentLoaded', () => {
+            initMapSystem();
+        });
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar-panel');
@@ -219,7 +166,11 @@
                     showDemoData();
                 } else {
                     locationsData = data || [];
-                    filterData();
+                    if(locationsData.length === 0) {
+                        showDemoData();
+                    } else {
+                        filterData();
+                    }
                 }
             } catch(e) {
                 showDemoData();
@@ -227,7 +178,10 @@
         }
 
         function showDemoData() {
-            locationsData = [{ id: 1, lat: 36.5, lng: 138.0, name: "長野県拠点(デモデータ)", manager: "管理者", phone: "000-000-0000", date: "2026-06-18", pref: "長野県", category: "その他", sales: 1200000 }];
+            locationsData = [
+                { id: 1, lat: 36.65, lng: 138.18, name: "長野駅前マルシェ(デモ)", manager: "山田太郎", phone: "026-123-4567", date: "2026-06-20", pref: "長野県", category: "イベント", sales: 1200000 },
+                { id: 2, lat: 35.68, lng: 139.76, name: "東京サテライトJA(デモ)", manager: "鈴木花子", phone: "03-9876-5432", date: "2026-07-15", pref: "東京都", category: "JA", sales: 450000 }
+            ];
             filterData();
         }
 
@@ -283,20 +237,24 @@
             if(supabase) {
                 const { error } = await supabase.from('locations').insert([newLoc]);
                 if (error) {
-                    alert("PUSH FAILED: " + error.message);
-                    return;
+                    alert("データベース送信失敗(デモモードで追加します): " + error.message);
+                    newLoc.id = Date.now();
+                    locationsData.push(newLoc);
+                    filterData();
+                } else {
+                    alert("データベースに同期しました！");
+                    await pullCloudData();
                 }
-                await pullCloudData();
             } else {
                 newLoc.id = Date.now();
                 locationsData.push(newLoc);
                 filterData();
+                alert("ローカル環境に保存しました（デモ）");
             }
             
             document.getElementById('input-form').reset();
             if (window.innerWidth < 992) toggleSidebar();
             map.setView([newLoc.lat, newLoc.lng], 12);
-            alert("SYSTEM: DATA PUSH SUCCESS.");
         }
     </script>
 </body>
