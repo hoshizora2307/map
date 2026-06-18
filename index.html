@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>信州マルシェ 開催マップ</title>
+    <title>MONDOCOLO CLOUD CORE</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -27,7 +27,8 @@
         }
         .auth-box {
             border: 1px solid #00ff00; padding: 40px; background: #050505;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2); max-width: 450px; width: 90%; z-index: 2;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3); max-width: 450px; width: 90%; z-index: 2;
+            border-radius: 4px;
         }
         .console-status { color: #ff0055; animation: blink 1s infinite; font-weight: bold; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
@@ -57,13 +58,15 @@
         .form-row .form-group { flex: 1; min-width: 0; }
         select, input {
             background-color: #000; color: #00ff00; border: 1px solid #00ff00;
-            padding: 6px; font-family: monospace; width: 100%; font-size: 0.9rem; outline: none;
+            padding: 12px; font-family: monospace; width: 100%; font-size: 1.1rem; outline: none;
+            border-radius: 4px;
         }
         .action-btn {
-            background-color: #003300; color: #00ff00; border: 1px solid #00ff00;
-            padding: 8px; cursor: pointer; font-family: monospace; font-weight: bold; width: 100%;
+            background-color: #00ff00; color: #000; border: 1px solid #00ff00;
+            padding: 14px; cursor: pointer; font-family: monospace; font-weight: bold; width: 100%;
+            font-size: 1.1rem; border-radius: 4px; transition: all 0.2s;
         }
-        .action-btn:hover { background-color: #00ff00; color: #000; box-shadow: 0 0 10px #00ff00; }
+        .action-btn:hover { background-color: #00aa00; box-shadow: 0 0 15px #00ff00; }
         footer { padding: 8px; text-align: center; background-color: #0a0a0a; border-top: 1px solid #00ff00; font-size: 0.7rem; height: 35px; }
         @media (min-width: 992px) {
             .toggle-btn { display: none; }
@@ -79,18 +82,18 @@
         <div class="matrix-bg" id="matrix-code"></div>
         <div class="auth-box">
             <div style="text-align: center; margin-bottom: 20px;">
-                <span class="console-status">[ STATUS: SECURE_PORTAL ]</span>
-                <h2 style="color: #00ff00; margin: 10px 0 0 0; font-size: 1.4rem; text-shadow: 0 0 8px #00ff00;">信州マルシェ 開催マップ</h2>
+                <span class="console-status">[ STATUS: CLOUD_ENCRYPTED ]</span>
+                <h2 style="color: #00ff00; margin: 10px 0 0 0; font-size: 1.6rem; text-shadow: 0 0 10px #00ff00; letter-spacing: 1px;">MONDOCOLO CLOUD CORE</h2>
             </div>
-            <p style="color: #666; font-size: 0.75rem; line-height: 1.4; margin-bottom: 25px;">
-                RESTRICTED AREA: 本システムは関係者専用の情報管理ポータルです。アクセスには認可されたセキュリティキーの入力が必要です。
+            <p style="color: #888; font-size: 0.8rem; line-height: 1.5; margin-bottom: 25px;">
+                RESTRICTED AREA: 本システムは株式会社MONDOCOLOの社外秘情報です。アクセスには認可された暗号化セキュリティキーの入力が必要です。
             </p>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <label style="font-size: 0.8rem; color: #00ff00;">SYS_ACCESS_KEY :</label>
-                <input type="text" id="passkey" style="text-align: center; font-size: 1.3rem; letter-spacing: 3px; border-color: #00ff00; color: #00ff00;" autofocus placeholder="mondocolo2026">
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <label style="font-size: 0.85rem; color: #00ff00; font-weight: bold;">SYS_ACCESS_KEY :</label>
+                <input type="text" id="passkey" style="text-align: center; font-size: 1.3rem; letter-spacing: 2px;" autofocus placeholder="mondocolo2026">
                 <button type="button" class="action-btn" id="connect-btn">CONNECT_TO_CORE();</button>
             </div>
-            <div id="auth-log" style="color: #ff0055; font-size: 0.8rem; margin-top: 15px; text-align: center; font-family: monospace;"></div>
+            <div id="auth-log" style="color: #ff0055; font-size: 0.85rem; margin-top: 15px; text-align: center; font-family: monospace; min-height: 20px;"></div>
         </div>
     </div>
 
@@ -135,7 +138,7 @@
                                 <div class="form-group"><label>緯度 [LAT]</label><input type="number" step="any" id="in-lat" required /></div>
                                 <div class="form-group"><label>経度 [LNG]</label><input type="number" step="any" id="in-lng" required /></div>
                             </div>
-                            <button type="submit" class="action-btn">PUSH_TO_SUPABASE();</button>
+                            <button type="submit" class="action-btn" style="font-size:0.9rem; padding:10px;">PUSH_TO_SUPABASE();</button>
                         </form>
                     </div>
                 </div>
@@ -150,7 +153,7 @@
         for(let i=0; i<30; i++) bg.innerHTML += Math.random().toString(16).substring(2).toUpperCase() + " ";
 
         const SUPABASE_URL = "https://nmfwsiihyyppjsuiomxt.supabase.co";
-        const SUPABASE_KEY = "nmfwsiihyyppjsuiomxt”;
+        const SUPABASE_KEY = "";
         
         let supabase = null;
         try {
