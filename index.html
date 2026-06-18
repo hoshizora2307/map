@@ -76,12 +76,12 @@
   }
 
   /* ---------- Layout ---------- */
-  .sm-main{ max-width:1280px; margin:0 auto; padding:22px 28px 60px; }
+  .sm-main{ max-width:1280px; margin:0 auto; padding:22px 28px 40px; }
 
   /* ---------- Stats ---------- */
   .sm-stats{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(auto-fit, minmax(170px,1fr));
     gap:12px;
     margin-bottom:18px;
   }
@@ -97,7 +97,7 @@
   }
   .sm-stat__value{
     font-family:'JetBrains Mono', monospace;
-    font-size:22px; font-weight:600; color:var(--pine); margin:0;
+    font-size:21px; font-weight:600; color:var(--pine); margin:0;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .sm-stat__value--accent{ color:var(--persimmon-deep); }
@@ -136,7 +136,7 @@
     padding:10px 12px;
     font-size:11.5px;
     box-shadow:var(--shadow);
-    max-width:190px;
+    max-width:200px;
   }
   .sm-legend__title{ font-weight:700; letter-spacing:0.05em; color:var(--pine); margin:0 0 6px; font-size:11px;}
   .sm-legend__grad{ display:flex; height:8px; border-radius:4px; overflow:hidden; margin-bottom:4px; }
@@ -160,13 +160,14 @@
   .marche-pin__glyph{ display:flex; }
   .marche-pin__glyph svg{ width:55%; height:55%; }
 
-  .sm-popup{ font-family:'Zen Kaku Gothic New', sans-serif; font-size:12.5px; min-width:200px; }
+  .sm-popup{ font-family:'Zen Kaku Gothic New', sans-serif; font-size:12.5px; min-width:210px; }
   .sm-popup__cat{ display:inline-block; font-size:10.5px; padding:2px 7px; border-radius:10px; color:#fff; margin-bottom:6px; }
   .sm-popup__name{ font-weight:700; font-size:13.5px; color:var(--pine); margin:0 0 4px; }
   .sm-popup__row{ color:var(--ink-soft); margin:2px 0; }
   .sm-popup__sales{ font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--persimmon-deep); }
+  .sm-popup__links{ display:flex; gap:12px; margin-top:8px; }
   .sm-popup__edit{
-    display:inline-block; margin-top:8px; font-size:11.5px; color:var(--indigo); text-decoration:underline; cursor:pointer; background:none; border:none; padding:0;
+    font-size:11.5px; color:var(--indigo); text-decoration:underline; cursor:pointer; background:none; border:none; padding:0;
   }
 
   /* ---------- Toolbar ---------- */
@@ -206,7 +207,7 @@
     background:#fff; border:1px solid var(--paper-line); border-radius:var(--radius);
     box-shadow:var(--shadow); overflow-x:auto;
   }
-  table.sm-table{ width:100%; border-collapse:collapse; min-width:880px; }
+  table.sm-table{ width:100%; border-collapse:collapse; min-width:1040px; }
   table.sm-table thead th{
     position:sticky; top:0; background:var(--paper-dim);
     text-align:left; font-size:11.5px; letter-spacing:0.04em; color:var(--ink-soft);
@@ -229,10 +230,11 @@
   .sm-sales-cell{ font-family:'JetBrains Mono',monospace; font-weight:600; display:flex; align-items:center; gap:7px; white-space:nowrap; }
   .sm-tier-dot{ width:9px; height:9px; border-radius:50%; flex:none; }
   .sm-badge{ display:inline-block; font-size:11px; padding:3px 9px; border-radius:11px; color:#fff; white-space:nowrap; }
-  .sm-actions{ display:flex; gap:6px; }
+  .sm-muted-cell{ color:var(--ink-soft); font-family:'JetBrains Mono',monospace; font-size:12.5px; white-space:nowrap; }
+  .sm-actions{ display:flex; gap:5px; }
   .sm-icon-btn{
     border:1px solid var(--paper-line); background:#fff; border-radius:6px; width:28px; height:28px;
-    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft); flex:none;
   }
   .sm-icon-btn:hover{ background:var(--paper-dim); color:var(--pine); }
   .sm-icon-btn--danger:hover{ color:#B23A2E; border-color:#E3B3A8; background:#FBEFEC; }
@@ -248,7 +250,7 @@
     padding:22px 24px 20px; margin-bottom:5vh;
   }
   .sm-modal__title{ font-family:'Shippori Mincho',serif; font-size:18px; color:var(--pine); margin:0 0 4px; }
-  .sm-modal__sub{ font-size:12px; color:var(--ink-soft); margin:0 0 16px; }
+  .sm-modal__sub{ font-size:12px; color:var(--ink-soft); margin:0 0 16px; line-height:1.6; }
   .sm-field{ margin-bottom:13px; }
   .sm-field label{ display:block; font-size:12px; color:var(--ink-soft); margin-bottom:5px; }
   .sm-field input, .sm-field select{
@@ -259,8 +261,22 @@
   .sm-field-row .sm-field{ flex:1; }
   .sm-geo-row{ display:flex; gap:8px; align-items:flex-end; }
   .sm-geo-hint{ font-size:11px; color:var(--ink-soft); margin-top:5px; line-height:1.5; }
+  .sm-checkbox-row{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-soft); margin:14px 0 4px; }
+  .sm-checkbox-row input{ width:auto; }
   .sm-modal__footer{ display:flex; justify-content:space-between; align-items:center; margin-top:18px; gap:10px; flex-wrap:wrap; }
   .sm-modal__footer-right{ display:flex; gap:8px; }
+
+  /* ---------- History modal ---------- */
+  .sm-history{ max-width:560px; }
+  .sm-hist-list{ max-height:240px; overflow-y:auto; border:1px solid var(--paper-line); border-radius:8px; margin:6px 0 16px; padding:2px 4px; }
+  .sm-hist-row{ display:grid; grid-template-columns:96px 92px 1fr 32px; gap:8px; align-items:center; padding:8px 6px; border-bottom:1px solid var(--paper-line); font-size:12.5px; }
+  .sm-hist-row:last-child{ border-bottom:none; }
+  .sm-hist-date{ font-family:'JetBrains Mono',monospace; color:var(--ink-soft); }
+  .sm-hist-sales{ font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--persimmon-deep); }
+  .sm-hist-note{ color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sm-hist-empty{ font-size:12.5px; color:var(--ink-soft); padding:16px 8px; text-align:center; }
+  .sm-hist-form{ background:var(--paper); border-radius:8px; padding:14px; }
+  .sm-hist-form__title{ font-size:12px; color:var(--ink-soft); margin:0 0 10px; letter-spacing:0.03em; }
 
   /* ---------- Confirm dialog ---------- */
   .sm-confirm{ max-width:380px; text-align:left; }
@@ -280,12 +296,19 @@
   .sm-footnote{ margin-top:22px; font-size:11.5px; color:var(--ink-soft); line-height:1.7; }
   .sm-loading{ padding:80px 20px; text-align:center; color:var(--ink-soft); font-size:13px; }
   .sm-hidden{ display:none !important; }
+  .sm-credit{
+    background:var(--paper-dim); border-top:1px solid var(--paper-line);
+    padding:16px 28px; text-align:center; font-size:11px; color:var(--ink-soft); letter-spacing:0.04em;
+  }
+  .sm-credit b{ color:var(--pine); font-weight:700; }
+  .sm-credit__sep{ margin:0 8px; opacity:0.5; }
 
   @media (max-width:760px){
-    .sm-stats{ grid-template-columns:repeat(2,1fr); }
     .sm-header{ padding:18px 18px 16px; }
-    .sm-main{ padding:18px 16px 50px; }
+    .sm-main{ padding:18px 16px 30px; }
     .sm-header__meta{ text-align:left; }
+    .sm-credit{ padding:14px 16px; }
+    .sm-credit__sep{ display:block; margin:4px 0 0; }
   }
 </style>
 </head>
@@ -295,7 +318,7 @@
     <div class="sm-header__row">
       <div>
         <p class="sm-header__title">信州<span>マルシェ</span> 拠点管理ボード</p>
-        <p class="sm-header__sub">道の駅・JA野菜直売所・イベント・高速SA — 開催実績マップ &amp; 一覧</p>
+        <p class="sm-header__sub">道の駅・JA野菜直売所・イベント・高速SA — 開催実績マップ &amp; 一覧（社内共有）</p>
       </div>
       <div class="sm-header__meta" id="sm-updated-meta">読み込み中…</div>
     </div>
@@ -310,7 +333,7 @@
       <section class="sm-stats" id="sm-stats"></section>
 
       <div class="sm-catbar-wrap">
-        <p class="sm-catbar-title">カテゴリー別 売上シェア</p>
+        <p class="sm-catbar-title">カテゴリー別 売上シェア（累計）</p>
         <div class="sm-catbar" id="sm-catbar"></div>
         <div class="sm-catlegend" id="sm-catlegend"></div>
       </div>
@@ -318,7 +341,7 @@
       <div class="sm-map-card">
         <div id="sm-map"></div>
         <div class="sm-legend">
-          <p class="sm-legend__title">売上高（万円）でピンの色が変化</p>
+          <p class="sm-legend__title">累計売上高（万円）でピンの色が変化</p>
           <div class="sm-legend__grad">
             <span style="background:var(--indigo)"></span>
             <span style="background:var(--sage)"></span>
@@ -327,7 +350,7 @@
             <span style="background:var(--persimmon-deep)"></span>
           </div>
           <div class="sm-legend__range"><span>〜300</span><span>1,500〜</span></div>
-          <p class="sm-legend__note">ピンの大きさは売上規模の相対比較です。アイコンは施設カテゴリーを表します。</p>
+          <p class="sm-legend__note">ピンの大きさは累計売上の相対比較、アイコンは施設カテゴリーです。</p>
         </div>
       </div>
 
@@ -341,7 +364,8 @@
           <input type="file" id="sm-csv-input" accept=".csv" class="sm-hidden" />
           <span class="sm-btn sm-btn--ghost" id="sm-csv-import-btn">CSV取込</span>
         </label>
-        <button class="sm-btn sm-btn--ghost" id="sm-csv-export-btn">CSV書き出し</button>
+        <button class="sm-btn sm-btn--ghost" id="sm-csv-export-facilities-btn">拠点CSV</button>
+        <button class="sm-btn sm-btn--ghost" id="sm-csv-export-records-btn">実績ログCSV</button>
         <button class="sm-btn sm-btn--primary" id="sm-add-btn">＋ 拠点を追加</button>
       </div>
 
@@ -354,7 +378,9 @@
               <th data-key="facilityName">施設名<span class="sm-sort-arrow"></span></th>
               <th data-key="prefecture">都道府県<span class="sm-sort-arrow"></span></th>
               <th data-key="category">カテゴリー<span class="sm-sort-arrow"></span></th>
-              <th data-key="sales">売上高（万円）<span class="sm-sort-arrow"></span></th>
+              <th data-key="sales">累計売上高（万円）<span class="sm-sort-arrow"></span></th>
+              <th data-key="recordCount">開催回数<span class="sm-sort-arrow"></span></th>
+              <th data-key="lastDate">直近開催日<span class="sm-sort-arrow"></span></th>
               <th data-key="phone">施設電話番号<span class="sm-sort-arrow"></span></th>
               <th data-key="contact">担当者名<span class="sm-sort-arrow"></span></th>
               <th class="no-sort">操作</th>
@@ -365,11 +391,16 @@
       </div>
 
       <p class="sm-footnote">
-        ※ 初期表示は説明用のサンプルデータです。実際の開催データに置き換えてご利用ください。座標は「地図の中心を取得」または「住所から検索」で入力できます。<br/>
-        ※ データは共有設定です。このページのリンクを開いた人は全員、同じデータを閲覧・編集できます（同時に編集した場合は最後の保存が反映されます）。社外に共有しないようご注意ください。
+        ※「拠点」は施設の基本情報、「実績」は開催ごとの売上記録です。マルシェを開催したら拠点の<strong>履歴アイコン</strong>から実績を追加してください。記録は削除されるまで蓄積され、累計売上に反映されます。<br/>
+        ※ データは共有設定です。このページのリンクを開いた人は全員、同じデータを閲覧・編集できます（同時編集時は最後の保存が反映されます）。社外に共有しないようご注意ください。<br/>
+        ※ 初期表示にはサンプルの拠点・実績データが含まれています。CSV取込や「＋拠点を追加」で実データに置き換えてください。
       </p>
     </div>
   </main>
+
+  <footer class="sm-credit">
+    <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span>制作・運用管理：Hoshitokimi Project</span>
+  </footer>
 
   <div id="sm-toast-host" class="sm-toast-host"></div>
 
@@ -382,61 +413,99 @@
   /* =========================================================
      定数・設定
   ========================================================= */
-  var STORAGE_KEY = "shinshu-marche-facilities-v1";
+  var STORAGE_KEY = "shinshu-marche-data-v2";
+  var LEGACY_KEY = "shinshu-marche-facilities-v1";
 
   var CATEGORY_META = {
     "道の駅": {
-      color: "var(--cat-eki)", hex:"#8C5A3C",
+      hex:"#8C5A3C",
       glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg>'
     },
     "JA野菜直売所": {
-      color: "var(--cat-ja)", hex:"#3F7D6B",
+      hex:"#3F7D6B",
       glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-4 7-10 7-10s7 6 7 10a7 7 0 0 1-7 7z"/><path d="M11 20v-6"/></svg>'
     },
     "イベント": {
-      color: "var(--cat-event)", hex:"#6B5CA5",
+      hex:"#6B5CA5",
       glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4"/><path d="M4 4h14l-3 4 3 4H4"/></svg>'
     },
     "高速SA": {
-      color: "var(--cat-sa)", hex:"#3E6B8A",
+      hex:"#3E6B8A",
       glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M5 11l1.5-4h11L19 11"/></svg>'
     }
   };
   var CATEGORY_ORDER = ["道の駅","JA野菜直売所","イベント","高速SA"];
 
   var TIERS = [
-    { max: 300,  color:"#34507A", label:"〜300" },
-    { max: 600,  color:"#5B7F66", label:"300〜600" },
-    { max: 1000, color:"#B08D57", label:"600〜1,000" },
-    { max: 1500, color:"#C8541E", label:"1,000〜1,500" },
-    { max: Infinity, color:"#8B2E1F", label:"1,500〜" }
+    { max: 300,  color:"#34507A" },
+    { max: 600,  color:"#5B7F66" },
+    { max: 1000, color:"#B08D57" },
+    { max: 1500, color:"#C8541E" },
+    { max: Infinity, color:"#8B2E1F" }
   ];
 
-  var SAMPLE_DATA = [
-    { id:"f1",  prefecture:"長野県", facilityName:"道の駅 信州新町", category:"道の駅", phone:"026-262-0188", contact:"小林 直人", sales:850,  lat:36.5919, lng:138.0594 },
-    { id:"f2",  prefecture:"長野県", facilityName:"道の駅 安曇野松川", category:"道の駅", phone:"0263-78-3001", contact:"田中 美咲", sales:1120, lat:36.4115, lng:137.8773 },
-    { id:"f3",  prefecture:"長野県", facilityName:"JA松本ハイランド 産直市場", category:"JA野菜直売所", phone:"0263-25-7711", contact:"山田 健一", sales:670, lat:36.2510, lng:137.9520 },
-    { id:"f4",  prefecture:"長野県", facilityName:"道の駅 こもれび館", category:"道の駅", phone:"026-245-1188", contact:"中村 真理", sales:430, lat:36.6850, lng:138.3500 },
-    { id:"f5",  prefecture:"長野県", facilityName:"JAながの 農産物直売所アグリながの", category:"JA野菜直売所", phone:"026-296-7700", contact:"斉藤 修", sales:510, lat:36.6800, lng:138.1850 },
-    { id:"f6",  prefecture:"長野県", facilityName:"道の駅 美麻", category:"道の駅", phone:"0261-23-2070", contact:"高橋 さとし", sales:280, lat:36.6230, lng:137.9100 },
-    { id:"f7",  prefecture:"長野県", facilityName:"中央道 諏訪湖SA(下り)", category:"高速SA", phone:"0266-58-5757", contact:"渡辺 隼人", sales:1480, lat:36.0560, lng:138.1110 },
-    { id:"f8",  prefecture:"山梨県", facilityName:"中央道 双葉SA", category:"高速SA", phone:"055-273-2011", contact:"小川 翔太", sales:990, lat:35.6660, lng:138.5340 },
-    { id:"f9",  prefecture:"群馬県", facilityName:"上信越道 横川SA", category:"高速SA", phone:"027-395-2017", contact:"木村 彩", sales:770, lat:36.3350, lng:138.7950 },
-    { id:"f10", prefecture:"新潟県", facilityName:"上信越道 名立谷浜SA", category:"高速SA", phone:"025-534-2002", contact:"林 大輔", sales:540, lat:37.1480, lng:138.1700 },
-    { id:"f11", prefecture:"東京都", facilityName:"信州フェア in 丸の内", category:"イベント", phone:"03-3211-4001", contact:"鈴木 陽子", sales:2350, lat:35.6812, lng:139.7671 },
-    { id:"f12", prefecture:"東京都", facilityName:"ふるさと和み市(新宿)", category:"イベント", phone:"03-5321-7755", contact:"伊藤 健太", sales:1860, lat:35.6896, lng:139.6917 },
-    { id:"f13", prefecture:"神奈川県", facilityName:"みなとみらい信州マルシェ", category:"イベント", phone:"045-682-2500", contact:"加藤 由美", sales:1430, lat:35.4555, lng:139.6320 },
-    { id:"f14", prefecture:"埼玉県", facilityName:"さいたま新都心 軽井沢フェア", category:"イベント", phone:"048-601-3411", contact:"松本 亮", sales:980, lat:35.8870, lng:139.6300 },
-    { id:"f15", prefecture:"愛知県", facilityName:"名古屋 信州フェスタ(オアシス21)", category:"イベント", phone:"052-963-5252", contact:"佐々木 玲奈", sales:1670, lat:35.1709, lng:136.9088 },
-    { id:"f16", prefecture:"長野県", facilityName:"JA上伊那 産直市場グリーンファーム", category:"JA野菜直売所", phone:"0265-71-7300", contact:"清水 大地", sales:605, lat:35.8260, lng:137.9520 },
-    { id:"f17", prefecture:"長野県", facilityName:"JA信州諏訪 ハイジ通り直売所", category:"JA野菜直売所", phone:"0266-52-1188", contact:"橋本 まどか", sales:380, lat:36.0530, lng:138.1170 },
-    { id:"f18", prefecture:"長野県", facilityName:"JA中野市 ぐりんぱる中野", category:"JA野菜直売所", phone:"0269-22-5566", contact:"石川 拓也", sales:455, lat:36.7460, lng:138.3590 },
-    { id:"f19", prefecture:"長野県", facilityName:"JAみなみ信州 アグリステーション飯田", category:"JA野菜直売所", phone:"0265-23-5005", contact:"後藤 千尋", sales:520, lat:35.5147, lng:137.8217 },
-    { id:"f20", prefecture:"長野県", facilityName:"道の駅 オアシスならわ", category:"道の駅", phone:"0265-49-2222", contact:"村上 拓実", sales:360, lat:35.6500, lng:137.8200 },
-    { id:"f21", prefecture:"長野県", facilityName:"道の駅 木曽ならかわ", category:"道の駅", phone:"0264-25-3393", contact:"西村 優子", sales:410, lat:35.7650, lng:137.6750 },
-    { id:"f22", prefecture:"長野県", facilityName:"道の駅 信越さかえ", category:"道の駅", phone:"026-262-1500", contact:"岡田 誠", sales:295, lat:36.8460, lng:138.3320 },
-    { id:"f23", prefecture:"静岡県", facilityName:"新東名 駿河湾沼津SA", category:"高速SA", phone:"055-941-0011", contact:"藤田 紗代", sales:1120, lat:35.0930, lng:138.8470 },
-    { id:"f24", prefecture:"大阪府", facilityName:"うめだ信州マルシェ", category:"イベント", phone:"06-6361-7001", contact:"三浦 健二", sales:1980, lat:34.7050, lng:135.4960 }
+  var SAMPLE_FACILITIES = [
+    { id:"f1",  prefecture:"長野県", facilityName:"道の駅 信州新町", category:"道の駅", phone:"026-262-0188", contact:"小林 直人", lat:36.5919, lng:138.0594 },
+    { id:"f2",  prefecture:"長野県", facilityName:"道の駅 安曇野松川", category:"道の駅", phone:"0263-78-3001", contact:"田中 美咲", lat:36.4115, lng:137.8773 },
+    { id:"f3",  prefecture:"長野県", facilityName:"JA松本ハイランド 産直市場", category:"JA野菜直売所", phone:"0263-25-7711", contact:"山田 健一", lat:36.2510, lng:137.9520 },
+    { id:"f4",  prefecture:"長野県", facilityName:"道の駅 こもれび館", category:"道の駅", phone:"026-245-1188", contact:"中村 真理", lat:36.6850, lng:138.3500 },
+    { id:"f5",  prefecture:"長野県", facilityName:"JAながの 農産物直売所アグリながの", category:"JA野菜直売所", phone:"026-296-7700", contact:"斉藤 修", lat:36.6800, lng:138.1850 },
+    { id:"f6",  prefecture:"長野県", facilityName:"道の駅 美麻", category:"道の駅", phone:"0261-23-2070", contact:"高橋 さとし", lat:36.6230, lng:137.9100 },
+    { id:"f7",  prefecture:"長野県", facilityName:"中央道 諏訪湖SA(下り)", category:"高速SA", phone:"0266-58-5757", contact:"渡辺 隼人", lat:36.0560, lng:138.1110 },
+    { id:"f8",  prefecture:"山梨県", facilityName:"中央道 双葉SA", category:"高速SA", phone:"055-273-2011", contact:"小川 翔太", lat:35.6660, lng:138.5340 },
+    { id:"f9",  prefecture:"群馬県", facilityName:"上信越道 横川SA", category:"高速SA", phone:"027-395-2017", contact:"木村 彩", lat:36.3350, lng:138.7950 },
+    { id:"f10", prefecture:"新潟県", facilityName:"上信越道 名立谷浜SA", category:"高速SA", phone:"025-534-2002", contact:"林 大輔", lat:37.1480, lng:138.1700 },
+    { id:"f11", prefecture:"東京都", facilityName:"信州フェア in 丸の内", category:"イベント", phone:"03-3211-4001", contact:"鈴木 陽子", lat:35.6812, lng:139.7671 },
+    { id:"f12", prefecture:"東京都", facilityName:"ふるさと和み市(新宿)", category:"イベント", phone:"03-5321-7755", contact:"伊藤 健太", lat:35.6896, lng:139.6917 },
+    { id:"f13", prefecture:"神奈川県", facilityName:"みなとみらい信州マルシェ", category:"イベント", phone:"045-682-2500", contact:"加藤 由美", lat:35.4555, lng:139.6320 },
+    { id:"f14", prefecture:"埼玉県", facilityName:"さいたま新都心 軽井沢フェア", category:"イベント", phone:"048-601-3411", contact:"松本 亮", lat:35.8870, lng:139.6300 },
+    { id:"f15", prefecture:"愛知県", facilityName:"名古屋 信州フェスタ(オアシス21)", category:"イベント", phone:"052-963-5252", contact:"佐々木 玲奈", lat:35.1709, lng:136.9088 },
+    { id:"f16", prefecture:"長野県", facilityName:"JA上伊那 産直市場グリーンファーム", category:"JA野菜直売所", phone:"0265-71-7300", contact:"清水 大地", lat:35.8260, lng:137.9520 },
+    { id:"f17", prefecture:"長野県", facilityName:"JA信州諏訪 ハイジ通り直売所", category:"JA野菜直売所", phone:"0266-52-1188", contact:"橋本 まどか", lat:36.0530, lng:138.1170 },
+    { id:"f18", prefecture:"長野県", facilityName:"JA中野市 ぐりんぱる中野", category:"JA野菜直売所", phone:"0269-22-5566", contact:"石川 拓也", lat:36.7460, lng:138.3590 },
+    { id:"f19", prefecture:"長野県", facilityName:"JAみなみ信州 アグリステーション飯田", category:"JA野菜直売所", phone:"0265-23-5005", contact:"後藤 千尋", lat:35.5147, lng:137.8217 },
+    { id:"f20", prefecture:"長野県", facilityName:"道の駅 オアシスならわ", category:"道の駅", phone:"0265-49-2222", contact:"村上 拓実", lat:35.6500, lng:137.8200 },
+    { id:"f21", prefecture:"長野県", facilityName:"道の駅 木曽ならかわ", category:"道の駅", phone:"0264-25-3393", contact:"西村 優子", lat:35.7650, lng:137.6750 },
+    { id:"f22", prefecture:"長野県", facilityName:"道の駅 信越さかえ", category:"道の駅", phone:"026-262-1500", contact:"岡田 誠", lat:36.8460, lng:138.3320 },
+    { id:"f23", prefecture:"静岡県", facilityName:"新東名 駿河湾沼津SA", category:"高速SA", phone:"055-941-0011", contact:"藤田 紗代", lat:35.0930, lng:138.8470 },
+    { id:"f24", prefecture:"大阪府", facilityName:"うめだ信州マルシェ", category:"イベント", phone:"06-6361-7001", contact:"三浦 健二", lat:34.7050, lng:135.4960 }
+  ];
+
+  var SAMPLE_RECORDS = [
+    { id:"r1",  facilityId:"f1",  date:"2026-04-12", sales:850, note:"" },
+    { id:"r2",  facilityId:"f2",  date:"2025-11-03", sales:380, note:"" },
+    { id:"r3",  facilityId:"f2",  date:"2026-02-08", sales:340, note:"" },
+    { id:"r4",  facilityId:"f2",  date:"2026-05-17", sales:400, note:"" },
+    { id:"r5",  facilityId:"f3",  date:"2026-03-22", sales:670, note:"" },
+    { id:"r6",  facilityId:"f4",  date:"2026-01-18", sales:430, note:"" },
+    { id:"r7",  facilityId:"f5",  date:"2026-02-14", sales:510, note:"" },
+    { id:"r8",  facilityId:"f6",  date:"2025-12-07", sales:280, note:"" },
+    { id:"r9",  facilityId:"f7",  date:"2025-10-12", sales:520, note:"" },
+    { id:"r10", facilityId:"f7",  date:"2026-01-11", sales:480, note:"" },
+    { id:"r11", facilityId:"f7",  date:"2026-04-19", sales:480, note:"" },
+    { id:"r12", facilityId:"f8",  date:"2026-03-09", sales:990, note:"" },
+    { id:"r13", facilityId:"f9",  date:"2026-02-21", sales:770, note:"" },
+    { id:"r14", facilityId:"f10", date:"2026-01-25", sales:540, note:"" },
+    { id:"r15", facilityId:"f11", date:"2025-11-22", sales:800, note:"" },
+    { id:"r16", facilityId:"f11", date:"2026-02-21", sales:750, note:"" },
+    { id:"r17", facilityId:"f11", date:"2026-05-09", sales:800, note:"" },
+    { id:"r18", facilityId:"f12", date:"2025-12-13", sales:900, note:"" },
+    { id:"r19", facilityId:"f12", date:"2026-04-04", sales:960, note:"" },
+    { id:"r20", facilityId:"f13", date:"2026-01-17", sales:700, note:"" },
+    { id:"r21", facilityId:"f13", date:"2026-04-25", sales:730, note:"" },
+    { id:"r22", facilityId:"f14", date:"2026-03-01", sales:980, note:"" },
+    { id:"r23", facilityId:"f15", date:"2025-12-06", sales:800, note:"" },
+    { id:"r24", facilityId:"f15", date:"2026-03-14", sales:870, note:"" },
+    { id:"r25", facilityId:"f16", date:"2026-02-09", sales:605, note:"" },
+    { id:"r26", facilityId:"f17", date:"2026-01-30", sales:380, note:"" },
+    { id:"r27", facilityId:"f18", date:"2026-03-19", sales:455, note:"" },
+    { id:"r28", facilityId:"f19", date:"2026-02-26", sales:520, note:"" },
+    { id:"r29", facilityId:"f20", date:"2026-01-14", sales:360, note:"" },
+    { id:"r30", facilityId:"f21", date:"2025-12-20", sales:410, note:"" },
+    { id:"r31", facilityId:"f22", date:"2026-03-07", sales:295, note:"" },
+    { id:"r32", facilityId:"f23", date:"2026-02-17", sales:1120, note:"" },
+    { id:"r33", facilityId:"f24", date:"2025-11-15", sales:980, note:"" },
+    { id:"r34", facilityId:"f24", date:"2026-03-28", sales:1000, note:"" }
   ];
 
   /* =========================================================
@@ -444,6 +513,7 @@
   ========================================================= */
   var state = {
     facilities: [],
+    records: [],
     search: "",
     prefecture: "all",
     activeCategories: new Set(CATEGORY_ORDER),
@@ -464,16 +534,19 @@
     }
     return TIERS[TIERS.length-1];
   }
-
-  function fmtMan(n){
-    return Number(n||0).toLocaleString("ja-JP");
-  }
-
+  function fmtMan(n){ return Number(n||0).toLocaleString("ja-JP"); }
   function uid(){
     if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
     return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
   }
-
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+  function escapeAttr(s){ return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;"); }
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
   function showToast(message, type){
     var host = document.getElementById("sm-toast-host");
     var el = document.createElement("div");
@@ -488,30 +561,63 @@
   }
 
   /* =========================================================
-     永続化
+     拠点 / 実績 集計ヘルパー
   ========================================================= */
-  async function loadFacilities(){
-    var loaded = null;
+  function recordsFor(facilityId){
+    return state.records.filter(function(r){ return r.facilityId === facilityId; });
+  }
+  function totalSalesFor(facilityId){
+    return recordsFor(facilityId).reduce(function(s,r){ return s + Number(r.sales||0); }, 0);
+  }
+  function lastDateFor(facilityId){
+    var recs = recordsFor(facilityId);
+    if (!recs.length) return null;
+    return recs.reduce(function(a,b){ return a.date > b.date ? a : b; }).date;
+  }
+
+  /* =========================================================
+     永続化（共有スコープ）
+  ========================================================= */
+  async function loadData(){
     try{
       var res = await window.storage.get(STORAGE_KEY, true);
       if (res && res.value){
-        loaded = JSON.parse(res.value);
+        var parsed = JSON.parse(res.value);
+        if (parsed && Array.isArray(parsed.facilities)){
+          state.facilities = parsed.facilities;
+          state.records = Array.isArray(parsed.records) ? parsed.records : [];
+          return;
+        }
       }
-    } catch(e){
-      loaded = null;
-    }
-    if (Array.isArray(loaded) && loaded.length){
-      state.facilities = loaded;
-    } else {
-      state.facilities = SAMPLE_DATA.map(function(f){ return Object.assign({}, f); });
-      try{ await window.storage.set(STORAGE_KEY, JSON.stringify(state.facilities), true); }
-      catch(e2){ /* このセッション中はメモリ上で動作を継続 */ }
-    }
+    } catch(e){ /* v2データなし → 続けて移行・サンプルを確認 */ }
+
+    // v1（旧バージョン：施設に売上高を直接保持）からの移行
+    try{
+      var legacy = await window.storage.get(LEGACY_KEY, true);
+      if (legacy && legacy.value){
+        var oldList = JSON.parse(legacy.value);
+        if (Array.isArray(oldList) && oldList.length){
+          state.facilities = oldList.map(function(f){
+            return { id:f.id, prefecture:f.prefecture, facilityName:f.facilityName, category:f.category, phone:f.phone, contact:f.contact, lat:f.lat, lng:f.lng };
+          });
+          state.records = oldList.map(function(f){
+            return { id: uid(), facilityId:f.id, date: todayStr(), sales: Number(f.sales||0), note:"旧バージョンからの移行データ" };
+          });
+          await persist();
+          return;
+        }
+      }
+    } catch(e2){ /* 旧データなし */ }
+
+    // サンプルデータで初期化
+    state.facilities = SAMPLE_FACILITIES.map(function(f){ return Object.assign({}, f); });
+    state.records = SAMPLE_RECORDS.map(function(r){ return Object.assign({}, r); });
+    try{ await persist(); } catch(e3){ /* このセッション中はメモリ上で動作を継続 */ }
   }
 
   async function persist(){
     try{
-      await window.storage.set(STORAGE_KEY, JSON.stringify(state.facilities), true);
+      await window.storage.set(STORAGE_KEY, JSON.stringify({ facilities: state.facilities, records: state.records }), true);
       updateMeta();
     } catch(e){
       showToast("保存に失敗しました。変更はこの画面でのみ有効です", "error");
@@ -523,7 +629,7 @@
     var now = new Date();
     var s = now.getFullYear() + "/" + String(now.getMonth()+1).padStart(2,"0") + "/" + String(now.getDate()).padStart(2,"0") +
       " " + String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
-    el.innerHTML = "拠点数 " + state.facilities.length + " 件<br/>最終更新 " + s;
+    el.innerHTML = "拠点数 " + state.facilities.length + " 件・実績 " + state.records.length + " 件<br/>最終更新 " + s;
   }
 
   /* =========================================================
@@ -546,11 +652,11 @@
   function getSorted(list){
     var key = state.sortKey, dir = state.sortDir === "asc" ? 1 : -1;
     return list.slice().sort(function(a,b){
-      var av = a[key], bv = b[key];
-      if (key === "sales"){
-        return (av - bv) * dir;
-      }
-      av = String(av||""); bv = String(bv||"");
+      var av, bv;
+      if (key === "sales"){ av = totalSalesFor(a.id); bv = totalSalesFor(b.id); return (av-bv) * dir; }
+      if (key === "recordCount"){ av = recordsFor(a.id).length; bv = recordsFor(b.id).length; return (av-bv) * dir; }
+      if (key === "lastDate"){ av = lastDateFor(a.id) || ""; bv = lastDateFor(b.id) || ""; return av.localeCompare(bv) * dir; }
+      av = String(a[key]||""); bv = String(b[key]||"");
       return av.localeCompare(bv, "ja") * dir;
     });
   }
@@ -560,25 +666,26 @@
   ========================================================= */
   function renderStats(){
     var list = state.facilities;
-    var total = list.reduce(function(s,f){ return s + Number(f.sales||0); }, 0);
-    var avg = list.length ? Math.round(total / list.length) : 0;
-    var top = list.slice().sort(function(a,b){ return b.sales - a.sales; })[0];
+    var totalSales = state.records.reduce(function(s,r){ return s + Number(r.sales||0); }, 0);
+    var recordCount = state.records.length;
+    var avg = list.length ? Math.round(totalSales / list.length) : 0;
+    var top = list.slice().sort(function(a,b){ return totalSalesFor(b.id) - totalSalesFor(a.id); })[0];
+    var topTotal = top ? totalSalesFor(top.id) : 0;
 
     var html = "";
     html += statCard("拠点数", list.length + " 件", "");
-    html += statCard("売上高合計", fmtMan(total) + " 万円", "", true);
+    html += statCard("開催実績（累計）", recordCount + " 回", "");
+    html += statCard("売上高合計", fmtMan(totalSales) + " 万円", "", true);
     html += statCard("平均売上 / 拠点", fmtMan(avg) + " 万円", "");
-    html += statCard("最高売上拠点", top ? top.facilityName : "—", top ? (fmtMan(top.sales) + " 万円・" + top.prefecture) : "");
+    html += statCard("最高売上拠点", top ? top.facilityName : "—", top ? (fmtMan(topTotal) + " 万円・" + top.prefecture) : "");
     document.getElementById("sm-stats").innerHTML = html;
 
-    // カテゴリー別シェア
     var byCat = {};
     CATEGORY_ORDER.forEach(function(c){ byCat[c] = 0; });
-    list.forEach(function(f){ byCat[f.category] = (byCat[f.category]||0) + Number(f.sales||0); });
-    var barHtml = "";
-    var legendHtml = "";
+    list.forEach(function(f){ byCat[f.category] = (byCat[f.category]||0) + totalSalesFor(f.id); });
+    var barHtml = "", legendHtml = "";
     CATEGORY_ORDER.forEach(function(c){
-      var pct = total ? (byCat[c] / total * 100) : 0;
+      var pct = totalSales ? (byCat[c] / totalSales * 100) : 0;
       var meta = CATEGORY_META[c];
       barHtml += '<div class="sm-catbar__seg" style="width:' + pct.toFixed(2) + '%; background:' + meta.hex + ';" title="' + c + ' ' + pct.toFixed(1) + '%"></div>';
       legendHtml += '<div class="sm-catlegend__item"><span class="sm-catlegend__dot" style="background:' + meta.hex + '"></span>' + c + '　' + fmtMan(byCat[c]) + '万円（' + pct.toFixed(1) + '%）</div>';
@@ -614,25 +721,14 @@
     }).join("");
   }
 
-  function escapeAttr(s){
-    return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
-  }
-  function escapeHtml(s){
-    return String(s==null?"":s)
-      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-  }
-
   /* =========================================================
      レンダリング: テーブル
   ========================================================= */
   function renderTable(){
     var filtered = getSorted(getFiltered());
     var total = state.facilities.length;
+    document.getElementById("sm-result-line").textContent = filtered.length + " / " + total + " 拠点を表示中";
 
-    document.getElementById("sm-result-line").textContent =
-      filtered.length + " / " + total + " 拠点を表示中";
-
-    // ソート矢印
     document.querySelectorAll("table.sm-table thead th[data-key]").forEach(function(th){
       var key = th.getAttribute("data-key");
       var arrow = th.querySelector(".sm-sort-arrow");
@@ -642,24 +738,30 @@
 
     var tbody = document.getElementById("sm-tbody");
     if (!filtered.length){
-      tbody.innerHTML = '<tr class="sm-empty-row"><td colspan="7">条件に一致する拠点がありません。検索語やフィルターを見直してください。</td></tr>';
+      tbody.innerHTML = '<tr class="sm-empty-row"><td colspan="9">条件に一致する拠点がありません。検索語やフィルターを見直してください。</td></tr>';
       return;
     }
 
     tbody.innerHTML = filtered.map(function(f){
-      var tier = tierFor(Number(f.sales||0));
+      var total2 = totalSalesFor(f.id);
+      var tier = tierFor(total2);
       var cat = CATEGORY_META[f.category] || CATEGORY_META["道の駅"];
       var selected = f.id === state.selectedId;
+      var count = recordsFor(f.id).length;
+      var last = lastDateFor(f.id);
       return '<tr data-id="' + f.id + '" class="' + (selected ? "is-selected" : "") + '" tabindex="0">' +
         '<td class="sm-name-cell">' + escapeHtml(f.facilityName) + '</td>' +
         '<td class="sm-pref-cell">' + escapeHtml(f.prefecture) + '</td>' +
         '<td><span class="sm-badge" style="background:' + cat.hex + '">' + escapeHtml(f.category) + '</span></td>' +
-        '<td><span class="sm-sales-cell"><span class="sm-tier-dot" style="background:' + tier.color + '"></span>' + fmtMan(f.sales) + '</span></td>' +
+        '<td><span class="sm-sales-cell"><span class="sm-tier-dot" style="background:' + tier.color + '"></span>' + fmtMan(total2) + '</span></td>' +
+        '<td class="sm-muted-cell">' + count + ' 回</td>' +
+        '<td class="sm-muted-cell">' + (last || "—") + '</td>' +
         '<td>' + escapeHtml(f.phone) + '</td>' +
         '<td>' + escapeHtml(f.contact) + '</td>' +
         '<td><div class="sm-actions">' +
-          '<button class="sm-icon-btn" data-action="edit" title="編集" aria-label="編集">' + iconPencil() + '</button>' +
-          '<button class="sm-icon-btn sm-icon-btn--danger" data-action="delete" title="削除" aria-label="削除">' + iconTrash() + '</button>' +
+          '<button class="sm-icon-btn" data-action="history" title="開催実績を記録・確認" aria-label="開催実績">' + iconClock() + '</button>' +
+          '<button class="sm-icon-btn" data-action="edit" title="基本情報を編集" aria-label="編集">' + iconPencil() + '</button>' +
+          '<button class="sm-icon-btn sm-icon-btn--danger" data-action="delete" title="拠点を削除" aria-label="削除">' + iconTrash() + '</button>' +
         '</div></td>' +
       '</tr>';
     }).join("");
@@ -670,6 +772,9 @@
   }
   function iconTrash(){
     return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+  }
+  function iconClock(){
+    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';
   }
 
   /* =========================================================
@@ -684,14 +789,13 @@
   }
 
   function buildIcon(f, isActive){
-    var tier = tierFor(Number(f.sales||0));
+    var total = totalSalesFor(f.id);
+    var tier = tierFor(total);
     var cat = CATEGORY_META[f.category] || CATEGORY_META["道の駅"];
-    var values = state.facilities.map(function(x){ return Number(x.sales||0); });
+    var values = state.facilities.map(function(x){ return totalSalesFor(x.id); });
     var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
     var size = 30;
-    if (max > min){
-      size = 26 + Math.round((Number(f.sales||0) - min) / (max - min) * 20);
-    }
+    if (max > min){ size = 26 + Math.round((total - min) / (max - min) * 20); }
     return L.divIcon({
       className: "marche-pin",
       html: '<div class="marche-pin__ring' + (isActive ? " is-active" : "") + '" style="--c:' + tier.color + ';width:' + size + 'px;height:' + size + 'px;">' +
@@ -703,15 +807,12 @@
 
   function renderMarkers(){
     var filteredIds = new Set(getFiltered().map(function(f){ return f.id; }));
-
-    // 削除済み・対象外のマーカーを除去
     Object.keys(markersById).forEach(function(id){
       if (!filteredIds.has(id) || !state.facilities.find(function(f){ return f.id === id; })){
         map.removeLayer(markersById[id]);
         delete markersById[id];
       }
     });
-
     state.facilities.forEach(function(f){
       if (!filteredIds.has(f.id)) return;
       var icon = buildIcon(f, f.id === state.selectedId);
@@ -720,10 +821,7 @@
         markersById[f.id].setLatLng([f.lat, f.lng]);
       } else {
         var marker = L.marker([f.lat, f.lng], { icon: icon });
-        marker.bindPopup(buildPopup(f));
-        marker.on("click", function(){
-          selectFacility(f.id, false);
-        });
+        marker.on("click", function(){ selectFacility(f.id, false); });
         marker.addTo(map);
         markersById[f.id] = marker;
       }
@@ -733,14 +831,18 @@
 
   function buildPopup(f){
     var cat = CATEGORY_META[f.category] || CATEGORY_META["道の駅"];
+    var total = totalSalesFor(f.id);
+    var count = recordsFor(f.id).length;
     return '<div class="sm-popup">' +
       '<span class="sm-popup__cat" style="background:' + cat.hex + '">' + escapeHtml(f.category) + '</span>' +
       '<p class="sm-popup__name">' + escapeHtml(f.facilityName) + '</p>' +
       '<p class="sm-popup__row">' + escapeHtml(f.prefecture) + '</p>' +
-      '<p class="sm-popup__row">売上高: <span class="sm-popup__sales">' + fmtMan(f.sales) + ' 万円</span></p>' +
+      '<p class="sm-popup__row">累計売上: <span class="sm-popup__sales">' + fmtMan(total) + ' 万円</span>（' + count + '回開催）</p>' +
       '<p class="sm-popup__row">担当: ' + escapeHtml(f.contact) + '（' + escapeHtml(f.phone) + '）</p>' +
-      '<button class="sm-popup__edit" data-edit-id="' + f.id + '">この拠点を編集</button>' +
-      '</div>';
+      '<div class="sm-popup__links">' +
+        '<button class="sm-popup__edit" data-history-id="' + f.id + '">実績を記録</button>' +
+        '<button class="sm-popup__edit" data-edit-id="' + f.id + '">基本情報を編集</button>' +
+      '</div></div>';
   }
 
   function selectFacility(id, panMap){
@@ -758,26 +860,29 @@
     }
   }
 
-  // ポップアップ内の「編集」ボタン（動的生成のためイベント委譲）
+  // ポップアップ内の動的ボタン（イベント委譲）
   document.addEventListener("click", function(e){
-    var btn = e.target.closest("[data-edit-id]");
-    if (btn){ openModal(btn.getAttribute("data-edit-id")); }
+    var editBtn = e.target.closest("[data-edit-id]");
+    if (editBtn){ openModal(editBtn.getAttribute("data-edit-id")); return; }
+    var histBtn = e.target.closest("[data-history-id]");
+    if (histBtn){ openHistoryModal(histBtn.getAttribute("data-history-id")); return; }
   });
 
   /* =========================================================
-     モーダル(追加・編集)
+     モーダル: 拠点(基本情報)の追加・編集
   ========================================================= */
   function openModal(id){
     state.editingId = id || null;
     var f = id ? state.facilities.find(function(x){ return x.id === id; }) : null;
+    var isNew = !f;
 
     var overlay = document.createElement("div");
     overlay.className = "sm-overlay";
     overlay.id = "sm-modal-overlay";
     overlay.innerHTML =
       '<div class="sm-modal">' +
-        '<p class="sm-modal__title">' + (f ? "拠点情報を編集" : "拠点を追加") + '</p>' +
-        '<p class="sm-modal__sub">マルシェを開催した施設の情報を入力してください。</p>' +
+        '<p class="sm-modal__title">' + (f ? "拠点の基本情報を編集" : "拠点を追加") + '</p>' +
+        '<p class="sm-modal__sub">売上高はここでは登録しません。保存後、拠点の「履歴」から開催実績を記録してください。</p>' +
         '<div class="sm-field"><label>施設名</label><input id="mf-name" type="text" value="' + escapeAttr(f ? f.facilityName : "") + '" placeholder="例：道の駅 信州新町" /></div>' +
         '<div class="sm-field-row">' +
           '<div class="sm-field"><label>都道府県</label><input id="mf-pref" type="text" value="' + escapeAttr(f ? f.prefecture : "長野県") + '" placeholder="長野県" /></div>' +
@@ -789,7 +894,6 @@
           '<div class="sm-field"><label>施設電話番号</label><input id="mf-phone" type="text" value="' + escapeAttr(f ? f.phone : "") + '" placeholder="026-000-0000" /></div>' +
           '<div class="sm-field"><label>担当者名</label><input id="mf-contact" type="text" value="' + escapeAttr(f ? f.contact : "") + '" placeholder="山田 太郎" /></div>' +
         '</div>' +
-        '<div class="sm-field"><label>売上高（万円）</label><input id="mf-sales" type="number" min="0" step="1" value="' + (f ? f.sales : "") + '" placeholder="850" /></div>' +
         '<div class="sm-field"><label>住所・地点名から座標を検索（任意）</label>' +
           '<div class="sm-geo-row"><input id="mf-address" type="text" placeholder="例：長野県長野市大字信州新町" />' +
           '<button class="sm-btn sm-btn--ghost" id="mf-geocode" type="button">検索</button></div>' +
@@ -800,6 +904,7 @@
         '</div>' +
         '<p class="sm-geo-hint">地図を見たい場所まで動かしてから下のボタンを押すと、地図中心の座標が自動入力されます。</p>' +
         '<button class="sm-btn sm-btn--ghost" id="mf-use-center" type="button" style="margin-top:6px;">地図の中心を取得</button>' +
+        (isNew ? '<div class="sm-checkbox-row"><input id="mf-open-history" type="checkbox" checked /><label for="mf-open-history">保存後にこの拠点の開催実績を入力する</label></div>' : '') +
         '<div class="sm-modal__footer">' +
           (f ? '<button class="sm-btn--text" id="mf-delete" type="button" style="color:#B23A2E;">この拠点を削除</button>' : '<span></span>') +
           '<div class="sm-modal__footer-right">' +
@@ -811,7 +916,6 @@
     document.body.appendChild(overlay);
 
     document.getElementById("mf-name").focus();
-
     overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
     document.getElementById("mf-cancel").addEventListener("click", closeModal);
     document.getElementById("mf-use-center").addEventListener("click", function(){
@@ -826,12 +930,11 @@
         closeModal();
         confirmDialog(
           "拠点を削除しますか？",
-          "「" + f.facilityName + "」を削除します。この操作は取り消せません。",
+          "「" + f.facilityName + "」と、これに紐づく開催実績（" + recordsFor(f.id).length + "件）をすべて削除します。この操作は取り消せません。",
           function(){ deleteFacility(f.id); }
         );
       });
     }
-
     function escKey(e){ if (e.key === "Escape") closeModal(); }
     document.addEventListener("keydown", escKey);
     overlay._escHandler = escKey;
@@ -877,33 +980,121 @@
     var cat = document.getElementById("mf-cat").value;
     var phone = document.getElementById("mf-phone").value.trim();
     var contact = document.getElementById("mf-contact").value.trim();
-    var sales = Number(document.getElementById("mf-sales").value);
     var lat = Number(document.getElementById("mf-lat").value);
     var lng = Number(document.getElementById("mf-lng").value);
+    var openHistoryAfter = document.getElementById("mf-open-history");
+    openHistoryAfter = openHistoryAfter ? openHistoryAfter.checked : false;
 
     if (!name || !pref){ showToast("施設名と都道府県は必須です", "error"); return; }
-    if (!isFinite(sales) || sales < 0){ showToast("売上高は0以上の数値で入力してください", "error"); return; }
     if (!isFinite(lat) || !isFinite(lng)){ showToast("緯度・経度を入力してください（地図の中心を取得、または住所検索を利用できます）", "error"); return; }
 
+    var newId = state.editingId;
     if (state.editingId){
       var f = state.facilities.find(function(x){ return x.id === state.editingId; });
-      Object.assign(f, { facilityName:name, prefecture:pref, category:cat, phone:phone, contact:contact, sales:sales, lat:lat, lng:lng });
+      Object.assign(f, { facilityName:name, prefecture:pref, category:cat, phone:phone, contact:contact, lat:lat, lng:lng });
       showToast("拠点情報を更新しました");
     } else {
-      state.facilities.push({ id: uid(), facilityName:name, prefecture:pref, category:cat, phone:phone, contact:contact, sales:sales, lat:lat, lng:lng });
+      newId = uid();
+      state.facilities.push({ id:newId, facilityName:name, prefecture:pref, category:cat, phone:phone, contact:contact, lat:lat, lng:lng });
       showToast("拠点を追加しました");
     }
     closeModal();
     await persist();
     renderAll();
+    if (openHistoryAfter && newId){ openHistoryModal(newId); }
   }
 
   async function deleteFacility(id){
     state.facilities = state.facilities.filter(function(f){ return f.id !== id; });
+    state.records = state.records.filter(function(r){ return r.facilityId !== id; });
     if (state.selectedId === id) state.selectedId = null;
     await persist();
     renderAll();
     showToast("拠点を削除しました");
+  }
+
+  /* =========================================================
+     モーダル: 開催実績の履歴・記録
+  ========================================================= */
+  function openHistoryModal(facilityId){
+    var facility = state.facilities.find(function(f){ return f.id === facilityId; });
+    if (!facility) return;
+    var overlay = document.createElement("div");
+    overlay.className = "sm-overlay";
+    overlay.id = "sm-history-overlay";
+    overlay.innerHTML = historyModalHtml(facility);
+    document.body.appendChild(overlay);
+    bindHistoryModalEvents(facility, overlay);
+    overlay.addEventListener("click", function(e){ if (e.target === overlay) closeHistoryModal(overlay); });
+    function escKey(e){ if (e.key === "Escape") closeHistoryModal(overlay); }
+    document.addEventListener("keydown", escKey);
+    overlay._escHandler = escKey;
+  }
+
+  function closeHistoryModal(overlay){
+    if (overlay._escHandler) document.removeEventListener("keydown", overlay._escHandler);
+    overlay.remove();
+  }
+
+  function historyModalHtml(facility){
+    var records = recordsFor(facility.id).slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+    var total = records.reduce(function(s,r){ return s + Number(r.sales||0); }, 0);
+    var rowsHtml = records.length ? records.map(function(r){
+      return '<div class="sm-hist-row" data-rid="' + r.id + '">' +
+        '<span class="sm-hist-date">' + escapeHtml(r.date) + '</span>' +
+        '<span class="sm-hist-sales">' + fmtMan(r.sales) + ' 万円</span>' +
+        '<span class="sm-hist-note">' + escapeHtml(r.note||"") + '</span>' +
+        '<button class="sm-icon-btn sm-icon-btn--danger" data-del-record="' + r.id + '" title="この記録を削除" aria-label="削除">' + iconTrash() + '</button>' +
+      '</div>';
+    }).join("") : '<p class="sm-hist-empty">まだ開催実績が記録されていません。下のフォームから最初の実績を登録してください。</p>';
+
+    return '<div class="sm-modal sm-history">' +
+      '<p class="sm-modal__title">' + escapeHtml(facility.facilityName) + ' の開催実績</p>' +
+      '<p class="sm-modal__sub">これまでの開催 ' + records.length + ' 回・累計売上 <strong>' + fmtMan(total) + ' 万円</strong>です。マルシェを開催するたびに、ここへ記録を追加してください。</p>' +
+      '<div class="sm-hist-list">' + rowsHtml + '</div>' +
+      '<div class="sm-hist-form">' +
+        '<p class="sm-hist-form__title">新しい実績を記録</p>' +
+        '<div class="sm-field-row">' +
+          '<div class="sm-field"><label>開催日</label><input id="hf-date" type="date" value="' + todayStr() + '" /></div>' +
+          '<div class="sm-field"><label>売上高（万円）</label><input id="hf-sales" type="number" min="0" step="1" placeholder="850" /></div>' +
+        '</div>' +
+        '<div class="sm-field"><label>メモ・記録者名（任意）</label><input id="hf-note" type="text" placeholder="例：雨天のため客足やや少なめ／記録：佐藤" /></div>' +
+        '<button class="sm-btn sm-btn--primary" id="hf-add" type="button">実績を追加</button>' +
+      '</div>' +
+      '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right">' +
+        '<button class="sm-btn sm-btn--ghost" id="hf-close" type="button">閉じる</button>' +
+      '</div></div>' +
+    '</div>';
+  }
+
+  function bindHistoryModalEvents(facility, overlay){
+    overlay.querySelector("#hf-close").addEventListener("click", function(){ closeHistoryModal(overlay); });
+    overlay.querySelector("#hf-add").addEventListener("click", async function(){
+      var date = overlay.querySelector("#hf-date").value;
+      var sales = Number(overlay.querySelector("#hf-sales").value);
+      var note = overlay.querySelector("#hf-note").value.trim();
+      if (!date){ showToast("開催日を入力してください", "error"); return; }
+      if (!isFinite(sales) || sales < 0){ showToast("売上高は0以上の数値で入力してください", "error"); return; }
+      state.records.push({ id: uid(), facilityId: facility.id, date: date, sales: sales, note: note });
+      await persist();
+      renderAll();
+      showToast("実績を記録しました");
+      overlay.innerHTML = historyModalHtml(facility);
+      bindHistoryModalEvents(facility, overlay);
+    });
+    overlay.querySelectorAll("[data-del-record]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var rid = btn.getAttribute("data-del-record");
+        confirmDialog("実績を削除しますか？", "この開催実績の記録を削除します。この操作は取り消せません。", async function(){
+          state.records = state.records.filter(function(r){ return r.id !== rid; });
+          await persist();
+          renderAll();
+          overlay.innerHTML = historyModalHtml(facility);
+          bindHistoryModalEvents(facility, overlay);
+          showToast("実績を削除しました");
+        });
+      });
+    });
   }
 
   /* =========================================================
@@ -930,31 +1121,39 @@
   /* =========================================================
      CSV 入出力
   ========================================================= */
-  var CSV_HEADERS = ["都道府県","施設名","カテゴリー","売上高(万円)","施設電話番号","担当者名","緯度","経度"];
-
-  function exportCsv(){
-    var rows = [CSV_HEADERS].concat(state.facilities.map(function(f){
-      return [f.prefecture, f.facilityName, f.category, f.sales, f.phone, f.contact, f.lat, f.lng];
+  function exportFacilitiesCsv(){
+    var headers = ["都道府県","施設名","カテゴリー","累計売上高(万円)","開催回数","直近開催日","施設電話番号","担当者名","緯度","経度"];
+    var rows = [headers].concat(state.facilities.map(function(f){
+      return [f.prefecture, f.facilityName, f.category, totalSalesFor(f.id), recordsFor(f.id).length, lastDateFor(f.id) || "", f.phone, f.contact, f.lat, f.lng];
     }));
+    downloadCsv(rows, "shinshu-marche-facilities-" + todayStr() + ".csv");
+    showToast("拠点CSVを書き出しました");
+  }
+
+  function exportRecordsCsv(){
+    var headers = ["施設名","都道府県","開催日","売上高(万円)","メモ"];
+    var rows = [headers].concat(state.records.slice().sort(function(a,b){ return a.date.localeCompare(b.date); }).map(function(r){
+      var f = state.facilities.find(function(x){ return x.id === r.facilityId; });
+      return [f ? f.facilityName : "(削除済み拠点)", f ? f.prefecture : "", r.date, r.sales, r.note || ""];
+    }));
+    downloadCsv(rows, "shinshu-marche-records-" + todayStr() + ".csv");
+    showToast("実績ログCSVを書き出しました");
+  }
+
+  function downloadCsv(rows, filename){
     var csv = rows.map(function(r){
       return r.map(function(v){
         var s = String(v == null ? "" : v);
-        if (s.indexOf(",") !== -1 || s.indexOf('"') !== -1 || s.indexOf("\n") !== -1){
-          s = '"' + s.replace(/"/g,'""') + '"';
-        }
+        if (s.indexOf(",") !== -1 || s.indexOf('"') !== -1 || s.indexOf("\n") !== -1){ s = '"' + s.replace(/"/g,'""') + '"'; }
         return s;
       }).join(",");
     }).join("\r\n");
     var blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
-    a.href = url;
-    a.download = "shinshu-marche-" + new Date().toISOString().slice(0,10) + ".csv";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
-    showToast("CSVを書き出しました");
   }
 
   function importCsv(file){
@@ -973,25 +1172,23 @@
           if (!name || !pref || !isFinite(lat) || !isFinite(lng)){ skipped++; return; }
           var cat = (r["カテゴリー"] || "").trim();
           if (CATEGORY_ORDER.indexOf(cat) === -1) cat = "道の駅";
+          var fid = uid();
           state.facilities.push({
-            id: uid(),
-            prefecture: pref,
-            facilityName: name,
-            category: cat,
-            phone: (r["施設電話番号"] || "").trim(),
-            contact: (r["担当者名"] || "").trim(),
-            sales: Number(r["売上高(万円)"] || 0),
+            id: fid, prefecture: pref, facilityName: name, category: cat,
+            phone: (r["施設電話番号"] || "").trim(), contact: (r["担当者名"] || "").trim(),
             lat: lat, lng: lng
           });
+          var salesVal = Number(r["累計売上高(万円)"] || r["売上高(万円)"] || 0);
+          if (salesVal > 0){
+            state.records.push({ id: uid(), facilityId: fid, date: (r["開催日"] || todayStr()), sales: salesVal, note: "CSV取込" });
+          }
           added++;
         });
         await persist();
         renderAll();
-        showToast(added + "件を取り込みました" + (skipped ? "（" + skipped + "件は項目不足のためスキップ）" : ""));
+        showToast(added + "件の拠点を取り込みました" + (skipped ? "（" + skipped + "件は項目不足のためスキップ）" : ""));
       },
-      error: function(){
-        showToast("CSVの読み込みに失敗しました", "error");
-      }
+      error: function(){ showToast("CSVの読み込みに失敗しました", "error"); }
     });
   }
 
@@ -1008,12 +1205,10 @@
 
   function bindEvents(){
     document.getElementById("sm-search").addEventListener("input", function(e){
-      state.search = e.target.value;
-      renderTable(); renderMarkers();
+      state.search = e.target.value; renderTable(); renderMarkers();
     });
     document.getElementById("sm-pref-filter").addEventListener("change", function(e){
-      state.prefecture = e.target.value;
-      renderTable(); renderMarkers();
+      state.prefecture = e.target.value; renderTable(); renderMarkers();
     });
     document.getElementById("sm-cat-filter").addEventListener("click", function(e){
       var chip = e.target.closest(".sm-chip");
@@ -1021,8 +1216,7 @@
       var cat = chip.getAttribute("data-cat");
       if (state.activeCategories.has(cat)) state.activeCategories.delete(cat);
       else state.activeCategories.add(cat);
-      renderFilterControls();
-      renderTable(); renderMarkers();
+      renderFilterControls(); renderTable(); renderMarkers();
     });
     document.getElementById("sm-clear-filters").addEventListener("click", function(){
       state.search = ""; state.prefecture = "all"; state.activeCategories = new Set(CATEGORY_ORDER);
@@ -1034,7 +1228,7 @@
       th.addEventListener("click", function(){
         var key = th.getAttribute("data-key");
         if (state.sortKey === key){ state.sortDir = state.sortDir === "asc" ? "desc" : "asc"; }
-        else { state.sortKey = key; state.sortDir = key === "sales" ? "desc" : "asc"; }
+        else { state.sortKey = key; state.sortDir = (key === "sales" || key === "recordCount" || key === "lastDate") ? "desc" : "asc"; }
         renderTable();
       });
     });
@@ -1046,10 +1240,11 @@
       var id = row.getAttribute("data-id");
       if (actionBtn){
         var action = actionBtn.getAttribute("data-action");
+        if (action === "history") openHistoryModal(id);
         if (action === "edit") openModal(id);
         if (action === "delete"){
           var f = state.facilities.find(function(x){ return x.id === id; });
-          confirmDialog("拠点を削除しますか？", "「" + (f ? f.facilityName : "") + "」を削除します。この操作は取り消せません。", function(){ deleteFacility(id); });
+          confirmDialog("拠点を削除しますか？", "「" + (f ? f.facilityName : "") + "」と紐づく開催実績（" + recordsFor(id).length + "件）をすべて削除します。この操作は取り消せません。", function(){ deleteFacility(id); });
         }
         return;
       }
@@ -1062,10 +1257,9 @@
     });
 
     document.getElementById("sm-add-btn").addEventListener("click", function(){ openModal(null); });
-    document.getElementById("sm-csv-export-btn").addEventListener("click", exportCsv);
-    document.getElementById("sm-csv-import-btn").addEventListener("click", function(){
-      document.getElementById("sm-csv-input").click();
-    });
+    document.getElementById("sm-csv-export-facilities-btn").addEventListener("click", exportFacilitiesCsv);
+    document.getElementById("sm-csv-export-records-btn").addEventListener("click", exportRecordsCsv);
+    document.getElementById("sm-csv-import-btn").addEventListener("click", function(){ document.getElementById("sm-csv-input").click(); });
     document.getElementById("sm-csv-input").addEventListener("change", function(e){
       var file = e.target.files[0];
       if (file) importCsv(file);
@@ -1077,7 +1271,7 @@
      初期化
   ========================================================= */
   async function init(){
-    await loadFacilities();
+    await loadData();
     initMap();
     bindEvents();
     renderAll();
