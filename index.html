@@ -1,261 +1,1092 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>信州マルシェ 開催マップ</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>信州マルシェ 拠点管理ボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<style>
+  :root{
+    --pine:#1F2D24;
+    --pine-soft:#2B3D2F;
+    --paper:#F7F3EA;
+    --paper-dim:#EEE7D6;
+    --paper-line: rgba(31,45,36,0.14);
+    --ink:#2A2521;
+    --ink-soft:#5B5246;
+    --persimmon:#C8541E;
+    --persimmon-deep:#8B2E1F;
+    --gold:#B08D57;
+    --sage:#5B7F66;
+    --indigo:#34507A;
+    --cat-eki:#8C5A3C;
+    --cat-ja:#3F7D6B;
+    --cat-event:#6B5CA5;
+    --cat-sa:#3E6B8A;
+    --radius:10px;
+    --shadow: 0 1px 2px rgba(31,45,36,0.06), 0 6px 16px rgba(31,45,36,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+  a{color:inherit;}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--persimmon); outline-offset:2px;}
 
-    <style>
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            background-color: #000; color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0; padding: 0; display: flex; flex-direction: column;
-            height: 100vh; overflow: hidden;
-        }
-        #app-root { display: flex; flex-direction: column; height: 100vh; width: 100%; }
-        header {
-            padding: 10px; border-bottom: 1px solid #00ff00;
-            display: flex; justify-content: space-between; align-items: center;
-            background-color: #0a0a0a; height: 50px; z-index: 10;
-        }
-        .toggle-btn {
-            background-color: #002200; color: #00ff00; border: 1px solid #00ff00;
-            padding: 5px 10px; cursor: pointer; font-family: monospace; font-weight: bold;
-        }
-        .main-container { position: relative; flex: 1; width: 100%; }
-        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background-color: #eee; }
-        .sidebar {
-            position: absolute; top: 0; left: 0; width: 100%; max-width: 380px; height: 100%;
-            background-color: rgba(0, 0, 0, 0.95); border-right: 1px solid #00ff00;
-            display: flex; flex-direction: column; padding: 15px; overflow-y: auto; gap: 20px;
-            z-index: 5; transition: transform 0.3s ease; transform: translateX(-100%);
-        }
-        .sidebar.active { transform: translateX(0); }
-        .section-title { font-size: 0.95rem; font-weight: bold; border-left: 4px solid #00ff00; padding-left: 8px; }
-        .panel-block { border: 1px solid #003300; padding: 12px; background-color: #050505; }
-        .form-group { display: flex; flex-direction: column; margin-bottom: 10px; font-size: 0.85rem; }
-        .form-row { display: flex; gap: 10px; }
-        .form-row .form-group { flex: 1; min-width: 0; }
-        select, input {
-            background-color: #000; color: #00ff00; border: 1px solid #00ff00;
-            padding: 12px; font-family: monospace; width: 100%; font-size: 1.1rem; outline: none;
-            border-radius: 4px;
-        }
-        .action-btn {
-            background-color: #00ff00; color: #000; border: 1px solid #00ff00;
-            padding: 14px; cursor: pointer; font-family: monospace; font-weight: bold; width: 100%;
-            font-size: 1.1rem; border-radius: 4px; transition: all 0.2s;
-        }
-        .action-btn:hover { background-color: #00aa00; box-shadow: 0 0 15px #00ff00; }
-        footer { padding: 8px; text-align: center; background-color: #0a0a0a; border-top: 1px solid #00ff00; font-size: 0.7rem; height: 35px; }
-        @media (min-width: 992px) {
-            .toggle-btn { display: none; }
-            .sidebar { position: relative; transform: translateX(0); width: 360px; }
-            .main-container { display: flex; flex-direction: row; }
-            #map { position: relative; flex: 1; }
-        }
-    </style>
+  /* ---------- Header ---------- */
+  .sm-header{
+    background:var(--pine);
+    color:var(--paper);
+    padding:22px 28px 20px;
+    border-bottom:3px solid var(--persimmon);
+  }
+  .sm-header__row{
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    max-width:1280px; margin:0 auto;
+  }
+  .sm-header__title{
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:0.06em;
+    margin:0;
+  }
+  .sm-header__title span{ color:#E7C9A8; }
+  .sm-header__sub{
+    margin:4px 0 0;
+    font-size:12.5px;
+    color:#C9D2C7;
+    letter-spacing:0.04em;
+  }
+  .sm-header__meta{
+    font-size:11.5px;
+    color:#AEBBAC;
+    text-align:right;
+    line-height:1.6;
+  }
+
+  /* ---------- Layout ---------- */
+  .sm-main{ max-width:1280px; margin:0 auto; padding:22px 28px 60px; }
+
+  /* ---------- Stats ---------- */
+  .sm-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .sm-stat{
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    box-shadow:var(--shadow);
+  }
+  .sm-stat__label{
+    font-size:11px; letter-spacing:0.08em; color:var(--ink-soft); margin:0 0 6px;
+  }
+  .sm-stat__value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:22px; font-weight:600; color:var(--pine); margin:0;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .sm-stat__value--accent{ color:var(--persimmon-deep); }
+  .sm-stat__sub{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
+
+  /* category share bar */
+  .sm-catbar-wrap{
+    background:#fff; border:1px solid var(--paper-line); border-radius:var(--radius);
+    padding:14px 16px 12px; margin-bottom:22px; box-shadow:var(--shadow);
+  }
+  .sm-catbar-title{ font-size:11px; letter-spacing:0.08em; color:var(--ink-soft); margin:0 0 10px; }
+  .sm-catbar{ display:flex; width:100%; height:10px; border-radius:6px; overflow:hidden; background:var(--paper-dim); }
+  .sm-catbar__seg{ height:100%; }
+  .sm-catlegend{ display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; }
+  .sm-catlegend__item{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); }
+  .sm-catlegend__dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+
+  /* ---------- Map card ---------- */
+  .sm-map-card{
+    position:relative;
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    margin-bottom:22px;
+  }
+  #sm-map{ height:480px; width:100%; background:#E4E0D2; }
+  @media (max-width:760px){ #sm-map{ height:360px; } }
+
+  .sm-legend{
+    position:absolute; right:14px; bottom:14px; z-index:500;
+    background:rgba(255,255,255,0.94);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:11.5px;
+    box-shadow:var(--shadow);
+    max-width:190px;
+  }
+  .sm-legend__title{ font-weight:700; letter-spacing:0.05em; color:var(--pine); margin:0 0 6px; font-size:11px;}
+  .sm-legend__grad{ display:flex; height:8px; border-radius:4px; overflow:hidden; margin-bottom:4px; }
+  .sm-legend__grad span{ flex:1; }
+  .sm-legend__range{ display:flex; justify-content:space-between; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; font-size:10px; }
+  .sm-legend__note{ margin-top:8px; color:var(--ink-soft); font-size:10.5px; line-height:1.5;}
+
+  /* leaflet marker */
+  .marche-pin{ display:flex; align-items:center; justify-content:center; }
+  .marche-pin__ring{
+    width:100%; height:100%;
+    border-radius:50%;
+    background: radial-gradient(circle at 32% 30%, rgba(255,255,255,0.35), rgba(255,255,255,0) 55%), var(--c);
+    border:2px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .15s ease;
+    cursor:pointer;
+  }
+  .marche-pin__ring:hover, .marche-pin__ring.is-active{ transform:scale(1.14); }
+  .marche-pin__glyph{ display:flex; }
+  .marche-pin__glyph svg{ width:55%; height:55%; }
+
+  .sm-popup{ font-family:'Zen Kaku Gothic New', sans-serif; font-size:12.5px; min-width:200px; }
+  .sm-popup__cat{ display:inline-block; font-size:10.5px; padding:2px 7px; border-radius:10px; color:#fff; margin-bottom:6px; }
+  .sm-popup__name{ font-weight:700; font-size:13.5px; color:var(--pine); margin:0 0 4px; }
+  .sm-popup__row{ color:var(--ink-soft); margin:2px 0; }
+  .sm-popup__sales{ font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--persimmon-deep); }
+  .sm-popup__edit{
+    display:inline-block; margin-top:8px; font-size:11.5px; color:var(--indigo); text-decoration:underline; cursor:pointer; background:none; border:none; padding:0;
+  }
+
+  /* ---------- Toolbar ---------- */
+  .sm-toolbar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .sm-input, .sm-select{
+    font-family:inherit; font-size:13px; padding:8px 11px;
+    border:1px solid var(--paper-line); border-radius:7px; background:#fff; color:var(--ink);
+  }
+  .sm-input{ min-width:200px; flex:1; max-width:280px; }
+  .sm-chip-group{ display:flex; gap:6px; flex-wrap:wrap; }
+  .sm-chip{
+    border:1px solid var(--paper-line); background:#fff; border-radius:20px;
+    padding:6px 12px; font-size:12px; cursor:pointer; color:var(--ink-soft);
+    display:flex; align-items:center; gap:6px; transition:all .12s ease;
+  }
+  .sm-chip__dot{ width:8px; height:8px; border-radius:50%; }
+  .sm-chip.is-active{ color:#fff; border-color:transparent; }
+  .sm-toolbar__spacer{ flex:1; }
+  .sm-btn{
+    font-size:13px; padding:8px 14px; border-radius:7px; border:1px solid transparent;
+    cursor:pointer; font-weight:600; white-space:nowrap;
+  }
+  .sm-btn--primary{ background:var(--persimmon); color:#fff; }
+  .sm-btn--primary:hover{ background:var(--persimmon-deep); }
+  .sm-btn--ghost{ background:#fff; border-color:var(--paper-line); color:var(--ink); }
+  .sm-btn--ghost:hover{ background:var(--paper-dim); }
+  .sm-btn--text{ background:none; border:none; color:var(--indigo); text-decoration:underline; padding:6px 4px; font-size:12.5px; cursor:pointer; }
+  .sm-file-label{ display:inline-block; }
+
+  .sm-result-line{ font-size:12px; color:var(--ink-soft); margin-bottom:8px; }
+
+  /* ---------- Table ---------- */
+  .sm-table-wrap{
+    background:#fff; border:1px solid var(--paper-line); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  table.sm-table{ width:100%; border-collapse:collapse; min-width:880px; }
+  table.sm-table thead th{
+    position:sticky; top:0; background:var(--paper-dim);
+    text-align:left; font-size:11.5px; letter-spacing:0.04em; color:var(--ink-soft);
+    padding:10px 12px; border-bottom:1px solid var(--paper-line);
+    cursor:pointer; user-select:none; white-space:nowrap;
+  }
+  table.sm-table thead th:hover{ color:var(--pine); }
+  table.sm-table thead th.is-sorted{ color:var(--pine); font-weight:700; }
+  table.sm-table thead th.no-sort{ cursor:default; }
+  table.sm-table thead th.no-sort:hover{ color:var(--ink-soft); }
+  .sm-sort-arrow{ font-size:10px; margin-left:3px; opacity:0.7; }
+  table.sm-table tbody td{
+    padding:10px 12px; border-bottom:1px solid var(--paper-line); font-size:13px; vertical-align:middle;
+  }
+  table.sm-table tbody tr{ cursor:pointer; transition:background .1s ease; }
+  table.sm-table tbody tr:hover{ background:#FAF7EF; }
+  table.sm-table tbody tr.is-selected{ background:#FBEEE2; box-shadow:inset 3px 0 0 var(--persimmon); }
+  .sm-name-cell{ font-weight:600; color:var(--pine); }
+  .sm-pref-cell{ color:var(--ink-soft); }
+  .sm-sales-cell{ font-family:'JetBrains Mono',monospace; font-weight:600; display:flex; align-items:center; gap:7px; white-space:nowrap; }
+  .sm-tier-dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+  .sm-badge{ display:inline-block; font-size:11px; padding:3px 9px; border-radius:11px; color:#fff; white-space:nowrap; }
+  .sm-actions{ display:flex; gap:6px; }
+  .sm-icon-btn{
+    border:1px solid var(--paper-line); background:#fff; border-radius:6px; width:28px; height:28px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft);
+  }
+  .sm-icon-btn:hover{ background:var(--paper-dim); color:var(--pine); }
+  .sm-icon-btn--danger:hover{ color:#B23A2E; border-color:#E3B3A8; background:#FBEFEC; }
+  .sm-empty-row td{ padding:34px 12px; text-align:center; color:var(--ink-soft); font-size:13px; }
+
+  /* ---------- Modal ---------- */
+  .sm-overlay{
+    position:fixed; inset:0; background:rgba(31,45,36,0.45); display:flex; align-items:flex-start;
+    justify-content:center; padding:5vh 16px; z-index:1000; overflow-y:auto;
+  }
+  .sm-modal{
+    background:#fff; border-radius:12px; width:100%; max-width:520px; box-shadow:0 24px 60px rgba(0,0,0,0.25);
+    padding:22px 24px 20px; margin-bottom:5vh;
+  }
+  .sm-modal__title{ font-family:'Shippori Mincho',serif; font-size:18px; color:var(--pine); margin:0 0 4px; }
+  .sm-modal__sub{ font-size:12px; color:var(--ink-soft); margin:0 0 16px; }
+  .sm-field{ margin-bottom:13px; }
+  .sm-field label{ display:block; font-size:12px; color:var(--ink-soft); margin-bottom:5px; }
+  .sm-field input, .sm-field select{
+    width:100%; font-family:inherit; font-size:13.5px; padding:9px 11px;
+    border:1px solid var(--paper-line); border-radius:7px; background:var(--paper); color:var(--ink);
+  }
+  .sm-field-row{ display:flex; gap:10px; }
+  .sm-field-row .sm-field{ flex:1; }
+  .sm-geo-row{ display:flex; gap:8px; align-items:flex-end; }
+  .sm-geo-hint{ font-size:11px; color:var(--ink-soft); margin-top:5px; line-height:1.5; }
+  .sm-modal__footer{ display:flex; justify-content:space-between; align-items:center; margin-top:18px; gap:10px; flex-wrap:wrap; }
+  .sm-modal__footer-right{ display:flex; gap:8px; }
+
+  /* ---------- Confirm dialog ---------- */
+  .sm-confirm{ max-width:380px; text-align:left; }
+  .sm-confirm p{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; margin:0 0 18px; }
+
+  /* ---------- Toast ---------- */
+  .sm-toast-host{ position:fixed; right:18px; bottom:18px; display:flex; flex-direction:column; gap:8px; z-index:2000; }
+  .sm-toast{
+    background:var(--pine); color:#fff; padding:11px 16px; border-radius:8px; font-size:13px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25); border-left:4px solid var(--gold);
+    animation:sm-toast-in .18s ease;
+  }
+  .sm-toast--error{ border-left-color:#D8674F; }
+  @keyframes sm-toast-in{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  /* ---------- Footer / loading ---------- */
+  .sm-footnote{ margin-top:22px; font-size:11.5px; color:var(--ink-soft); line-height:1.7; }
+  .sm-loading{ padding:80px 20px; text-align:center; color:var(--ink-soft); font-size:13px; }
+  .sm-hidden{ display:none !important; }
+
+  @media (max-width:760px){
+    .sm-stats{ grid-template-columns:repeat(2,1fr); }
+    .sm-header{ padding:18px 18px 16px; }
+    .sm-main{ padding:18px 16px 50px; }
+    .sm-header__meta{ text-align:left; }
+  }
+</style>
 </head>
 <body>
 
-    <div id="app-root">
-        <header>
-            <h1>[ 信州マルシェ 開催マップ ]</h1>
-            <button class="toggle-btn" id="toggle-panel-btn" onclick="toggleSidebar()">[ MENU_OPEN ]</button>
-        </header>
-
-        <div class="main-container">
-            <div class="sidebar" id="sidebar-panel">
-                <div>
-                    <div class="section-title">// FILTER_SYSTEM</div>
-                    <div class="panel-block">
-                        <div class="form-row">
-                            <div class="form-group"><label>開催年</label><select id="filter-year"><option value="">ALL</option><option value="2024">2024年</option><option value="2025">2025年</option><option value="2026">2026年</option><option value="2027">2027年</option></select></div>
-                            <div class="form-group"><label>開催月</label><select id="filter-month"><option value="">ALL</option><option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option></select></div>
-                        </div>
-                        <div class="form-group"><label>都道府県</label><select id="filter-pref"><option value="">ALL</option><option value="東京都">東京都</option><option value="長野県">長野県</option><option value="大阪府">大阪府</option><option value="北海道">北海道</option><option value="福岡県">福岡県</option></select></div>
-                        <div class="form-group"><label>施設カテゴリ</label><select id="filter-category"><option value="">ALL</option><option value="道の駅">道の駅</option><option value="JA">JA</option><option value="イベント">イベント</option><option value="その他">その他</option></select></div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="section-title">// REALTIME_DATA_INPUT</div>
-                    <div class="panel-block">
-                        <form id="input-form" onsubmit="event.preventDefault(); pushNewNode();">
-                            <div class="form-group"><label>施設名</label><input type="text" id="in-name" required /></div>
-                            <div class="form-row">
-                                <div class="form-group"><label>担当者名</label><input type="text" id="in-manager" required /></div>
-                                <div class="form-group"><label>施設電話番号</label><input type="tel" id="in-phone" required /></div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group"><label>開催日</label><input type="date" id="in-date" required /></div>
-                                <div class="form-group"><label>売上金額 [¥]</label><input type="number" id="in-sales" required min="0" /></div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group"><label>都道府県</label><select id="in-pref" required><option value="東京都">東京都</option><option value="長野県">長野県</option><option value="大阪府">大阪府</option><option value="北海道">北海道</option><option value="福岡県">福岡県</option></select></div>
-                                <div class="form-group"><label>カテゴリ</label><select id="in-category" required><option value="道の駅">道の駅</option><option value="JA">JA</option><option value="イベント">イベント</option><option value="その他">その他</option></select></div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group"><label>緯度 [LAT]</label><input type="number" step="any" id="in-lat" required /></div>
-                                <div class="form-group"><label>経度 [LNG]</label><input type="number" step="any" id="in-lng" required /></div>
-                            </div>
-                            <button type="submit" class="action-btn" style="font-size:0.9rem; padding:10px;">PUSH_TO_SUPABASE();</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div id="map"></div>
-        </div>
-        <footer>Credit: 信州マルシェ 開催マップポータル</footer>
+  <header class="sm-header">
+    <div class="sm-header__row">
+      <div>
+        <p class="sm-header__title">信州<span>マルシェ</span> 拠点管理ボード</p>
+        <p class="sm-header__sub">道の駅・JA野菜直売所・イベント・高速SA — 開催実績マップ &amp; 一覧</p>
+      </div>
+      <div class="sm-header__meta" id="sm-updated-meta">読み込み中…</div>
     </div>
+  </header>
 
-    <script>
-        const SUPABASE_URL = "https://nmfwsiihyyppjsuiomxt.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_fotuWYpXEdjOjalQtkuhfA_g7CiiQ";
-        
-        let supabase = null;
-        try {
-            if(window.supabase && SUPABASE_URL && SUPABASE_KEY) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-        } catch(e) {}
+  <main class="sm-main">
 
-        let map, currentMarkers = [], locationsData = [];
+    <div id="sm-loading" class="sm-loading">データを読み込んでいます…</div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initMapSystem();
+    <div id="sm-app" class="sm-hidden">
+
+      <section class="sm-stats" id="sm-stats"></section>
+
+      <div class="sm-catbar-wrap">
+        <p class="sm-catbar-title">カテゴリー別 売上シェア</p>
+        <div class="sm-catbar" id="sm-catbar"></div>
+        <div class="sm-catlegend" id="sm-catlegend"></div>
+      </div>
+
+      <div class="sm-map-card">
+        <div id="sm-map"></div>
+        <div class="sm-legend">
+          <p class="sm-legend__title">売上高（万円）でピンの色が変化</p>
+          <div class="sm-legend__grad">
+            <span style="background:var(--indigo)"></span>
+            <span style="background:var(--sage)"></span>
+            <span style="background:var(--gold)"></span>
+            <span style="background:var(--persimmon)"></span>
+            <span style="background:var(--persimmon-deep)"></span>
+          </div>
+          <div class="sm-legend__range"><span>〜300</span><span>1,500〜</span></div>
+          <p class="sm-legend__note">ピンの大きさは売上規模の相対比較です。アイコンは施設カテゴリーを表します。</p>
+        </div>
+      </div>
+
+      <div class="sm-toolbar">
+        <input id="sm-search" class="sm-input" type="text" placeholder="施設名・担当者・電話番号で検索" />
+        <select id="sm-pref-filter" class="sm-select"></select>
+        <div class="sm-chip-group" id="sm-cat-filter"></div>
+        <div class="sm-toolbar__spacer"></div>
+        <button class="sm-btn--text" id="sm-clear-filters">条件をクリア</button>
+        <label class="sm-file-label">
+          <input type="file" id="sm-csv-input" accept=".csv" class="sm-hidden" />
+          <span class="sm-btn sm-btn--ghost" id="sm-csv-import-btn">CSV取込</span>
+        </label>
+        <button class="sm-btn sm-btn--ghost" id="sm-csv-export-btn">CSV書き出し</button>
+        <button class="sm-btn sm-btn--primary" id="sm-add-btn">＋ 拠点を追加</button>
+      </div>
+
+      <p class="sm-result-line" id="sm-result-line"></p>
+
+      <div class="sm-table-wrap">
+        <table class="sm-table">
+          <thead>
+            <tr>
+              <th data-key="facilityName">施設名<span class="sm-sort-arrow"></span></th>
+              <th data-key="prefecture">都道府県<span class="sm-sort-arrow"></span></th>
+              <th data-key="category">カテゴリー<span class="sm-sort-arrow"></span></th>
+              <th data-key="sales">売上高（万円）<span class="sm-sort-arrow"></span></th>
+              <th data-key="phone">施設電話番号<span class="sm-sort-arrow"></span></th>
+              <th data-key="contact">担当者名<span class="sm-sort-arrow"></span></th>
+              <th class="no-sort">操作</th>
+            </tr>
+          </thead>
+          <tbody id="sm-tbody"></tbody>
+        </table>
+      </div>
+
+      <p class="sm-footnote">
+        ※ 初期表示は説明用のサンプルデータです。実際の開催データに置き換えてご利用ください。座標は「地図の中心を取得」または「住所から検索」で入力できます。<br/>
+        ※ データは共有設定です。このページのリンクを開いた人は全員、同じデータを閲覧・編集できます（同時に編集した場合は最後の保存が反映されます）。社外に共有しないようご注意ください。
+      </p>
+    </div>
+  </main>
+
+  <div id="sm-toast-host" class="sm-toast-host"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     定数・設定
+  ========================================================= */
+  var STORAGE_KEY = "shinshu-marche-facilities-v1";
+
+  var CATEGORY_META = {
+    "道の駅": {
+      color: "var(--cat-eki)", hex:"#8C5A3C",
+      glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg>'
+    },
+    "JA野菜直売所": {
+      color: "var(--cat-ja)", hex:"#3F7D6B",
+      glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-4 7-10 7-10s7 6 7 10a7 7 0 0 1-7 7z"/><path d="M11 20v-6"/></svg>'
+    },
+    "イベント": {
+      color: "var(--cat-event)", hex:"#6B5CA5",
+      glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4"/><path d="M4 4h14l-3 4 3 4H4"/></svg>'
+    },
+    "高速SA": {
+      color: "var(--cat-sa)", hex:"#3E6B8A",
+      glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M5 11l1.5-4h11L19 11"/></svg>'
+    }
+  };
+  var CATEGORY_ORDER = ["道の駅","JA野菜直売所","イベント","高速SA"];
+
+  var TIERS = [
+    { max: 300,  color:"#34507A", label:"〜300" },
+    { max: 600,  color:"#5B7F66", label:"300〜600" },
+    { max: 1000, color:"#B08D57", label:"600〜1,000" },
+    { max: 1500, color:"#C8541E", label:"1,000〜1,500" },
+    { max: Infinity, color:"#8B2E1F", label:"1,500〜" }
+  ];
+
+  var SAMPLE_DATA = [
+    { id:"f1",  prefecture:"長野県", facilityName:"道の駅 信州新町", category:"道の駅", phone:"026-262-0188", contact:"小林 直人", sales:850,  lat:36.5919, lng:138.0594 },
+    { id:"f2",  prefecture:"長野県", facilityName:"道の駅 安曇野松川", category:"道の駅", phone:"0263-78-3001", contact:"田中 美咲", sales:1120, lat:36.4115, lng:137.8773 },
+    { id:"f3",  prefecture:"長野県", facilityName:"JA松本ハイランド 産直市場", category:"JA野菜直売所", phone:"0263-25-7711", contact:"山田 健一", sales:670, lat:36.2510, lng:137.9520 },
+    { id:"f4",  prefecture:"長野県", facilityName:"道の駅 こもれび館", category:"道の駅", phone:"026-245-1188", contact:"中村 真理", sales:430, lat:36.6850, lng:138.3500 },
+    { id:"f5",  prefecture:"長野県", facilityName:"JAながの 農産物直売所アグリながの", category:"JA野菜直売所", phone:"026-296-7700", contact:"斉藤 修", sales:510, lat:36.6800, lng:138.1850 },
+    { id:"f6",  prefecture:"長野県", facilityName:"道の駅 美麻", category:"道の駅", phone:"0261-23-2070", contact:"高橋 さとし", sales:280, lat:36.6230, lng:137.9100 },
+    { id:"f7",  prefecture:"長野県", facilityName:"中央道 諏訪湖SA(下り)", category:"高速SA", phone:"0266-58-5757", contact:"渡辺 隼人", sales:1480, lat:36.0560, lng:138.1110 },
+    { id:"f8",  prefecture:"山梨県", facilityName:"中央道 双葉SA", category:"高速SA", phone:"055-273-2011", contact:"小川 翔太", sales:990, lat:35.6660, lng:138.5340 },
+    { id:"f9",  prefecture:"群馬県", facilityName:"上信越道 横川SA", category:"高速SA", phone:"027-395-2017", contact:"木村 彩", sales:770, lat:36.3350, lng:138.7950 },
+    { id:"f10", prefecture:"新潟県", facilityName:"上信越道 名立谷浜SA", category:"高速SA", phone:"025-534-2002", contact:"林 大輔", sales:540, lat:37.1480, lng:138.1700 },
+    { id:"f11", prefecture:"東京都", facilityName:"信州フェア in 丸の内", category:"イベント", phone:"03-3211-4001", contact:"鈴木 陽子", sales:2350, lat:35.6812, lng:139.7671 },
+    { id:"f12", prefecture:"東京都", facilityName:"ふるさと和み市(新宿)", category:"イベント", phone:"03-5321-7755", contact:"伊藤 健太", sales:1860, lat:35.6896, lng:139.6917 },
+    { id:"f13", prefecture:"神奈川県", facilityName:"みなとみらい信州マルシェ", category:"イベント", phone:"045-682-2500", contact:"加藤 由美", sales:1430, lat:35.4555, lng:139.6320 },
+    { id:"f14", prefecture:"埼玉県", facilityName:"さいたま新都心 軽井沢フェア", category:"イベント", phone:"048-601-3411", contact:"松本 亮", sales:980, lat:35.8870, lng:139.6300 },
+    { id:"f15", prefecture:"愛知県", facilityName:"名古屋 信州フェスタ(オアシス21)", category:"イベント", phone:"052-963-5252", contact:"佐々木 玲奈", sales:1670, lat:35.1709, lng:136.9088 },
+    { id:"f16", prefecture:"長野県", facilityName:"JA上伊那 産直市場グリーンファーム", category:"JA野菜直売所", phone:"0265-71-7300", contact:"清水 大地", sales:605, lat:35.8260, lng:137.9520 },
+    { id:"f17", prefecture:"長野県", facilityName:"JA信州諏訪 ハイジ通り直売所", category:"JA野菜直売所", phone:"0266-52-1188", contact:"橋本 まどか", sales:380, lat:36.0530, lng:138.1170 },
+    { id:"f18", prefecture:"長野県", facilityName:"JA中野市 ぐりんぱる中野", category:"JA野菜直売所", phone:"0269-22-5566", contact:"石川 拓也", sales:455, lat:36.7460, lng:138.3590 },
+    { id:"f19", prefecture:"長野県", facilityName:"JAみなみ信州 アグリステーション飯田", category:"JA野菜直売所", phone:"0265-23-5005", contact:"後藤 千尋", sales:520, lat:35.5147, lng:137.8217 },
+    { id:"f20", prefecture:"長野県", facilityName:"道の駅 オアシスならわ", category:"道の駅", phone:"0265-49-2222", contact:"村上 拓実", sales:360, lat:35.6500, lng:137.8200 },
+    { id:"f21", prefecture:"長野県", facilityName:"道の駅 木曽ならかわ", category:"道の駅", phone:"0264-25-3393", contact:"西村 優子", sales:410, lat:35.7650, lng:137.6750 },
+    { id:"f22", prefecture:"長野県", facilityName:"道の駅 信越さかえ", category:"道の駅", phone:"026-262-1500", contact:"岡田 誠", sales:295, lat:36.8460, lng:138.3320 },
+    { id:"f23", prefecture:"静岡県", facilityName:"新東名 駿河湾沼津SA", category:"高速SA", phone:"055-941-0011", contact:"藤田 紗代", sales:1120, lat:35.0930, lng:138.8470 },
+    { id:"f24", prefecture:"大阪府", facilityName:"うめだ信州マルシェ", category:"イベント", phone:"06-6361-7001", contact:"三浦 健二", sales:1980, lat:34.7050, lng:135.4960 }
+  ];
+
+  /* =========================================================
+     状態
+  ========================================================= */
+  var state = {
+    facilities: [],
+    search: "",
+    prefecture: "all",
+    activeCategories: new Set(CATEGORY_ORDER),
+    sortKey: "sales",
+    sortDir: "desc",
+    selectedId: null,
+    editingId: null
+  };
+
+  var map, markersById = {};
+
+  /* =========================================================
+     ユーティリティ
+  ========================================================= */
+  function tierFor(sales){
+    for (var i=0; i<TIERS.length; i++){
+      if (sales <= TIERS[i].max) return TIERS[i];
+    }
+    return TIERS[TIERS.length-1];
+  }
+
+  function fmtMan(n){
+    return Number(n||0).toLocaleString("ja-JP");
+  }
+
+  function uid(){
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function showToast(message, type){
+    var host = document.getElementById("sm-toast-host");
+    var el = document.createElement("div");
+    el.className = "sm-toast" + (type === "error" ? " sm-toast--error" : "");
+    el.textContent = message;
+    host.appendChild(el);
+    setTimeout(function(){
+      el.style.opacity = "0";
+      el.style.transition = "opacity .25s ease";
+      setTimeout(function(){ el.remove(); }, 260);
+    }, 2800);
+  }
+
+  /* =========================================================
+     永続化
+  ========================================================= */
+  async function loadFacilities(){
+    var loaded = null;
+    try{
+      var res = await window.storage.get(STORAGE_KEY, true);
+      if (res && res.value){
+        loaded = JSON.parse(res.value);
+      }
+    } catch(e){
+      loaded = null;
+    }
+    if (Array.isArray(loaded) && loaded.length){
+      state.facilities = loaded;
+    } else {
+      state.facilities = SAMPLE_DATA.map(function(f){ return Object.assign({}, f); });
+      try{ await window.storage.set(STORAGE_KEY, JSON.stringify(state.facilities), true); }
+      catch(e2){ /* このセッション中はメモリ上で動作を継続 */ }
+    }
+  }
+
+  async function persist(){
+    try{
+      await window.storage.set(STORAGE_KEY, JSON.stringify(state.facilities), true);
+      updateMeta();
+    } catch(e){
+      showToast("保存に失敗しました。変更はこの画面でのみ有効です", "error");
+    }
+  }
+
+  function updateMeta(){
+    var el = document.getElementById("sm-updated-meta");
+    var now = new Date();
+    var s = now.getFullYear() + "/" + String(now.getMonth()+1).padStart(2,"0") + "/" + String(now.getDate()).padStart(2,"0") +
+      " " + String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
+    el.innerHTML = "拠点数 " + state.facilities.length + " 件<br/>最終更新 " + s;
+  }
+
+  /* =========================================================
+     フィルタ・ソート
+  ========================================================= */
+  function getFiltered(){
+    var q = state.search.trim().toLowerCase();
+    var allCats = state.activeCategories.size === 0 || state.activeCategories.size === CATEGORY_ORDER.length;
+    return state.facilities.filter(function(f){
+      if (state.prefecture !== "all" && f.prefecture !== state.prefecture) return false;
+      if (!allCats && !state.activeCategories.has(f.category)) return false;
+      if (q){
+        var hay = (f.facilityName + " " + f.contact + " " + f.phone).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function getSorted(list){
+    var key = state.sortKey, dir = state.sortDir === "asc" ? 1 : -1;
+    return list.slice().sort(function(a,b){
+      var av = a[key], bv = b[key];
+      if (key === "sales"){
+        return (av - bv) * dir;
+      }
+      av = String(av||""); bv = String(bv||"");
+      return av.localeCompare(bv, "ja") * dir;
+    });
+  }
+
+  /* =========================================================
+     レンダリング: 統計
+  ========================================================= */
+  function renderStats(){
+    var list = state.facilities;
+    var total = list.reduce(function(s,f){ return s + Number(f.sales||0); }, 0);
+    var avg = list.length ? Math.round(total / list.length) : 0;
+    var top = list.slice().sort(function(a,b){ return b.sales - a.sales; })[0];
+
+    var html = "";
+    html += statCard("拠点数", list.length + " 件", "");
+    html += statCard("売上高合計", fmtMan(total) + " 万円", "", true);
+    html += statCard("平均売上 / 拠点", fmtMan(avg) + " 万円", "");
+    html += statCard("最高売上拠点", top ? top.facilityName : "—", top ? (fmtMan(top.sales) + " 万円・" + top.prefecture) : "");
+    document.getElementById("sm-stats").innerHTML = html;
+
+    // カテゴリー別シェア
+    var byCat = {};
+    CATEGORY_ORDER.forEach(function(c){ byCat[c] = 0; });
+    list.forEach(function(f){ byCat[f.category] = (byCat[f.category]||0) + Number(f.sales||0); });
+    var barHtml = "";
+    var legendHtml = "";
+    CATEGORY_ORDER.forEach(function(c){
+      var pct = total ? (byCat[c] / total * 100) : 0;
+      var meta = CATEGORY_META[c];
+      barHtml += '<div class="sm-catbar__seg" style="width:' + pct.toFixed(2) + '%; background:' + meta.hex + ';" title="' + c + ' ' + pct.toFixed(1) + '%"></div>';
+      legendHtml += '<div class="sm-catlegend__item"><span class="sm-catlegend__dot" style="background:' + meta.hex + '"></span>' + c + '　' + fmtMan(byCat[c]) + '万円（' + pct.toFixed(1) + '%）</div>';
+    });
+    document.getElementById("sm-catbar").innerHTML = barHtml || '<div class="sm-catbar__seg" style="width:100%;background:var(--paper-line);"></div>';
+    document.getElementById("sm-catlegend").innerHTML = legendHtml;
+  }
+
+  function statCard(label, value, sub, accent){
+    return '<div class="sm-stat"><p class="sm-stat__label">' + label + '</p>' +
+      '<p class="sm-stat__value' + (accent ? ' sm-stat__value--accent' : '') + '">' + value + '</p>' +
+      (sub ? '<p class="sm-stat__sub">' + sub + '</p>' : '') + '</div>';
+  }
+
+  /* =========================================================
+     レンダリング: フィルタUI
+  ========================================================= */
+  function renderFilterControls(){
+    var prefSel = document.getElementById("sm-pref-filter");
+    var prefs = Array.from(new Set(state.facilities.map(function(f){ return f.prefecture; }))).sort(function(a,b){ return a.localeCompare(b,"ja"); });
+    var current = state.prefecture;
+    prefSel.innerHTML = '<option value="all">すべての都道府県</option>' +
+      prefs.map(function(p){ return '<option value="' + escapeAttr(p) + '"' + (p===current?' selected':'') + '>' + p + '</option>'; }).join("");
+    if (!prefs.includes(current)) { prefSel.value = "all"; state.prefecture = "all"; }
+
+    var catWrap = document.getElementById("sm-cat-filter");
+    catWrap.innerHTML = CATEGORY_ORDER.map(function(c){
+      var meta = CATEGORY_META[c];
+      var active = state.activeCategories.has(c);
+      return '<button type="button" class="sm-chip' + (active ? ' is-active' : '') + '" data-cat="' + c + '" style="' +
+        (active ? ('background:' + meta.hex + ';') : '') + '">' +
+        '<span class="sm-chip__dot" style="background:' + meta.hex + '"></span>' + c + '</button>';
+    }).join("");
+  }
+
+  function escapeAttr(s){
+    return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
+  }
+  function escapeHtml(s){
+    return String(s==null?"":s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  /* =========================================================
+     レンダリング: テーブル
+  ========================================================= */
+  function renderTable(){
+    var filtered = getSorted(getFiltered());
+    var total = state.facilities.length;
+
+    document.getElementById("sm-result-line").textContent =
+      filtered.length + " / " + total + " 拠点を表示中";
+
+    // ソート矢印
+    document.querySelectorAll("table.sm-table thead th[data-key]").forEach(function(th){
+      var key = th.getAttribute("data-key");
+      var arrow = th.querySelector(".sm-sort-arrow");
+      th.classList.toggle("is-sorted", key === state.sortKey);
+      arrow.textContent = key === state.sortKey ? (state.sortDir === "asc" ? "▲" : "▼") : "";
+    });
+
+    var tbody = document.getElementById("sm-tbody");
+    if (!filtered.length){
+      tbody.innerHTML = '<tr class="sm-empty-row"><td colspan="7">条件に一致する拠点がありません。検索語やフィルターを見直してください。</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(function(f){
+      var tier = tierFor(Number(f.sales||0));
+      var cat = CATEGORY_META[f.category] || CATEGORY_META["道の駅"];
+      var selected = f.id === state.selectedId;
+      return '<tr data-id="' + f.id + '" class="' + (selected ? "is-selected" : "") + '" tabindex="0">' +
+        '<td class="sm-name-cell">' + escapeHtml(f.facilityName) + '</td>' +
+        '<td class="sm-pref-cell">' + escapeHtml(f.prefecture) + '</td>' +
+        '<td><span class="sm-badge" style="background:' + cat.hex + '">' + escapeHtml(f.category) + '</span></td>' +
+        '<td><span class="sm-sales-cell"><span class="sm-tier-dot" style="background:' + tier.color + '"></span>' + fmtMan(f.sales) + '</span></td>' +
+        '<td>' + escapeHtml(f.phone) + '</td>' +
+        '<td>' + escapeHtml(f.contact) + '</td>' +
+        '<td><div class="sm-actions">' +
+          '<button class="sm-icon-btn" data-action="edit" title="編集" aria-label="編集">' + iconPencil() + '</button>' +
+          '<button class="sm-icon-btn sm-icon-btn--danger" data-action="delete" title="削除" aria-label="削除">' + iconTrash() + '</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join("");
+  }
+
+  function iconPencil(){
+    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  }
+  function iconTrash(){
+    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+  }
+
+  /* =========================================================
+     レンダリング: 地図
+  ========================================================= */
+  function initMap(){
+    map = L.map("sm-map", { scrollWheelZoom:true }).setView([36.4, 138.0], 7);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 18
+    }).addTo(map);
+  }
+
+  function buildIcon(f, isActive){
+    var tier = tierFor(Number(f.sales||0));
+    var cat = CATEGORY_META[f.category] || CATEGORY_META["道の駅"];
+    var values = state.facilities.map(function(x){ return Number(x.sales||0); });
+    var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
+    var size = 30;
+    if (max > min){
+      size = 26 + Math.round((Number(f.sales||0) - min) / (max - min) * 20);
+    }
+    return L.divIcon({
+      className: "marche-pin",
+      html: '<div class="marche-pin__ring' + (isActive ? " is-active" : "") + '" style="--c:' + tier.color + ';width:' + size + 'px;height:' + size + 'px;">' +
+        '<span class="marche-pin__glyph">' + cat.glyph + '</span></div>',
+      iconSize: [size, size],
+      iconAnchor: [size/2, size/2]
+    });
+  }
+
+  function renderMarkers(){
+    var filteredIds = new Set(getFiltered().map(function(f){ return f.id; }));
+
+    // 削除済み・対象外のマーカーを除去
+    Object.keys(markersById).forEach(function(id){
+      if (!filteredIds.has(id) || !state.facilities.find(function(f){ return f.id === id; })){
+        map.removeLayer(markersById[id]);
+        delete markersById[id];
+      }
+    });
+
+    state.facilities.forEach(function(f){
+      if (!filteredIds.has(f.id)) return;
+      var icon = buildIcon(f, f.id === state.selectedId);
+      if (markersById[f.id]){
+        markersById[f.id].setIcon(icon);
+        markersById[f.id].setLatLng([f.lat, f.lng]);
+      } else {
+        var marker = L.marker([f.lat, f.lng], { icon: icon });
+        marker.bindPopup(buildPopup(f));
+        marker.on("click", function(){
+          selectFacility(f.id, false);
         });
+        marker.addTo(map);
+        markersById[f.id] = marker;
+      }
+      markersById[f.id].setPopupContent(buildPopup(f));
+    });
+  }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar-panel');
-            const btn = document.getElementById('toggle-panel-btn');
-            sidebar.classList.toggle('active');
-            btn.innerText = sidebar.classList.contains('active') ? "[ MENU_CLOSE ]" : "[ MENU_OPEN ]";
+  function buildPopup(f){
+    var cat = CATEGORY_META[f.category] || CATEGORY_META["道の駅"];
+    return '<div class="sm-popup">' +
+      '<span class="sm-popup__cat" style="background:' + cat.hex + '">' + escapeHtml(f.category) + '</span>' +
+      '<p class="sm-popup__name">' + escapeHtml(f.facilityName) + '</p>' +
+      '<p class="sm-popup__row">' + escapeHtml(f.prefecture) + '</p>' +
+      '<p class="sm-popup__row">売上高: <span class="sm-popup__sales">' + fmtMan(f.sales) + ' 万円</span></p>' +
+      '<p class="sm-popup__row">担当: ' + escapeHtml(f.contact) + '（' + escapeHtml(f.phone) + '）</p>' +
+      '<button class="sm-popup__edit" data-edit-id="' + f.id + '">この拠点を編集</button>' +
+      '</div>';
+  }
+
+  function selectFacility(id, panMap){
+    state.selectedId = id;
+    renderTable();
+    renderMarkers();
+    var row = document.querySelector('tr[data-id="' + id + '"]');
+    if (row) row.scrollIntoView({ block:"nearest" });
+    if (panMap){
+      var f = state.facilities.find(function(x){ return x.id === id; });
+      if (f){
+        map.flyTo([f.lat, f.lng], Math.max(map.getZoom(), 10), { duration:0.6 });
+        markersById[id] && markersById[id].openPopup();
+      }
+    }
+  }
+
+  // ポップアップ内の「編集」ボタン（動的生成のためイベント委譲）
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest("[data-edit-id]");
+    if (btn){ openModal(btn.getAttribute("data-edit-id")); }
+  });
+
+  /* =========================================================
+     モーダル(追加・編集)
+  ========================================================= */
+  function openModal(id){
+    state.editingId = id || null;
+    var f = id ? state.facilities.find(function(x){ return x.id === id; }) : null;
+
+    var overlay = document.createElement("div");
+    overlay.className = "sm-overlay";
+    overlay.id = "sm-modal-overlay";
+    overlay.innerHTML =
+      '<div class="sm-modal">' +
+        '<p class="sm-modal__title">' + (f ? "拠点情報を編集" : "拠点を追加") + '</p>' +
+        '<p class="sm-modal__sub">マルシェを開催した施設の情報を入力してください。</p>' +
+        '<div class="sm-field"><label>施設名</label><input id="mf-name" type="text" value="' + escapeAttr(f ? f.facilityName : "") + '" placeholder="例：道の駅 信州新町" /></div>' +
+        '<div class="sm-field-row">' +
+          '<div class="sm-field"><label>都道府県</label><input id="mf-pref" type="text" value="' + escapeAttr(f ? f.prefecture : "長野県") + '" placeholder="長野県" /></div>' +
+          '<div class="sm-field"><label>カテゴリー</label><select id="mf-cat">' +
+            CATEGORY_ORDER.map(function(c){ return '<option value="' + c + '"' + (f && f.category===c ? " selected" : "") + '>' + c + '</option>'; }).join("") +
+          '</select></div>' +
+        '</div>' +
+        '<div class="sm-field-row">' +
+          '<div class="sm-field"><label>施設電話番号</label><input id="mf-phone" type="text" value="' + escapeAttr(f ? f.phone : "") + '" placeholder="026-000-0000" /></div>' +
+          '<div class="sm-field"><label>担当者名</label><input id="mf-contact" type="text" value="' + escapeAttr(f ? f.contact : "") + '" placeholder="山田 太郎" /></div>' +
+        '</div>' +
+        '<div class="sm-field"><label>売上高（万円）</label><input id="mf-sales" type="number" min="0" step="1" value="' + (f ? f.sales : "") + '" placeholder="850" /></div>' +
+        '<div class="sm-field"><label>住所・地点名から座標を検索（任意）</label>' +
+          '<div class="sm-geo-row"><input id="mf-address" type="text" placeholder="例：長野県長野市大字信州新町" />' +
+          '<button class="sm-btn sm-btn--ghost" id="mf-geocode" type="button">検索</button></div>' +
+        '</div>' +
+        '<div class="sm-field-row">' +
+          '<div class="sm-field"><label>緯度</label><input id="mf-lat" type="number" step="0.000001" value="' + (f ? f.lat : "") + '" /></div>' +
+          '<div class="sm-field"><label>経度</label><input id="mf-lng" type="number" step="0.000001" value="' + (f ? f.lng : "") + '" /></div>' +
+        '</div>' +
+        '<p class="sm-geo-hint">地図を見たい場所まで動かしてから下のボタンを押すと、地図中心の座標が自動入力されます。</p>' +
+        '<button class="sm-btn sm-btn--ghost" id="mf-use-center" type="button" style="margin-top:6px;">地図の中心を取得</button>' +
+        '<div class="sm-modal__footer">' +
+          (f ? '<button class="sm-btn--text" id="mf-delete" type="button" style="color:#B23A2E;">この拠点を削除</button>' : '<span></span>') +
+          '<div class="sm-modal__footer-right">' +
+            '<button class="sm-btn sm-btn--ghost" id="mf-cancel" type="button">キャンセル</button>' +
+            '<button class="sm-btn sm-btn--primary" id="mf-save" type="button">保存</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    document.getElementById("mf-name").focus();
+
+    overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
+    document.getElementById("mf-cancel").addEventListener("click", closeModal);
+    document.getElementById("mf-use-center").addEventListener("click", function(){
+      var c = map.getCenter();
+      document.getElementById("mf-lat").value = c.lat.toFixed(6);
+      document.getElementById("mf-lng").value = c.lng.toFixed(6);
+    });
+    document.getElementById("mf-geocode").addEventListener("click", doGeocode);
+    document.getElementById("mf-save").addEventListener("click", saveModal);
+    if (f){
+      document.getElementById("mf-delete").addEventListener("click", function(){
+        closeModal();
+        confirmDialog(
+          "拠点を削除しますか？",
+          "「" + f.facilityName + "」を削除します。この操作は取り消せません。",
+          function(){ deleteFacility(f.id); }
+        );
+      });
+    }
+
+    function escKey(e){ if (e.key === "Escape") closeModal(); }
+    document.addEventListener("keydown", escKey);
+    overlay._escHandler = escKey;
+  }
+
+  function closeModal(){
+    var overlay = document.getElementById("sm-modal-overlay");
+    if (!overlay) return;
+    if (overlay._escHandler) document.removeEventListener("keydown", overlay._escHandler);
+    overlay.remove();
+    state.editingId = null;
+  }
+
+  async function doGeocode(){
+    var addr = document.getElementById("mf-address").value.trim();
+    if (!addr){ showToast("検索する地点名・住所を入力してください", "error"); return; }
+    var btn = document.getElementById("mf-geocode");
+    var orig = btn.textContent;
+    btn.textContent = "検索中…";
+    btn.disabled = true;
+    try{
+      var url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(addr);
+      var resp = await fetch(url, { headers: { "Accept-Language": "ja" } });
+      var data = await resp.json();
+      if (data && data.length){
+        document.getElementById("mf-lat").value = Number(data[0].lat).toFixed(6);
+        document.getElementById("mf-lng").value = Number(data[0].lon).toFixed(6);
+        showToast("座標を取得しました");
+      } else {
+        showToast("見つかりませんでした。手動で入力するか別の表記でお試しください", "error");
+      }
+    } catch(e){
+      showToast("検索に失敗しました。手動で座標を入力してください", "error");
+    } finally {
+      btn.textContent = orig;
+      btn.disabled = false;
+    }
+  }
+
+  async function saveModal(){
+    var name = document.getElementById("mf-name").value.trim();
+    var pref = document.getElementById("mf-pref").value.trim();
+    var cat = document.getElementById("mf-cat").value;
+    var phone = document.getElementById("mf-phone").value.trim();
+    var contact = document.getElementById("mf-contact").value.trim();
+    var sales = Number(document.getElementById("mf-sales").value);
+    var lat = Number(document.getElementById("mf-lat").value);
+    var lng = Number(document.getElementById("mf-lng").value);
+
+    if (!name || !pref){ showToast("施設名と都道府県は必須です", "error"); return; }
+    if (!isFinite(sales) || sales < 0){ showToast("売上高は0以上の数値で入力してください", "error"); return; }
+    if (!isFinite(lat) || !isFinite(lng)){ showToast("緯度・経度を入力してください（地図の中心を取得、または住所検索を利用できます）", "error"); return; }
+
+    if (state.editingId){
+      var f = state.facilities.find(function(x){ return x.id === state.editingId; });
+      Object.assign(f, { facilityName:name, prefecture:pref, category:cat, phone:phone, contact:contact, sales:sales, lat:lat, lng:lng });
+      showToast("拠点情報を更新しました");
+    } else {
+      state.facilities.push({ id: uid(), facilityName:name, prefecture:pref, category:cat, phone:phone, contact:contact, sales:sales, lat:lat, lng:lng });
+      showToast("拠点を追加しました");
+    }
+    closeModal();
+    await persist();
+    renderAll();
+  }
+
+  async function deleteFacility(id){
+    state.facilities = state.facilities.filter(function(f){ return f.id !== id; });
+    if (state.selectedId === id) state.selectedId = null;
+    await persist();
+    renderAll();
+    showToast("拠点を削除しました");
+  }
+
+  /* =========================================================
+     確認ダイアログ
+  ========================================================= */
+  function confirmDialog(title, message, onConfirm){
+    var overlay = document.createElement("div");
+    overlay.className = "sm-overlay";
+    overlay.innerHTML =
+      '<div class="sm-modal sm-confirm">' +
+        '<p class="sm-modal__title">' + escapeHtml(title) + '</p>' +
+        '<p>' + escapeHtml(message) + '</p>' +
+        '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right">' +
+          '<button class="sm-btn sm-btn--ghost" id="cf-cancel" type="button">キャンセル</button>' +
+          '<button class="sm-btn sm-btn--primary" id="cf-ok" type="button" style="background:#B23A2E;">削除する</button>' +
+        '</div></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", function(e){ if (e.target === overlay) overlay.remove(); });
+    document.getElementById("cf-cancel").addEventListener("click", function(){ overlay.remove(); });
+    document.getElementById("cf-ok").addEventListener("click", function(){ overlay.remove(); onConfirm(); });
+  }
+
+  /* =========================================================
+     CSV 入出力
+  ========================================================= */
+  var CSV_HEADERS = ["都道府県","施設名","カテゴリー","売上高(万円)","施設電話番号","担当者名","緯度","経度"];
+
+  function exportCsv(){
+    var rows = [CSV_HEADERS].concat(state.facilities.map(function(f){
+      return [f.prefecture, f.facilityName, f.category, f.sales, f.phone, f.contact, f.lat, f.lng];
+    }));
+    var csv = rows.map(function(r){
+      return r.map(function(v){
+        var s = String(v == null ? "" : v);
+        if (s.indexOf(",") !== -1 || s.indexOf('"') !== -1 || s.indexOf("\n") !== -1){
+          s = '"' + s.replace(/"/g,'""') + '"';
         }
+        return s;
+      }).join(",");
+    }).join("\r\n");
+    var blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "shinshu-marche-" + new Date().toISOString().slice(0,10) + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("CSVを書き出しました");
+  }
 
-        async function initMapSystem() {
-            if (map) return;
-            map = L.map('map', { tap: false }).setView([36.5, 138.0], 6);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+  function importCsv(file){
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async function(results){
+        var rows = results.data;
+        if (!rows.length){ showToast("CSVにデータが見つかりませんでした", "error"); return; }
+        var added = 0, skipped = 0;
+        rows.forEach(function(r){
+          var name = (r["施設名"] || "").trim();
+          var pref = (r["都道府県"] || "").trim();
+          var lat = Number(r["緯度"]);
+          var lng = Number(r["経度"]);
+          if (!name || !pref || !isFinite(lat) || !isFinite(lng)){ skipped++; return; }
+          var cat = (r["カテゴリー"] || "").trim();
+          if (CATEGORY_ORDER.indexOf(cat) === -1) cat = "道の駅";
+          state.facilities.push({
+            id: uid(),
+            prefecture: pref,
+            facilityName: name,
+            category: cat,
+            phone: (r["施設電話番号"] || "").trim(),
+            contact: (r["担当者名"] || "").trim(),
+            sales: Number(r["売上高(万円)"] || 0),
+            lat: lat, lng: lng
+          });
+          added++;
+        });
+        await persist();
+        renderAll();
+        showToast(added + "件を取り込みました" + (skipped ? "（" + skipped + "件は項目不足のためスキップ）" : ""));
+      },
+      error: function(){
+        showToast("CSVの読み込みに失敗しました", "error");
+      }
+    });
+  }
 
-            map.on('contextmenu click', function(e) {
-                document.getElementById('in-lat').value = e.latlng.lat.toFixed(6);
-                document.getElementById('in-lng').value = e.latlng.lng.toFixed(6);
-                if (window.innerWidth < 992) toggleSidebar();
-            });
+  /* =========================================================
+     一括描画 & イベントバインド
+  ========================================================= */
+  function renderAll(){
+    renderStats();
+    renderFilterControls();
+    renderTable();
+    renderMarkers();
+    updateMeta();
+  }
 
-            ['filter-year', 'filter-month', 'filter-pref', 'filter-category'].forEach(id => {
-                document.getElementById(id).addEventListener('change', filterData);
-            });
+  function bindEvents(){
+    document.getElementById("sm-search").addEventListener("input", function(e){
+      state.search = e.target.value;
+      renderTable(); renderMarkers();
+    });
+    document.getElementById("sm-pref-filter").addEventListener("change", function(e){
+      state.prefecture = e.target.value;
+      renderTable(); renderMarkers();
+    });
+    document.getElementById("sm-cat-filter").addEventListener("click", function(e){
+      var chip = e.target.closest(".sm-chip");
+      if (!chip) return;
+      var cat = chip.getAttribute("data-cat");
+      if (state.activeCategories.has(cat)) state.activeCategories.delete(cat);
+      else state.activeCategories.add(cat);
+      renderFilterControls();
+      renderTable(); renderMarkers();
+    });
+    document.getElementById("sm-clear-filters").addEventListener("click", function(){
+      state.search = ""; state.prefecture = "all"; state.activeCategories = new Set(CATEGORY_ORDER);
+      document.getElementById("sm-search").value = "";
+      renderFilterControls(); renderTable(); renderMarkers();
+    });
 
-            await pullCloudData();
+    document.querySelectorAll("table.sm-table thead th[data-key]").forEach(function(th){
+      th.addEventListener("click", function(){
+        var key = th.getAttribute("data-key");
+        if (state.sortKey === key){ state.sortDir = state.sortDir === "asc" ? "desc" : "asc"; }
+        else { state.sortKey = key; state.sortDir = key === "sales" ? "desc" : "asc"; }
+        renderTable();
+      });
+    });
+
+    document.getElementById("sm-tbody").addEventListener("click", function(e){
+      var actionBtn = e.target.closest("[data-action]");
+      var row = e.target.closest("tr[data-id]");
+      if (!row) return;
+      var id = row.getAttribute("data-id");
+      if (actionBtn){
+        var action = actionBtn.getAttribute("data-action");
+        if (action === "edit") openModal(id);
+        if (action === "delete"){
+          var f = state.facilities.find(function(x){ return x.id === id; });
+          confirmDialog("拠点を削除しますか？", "「" + (f ? f.facilityName : "") + "」を削除します。この操作は取り消せません。", function(){ deleteFacility(id); });
         }
+        return;
+      }
+      selectFacility(id, true);
+    });
+    document.getElementById("sm-tbody").addEventListener("keydown", function(e){
+      if (e.key !== "Enter") return;
+      var row = e.target.closest("tr[data-id]");
+      if (row) selectFacility(row.getAttribute("data-id"), true);
+    });
 
-        async function pullCloudData() {
-            if(!supabase) {
-                showDemoData();
-                return;
-            }
-            try {
-                const { data, error } = await supabase.from('locations').select('*');
-                if (error) {
-                    showDemoData();
-                } else {
-                    locationsData = data || [];
-                    if(locationsData.length === 0) {
-                        showDemoData();
-                    } else {
-                        filterData();
-                    }
-                }
-            } catch(e) {
-                showDemoData();
-            }
-        }
+    document.getElementById("sm-add-btn").addEventListener("click", function(){ openModal(null); });
+    document.getElementById("sm-csv-export-btn").addEventListener("click", exportCsv);
+    document.getElementById("sm-csv-import-btn").addEventListener("click", function(){
+      document.getElementById("sm-csv-input").click();
+    });
+    document.getElementById("sm-csv-input").addEventListener("change", function(e){
+      var file = e.target.files[0];
+      if (file) importCsv(file);
+      e.target.value = "";
+    });
+  }
 
-        function showDemoData() {
-            locationsData = [
-                { id: 1, lat: 36.65, lng: 138.18, name: "長野駅前マルシェ(デモ)", manager: "山田太郎", phone: "026-123-4567", date: "2026-06-20", pref: "長野県", category: "イベント", sales: 1200000 },
-                { id: 2, lat: 35.68, lng: 139.76, name: "東京サテライトJA(デモ)", manager: "鈴木花子", phone: "03-9876-5432", date: "2026-07-15", pref: "東京都", category: "JA", sales: 450000 }
-            ];
-            filterData();
-        }
+  /* =========================================================
+     初期化
+  ========================================================= */
+  async function init(){
+    await loadFacilities();
+    initMap();
+    bindEvents();
+    renderAll();
+    document.getElementById("sm-loading").classList.add("sm-hidden");
+    document.getElementById("sm-app").classList.remove("sm-hidden");
+  }
 
-        function getPinColor(sales) {
-            if (sales >= 1000000) return '#ff003c';
-            if (sales >= 500000)  return '#ff9900';
-            return '#0099ff';
-        }
-
-        function filterData() {
-            const y = document.getElementById('filter-year').value;
-            const m = document.getElementById('filter-month').value;
-            const p = document.getElementById('filter-pref').value;
-            const c = document.getElementById('filter-category').value;
-
-            currentMarkers.forEach(m => map.removeLayer(m));
-            currentMarkers = [];
-
-            locationsData.filter(loc => {
-                if(!loc.date) return false;
-                const ly = loc.date.substring(0, 4), lm = loc.date.substring(5, 7);
-                return (y===""||ly===y) && (m===""||lm===m) && (p===""||loc.pref===p) && (c===""||loc.category===c);
-            }).forEach(loc => {
-                const color = getPinColor(loc.sales);
-                const customIcon = L.divIcon({
-                    className: "custom-pin", iconAnchor: [9, 9], popupAnchor: [0, -10],
-                    html: `<span style="background-color:${color}; width:18px; height:18px; display:block; border-radius:50%; box-shadow:0 0 10px ${color}; border:2px solid #fff;" />`
-                });
-                const marker = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
-                marker.bindPopup(`
-                    <div style="color:#00ff00; font-family:monospace;">
-                        <strong style="color:#fff; font-size:1rem;">${loc.name}</strong><br><hr style="border-color:#003300; margin:6px 0;">
-                        <strong>[担当]</strong> ${loc.manager}<br><strong>[TEL]</strong> ${loc.phone}<br><strong>[日程]</strong> ${loc.date}<br><strong>[売上]</strong> ¥${Number(loc.sales).toLocaleString()}
-                    </div>
-                `);
-                currentMarkers.push(marker);
-            });
-        }
-
-        async function pushNewNode() {
-            const newLoc = {
-                name: document.getElementById('in-name').value,
-                manager: document.getElementById('in-manager').value,
-                phone: document.getElementById('in-phone').value,
-                date: document.getElementById('in-date').value,
-                sales: parseInt(document.getElementById('in-sales').value, 10),
-                pref: document.getElementById('in-pref').value,
-                category: document.getElementById('in-category').value,
-                lat: parseFloat(document.getElementById('in-lat').value),
-                lng: parseFloat(document.getElementById('in-lng').value)
-            };
-
-            if(supabase) {
-                const { error } = await supabase.from('locations').insert([newLoc]);
-                if (error) {
-                    alert("データベース送信失敗(デモモードで追加します): " + error.message);
-                    newLoc.id = Date.now();
-                    locationsData.push(newLoc);
-                    filterData();
-                } else {
-                    alert("データベースに同期しました！");
-                    await pullCloudData();
-                }
-            } else {
-                newLoc.id = Date.now();
-                locationsData.push(newLoc);
-                filterData();
-                alert("ローカル環境に保存しました（デモ）");
-            }
-            
-            document.getElementById('input-form').reset();
-            if (window.innerWidth < 992) toggleSidebar();
-            map.setView([newLoc.lat, newLoc.lng], 12);
-        }
-    </script>
+  init();
+})();
+</script>
 </body>
 </html>
