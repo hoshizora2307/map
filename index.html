@@ -62,7 +62,7 @@
             border-radius: 4px;
         }
         .action-btn {
-            background-color: #00ff00; color: #000; border: 1px solid #00ff00;
+            background-color: #00ff00; color: #00; border: 1px solid #00ff00;
             padding: 14px; cursor: pointer; font-family: monospace; font-weight: bold; width: 100%;
             font-size: 1.1rem; border-radius: 4px; transition: all 0.2s;
         }
@@ -91,7 +91,7 @@
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <label style="font-size: 0.85rem; color: #00ff00; font-weight: bold;">SYS_ACCESS_KEY :</label>
                 <input type="text" id="passkey" style="text-align: center; font-size: 1.3rem; letter-spacing: 2px;" autofocus placeholder="mondocolo2026">
-                <button type="button" class="action-btn" id="connect-btn">CONNECT_TO_CORE();</button>
+                <button type="button" class="action-btn" id="connect-btn" onclick="requestSystemAccess()">CONNECT_TO_CORE();</button>
             </div>
             <div id="auth-log" style="color: #ff0055; font-size: 0.85rem; margin-top: 15px; text-align: center; font-family: monospace; min-height: 20px;"></div>
         </div>
@@ -165,24 +165,22 @@
         let map, currentMarkers = [], locationsData = [];
 
         function requestSystemAccess() {
-            const pass = document.getElementById('passkey').value.trim().toLowerCase();
+            const pass = document.getElementById('passkey').value.trim();
             const log = document.getElementById('auth-log');
-            log.style.color = "#00ff00"; log.innerText = "AUTHENTICATING... PLEASE WAIT.";
 
             if (pass === "mondocolo2026") { 
-                log.innerText = "ACCESS GRANTED. FETCHING DATA...";
                 document.getElementById('auth-terminal').style.display = 'none';
                 document.getElementById('app-root').style.display = 'flex';
                 try {
                     initMapSystem();
                 } catch(mapErr) {}
             } else {
-                log.style.color = "#ff0055"; log.innerText = "CRITICAL_ERROR: INVALID_KEY.";
+                log.style.color = "#ff0055"; 
+                log.innerText = "CRITICAL_ERROR: INVALID_KEY.";
                 document.getElementById('passkey').value = "";
             }
         }
 
-        document.getElementById('connect-btn').addEventListener('click', requestSystemAccess);
         document.getElementById('passkey').addEventListener('keypress', (e) => { if(e.key==='Enter') requestSystemAccess(); });
 
         function toggleSidebar() {
