@@ -1,1295 +1,1117 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#1F2E26">
-<title>仕入先マップ｜信州マルシェ</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>信州マルシェ 拠点管理ボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-:root {
-  --bg: #F7F4EC; --ink: #1F2E26; --soft: #3E5246;
-  --accent: #D98E2B; --accentBg: #F0D9AE;
-  --line: #DAD3C2; --white: #FFFFFF;
-  --danger: #B3452F; --dangerBg: #FBEAE5;
-}
-html, body { height: 100%; overflow: hidden; background: var(--ink); }
-body {
-  font-family: 'Hiragino Sans','Noto Sans JP',-apple-system,BlinkMacSystemFont,sans-serif;
-  color: var(--ink); font-size: 14px; line-height: 1.5;
-}
-#app { max-width: 480px; margin: 0 auto; height: 100vh; height: 100dvh;
-  background: var(--bg); display: flex; flex-direction: column; position: relative; overflow: hidden; }
-input, select, textarea, button { font-family: inherit; font-size: 16px; }
-input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-button { cursor: pointer; }
-.leaflet-popup-content-wrapper { border-radius: 12px; }
+  :root{
+    --pine:#1F2D24;--pine-soft:#2B3D2F;--paper:#F7F3EA;--paper-dim:#EEE7D6;
+    --paper-line:rgba(31,45,36,0.14);--ink:#2A2521;--ink-soft:#5B5246;
+    --persimmon:#C8541E;--persimmon-deep:#8B2E1F;--gold:#B08D57;--sage:#5B7F66;
+    --indigo:#34507A;--cat-eki:#8C5A3C;--cat-ja:#3F7D6B;--cat-event:#6B5CA5;--cat-sa:#3E6B8A;
+    --radius:10px;--shadow:0 1px 2px rgba(31,45,36,0.06),0 6px 16px rgba(31,45,36,0.08);
+  }
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+  a{color:inherit;}button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--persimmon);outline-offset:2px;}
 
+  .sm-header{background:var(--pine);color:var(--paper);padding:22px 28px 20px;border-bottom:3px solid var(--persimmon);}
+  .sm-header__row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;max-width:1280px;margin:0 auto;}
+  .sm-header__title{font-family:'Shippori Mincho',serif;font-weight:700;font-size:clamp(18px,4vw,26px);letter-spacing:0.06em;margin:0;white-space:nowrap;}
+  .sm-header__title span{color:#E7C9A8;}
+  .sm-header__sub{margin:4px 0 0;font-size:12.5px;color:#C9D2C7;letter-spacing:0.04em;}
+  .sm-header__meta{font-size:11.5px;color:#AEBBAC;text-align:right;line-height:1.6;}
+  .sm-header__actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .sm-header__badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;background:rgba(255,255,255,0.12);border-radius:12px;padding:3px 10px;color:#C9D2C7;}
+  .sm-header__badge.is-ok{color:#9FD9A8;}
+  .sm-header__badge.is-err{color:#F4A98A;}
 
-.topbar {
-  background: var(--ink); color: #fff; padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0; padding-top: max(12px, env(safe-area-inset-top));
-}
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand-mark {
-  width: 36px; height: 36px; border-radius: 8px; background: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 18px; font-family: serif;
-}
-.brand-title { font-weight: 700; font-size: 15px; }
-.brand-sub { font-size: 10px; opacity: 0.7; }
-.btn-add {
-  background: var(--accent); border: none; color: #fff;
-  border-radius: 20px; padding: 8px 16px; font-size: 14px; font-weight: 700;
-}
-.btn-add:active { transform: scale(0.95); }
+  .sm-main{max-width:1280px;margin:0 auto;padding:22px 28px 40px;}
 
+  .sm-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px;}
+  .sm-stat{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
+  .sm-stat__label{font-size:11px;letter-spacing:0.08em;color:var(--ink-soft);margin:0 0 6px;}
+  .sm-stat__value{font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:600;color:var(--pine);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sm-stat__value--accent{color:var(--persimmon-deep);}
+  .sm-stat__sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
 
-.main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-.view { position: absolute; inset: 0; display: none; flex-direction: column; overflow: hidden; }
-.view.active { display: flex; }
+  .sm-catbar-wrap{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);padding:14px 16px 12px;margin-bottom:22px;box-shadow:var(--shadow);}
+  .sm-catbar-title{font-size:11px;letter-spacing:0.08em;color:var(--ink-soft);margin:0 0 10px;}
+  .sm-catbar{display:flex;width:100%;height:10px;border-radius:6px;overflow:hidden;background:var(--paper-dim);}
+  .sm-catbar__seg{height:100%;}
+  .sm-catlegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;}
+  .sm-catlegend__item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);}
+  .sm-catlegend__dot{width:9px;height:9px;border-radius:50%;flex:none;}
 
+  .sm-map-card{position:relative;background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:22px;}
+  #sm-map{height:480px;width:100%;background:#E4E0D2;}
+  @media(max-width:760px){#sm-map{height:360px;}}
+  .sm-legend{position:absolute;right:14px;bottom:14px;z-index:500;background:rgba(255,255,255,0.94);border:1px solid var(--paper-line);border-radius:8px;padding:10px 12px;font-size:11.5px;box-shadow:var(--shadow);max-width:200px;}
+  .sm-legend__title{font-weight:700;letter-spacing:0.05em;color:var(--pine);margin:0 0 6px;font-size:11px;}
+  .sm-legend__grad{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:4px;}
+  .sm-legend__grad span{flex:1;}
+  .sm-legend__range{display:flex;justify-content:space-between;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:10px;}
+  .sm-legend__note{margin-top:8px;color:var(--ink-soft);font-size:10.5px;line-height:1.5;}
 
-.tabbar {
-  display: flex; flex-direction: column; background: var(--white);
-  border-top: 1px solid var(--line); flex-shrink: 0;
-  padding-bottom: max(env(safe-area-inset-bottom), 4px);
-}
-.tabs { display: flex; }
-.tab {
-  flex: 1; padding: 10px 0 6px; border: none; background: transparent;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  color: var(--soft); font-size: 10px; font-weight: 400;
-  border-top: 2px solid transparent; min-height: 56px;
-}
-.tab.active { color: var(--accent); font-weight: 700; border-top-color: var(--accent); }
-.tab-icon { font-size: 22px; line-height: 1; }
-.copyright { text-align: center; font-size: 9px; color: var(--soft); padding-top: 2px; }
+  .marche-pin{display:flex;align-items:center;justify-content:center;}
+  .marche-pin__ring{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 32% 30%,rgba(255,255,255,0.35),rgba(255,255,255,0) 55%),var(--c);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;transition:transform .15s ease;cursor:pointer;}
+  .marche-pin__ring:hover,.marche-pin__ring.is-active{transform:scale(1.14);}
+  .marche-pin__glyph{display:flex;}
+  .marche-pin__glyph svg{width:55%;height:55%;}
 
+  .sm-popup{font-family:'Zen Kaku Gothic New',sans-serif;font-size:12.5px;min-width:210px;}
+  .sm-popup__cat{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:10px;color:#fff;margin-bottom:6px;}
+  .sm-popup__name{font-weight:700;font-size:13.5px;color:var(--pine);margin:0 0 4px;}
+  .sm-popup__row{color:var(--ink-soft);margin:2px 0;}
+  .sm-popup__sales{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--persimmon-deep);}
+  .sm-popup__links{display:flex;gap:12px;margin-top:8px;}
+  .sm-popup__edit{font-size:11.5px;color:var(--indigo);text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;}
 
-#mainMap, #routeMap { width: 100%; height: 100%; }
+  .sm-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .sm-input,.sm-select{font-family:inherit;font-size:13px;padding:8px 11px;border:1px solid var(--paper-line);border-radius:7px;background:#fff;color:var(--ink);}
+  .sm-input{min-width:200px;flex:1;max-width:280px;}
+  .sm-chip-group{display:flex;gap:6px;flex-wrap:wrap;}
+  .sm-chip{border:1px solid var(--paper-line);background:#fff;border-radius:20px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--ink-soft);display:flex;align-items:center;gap:6px;transition:all .12s ease;}
+  .sm-chip__dot{width:8px;height:8px;border-radius:50%;}
+  .sm-chip.is-active{color:#fff;border-color:transparent;}
+  .sm-toolbar__spacer{flex:1;}
+  .sm-btn{font-size:13px;padding:8px 14px;border-radius:7px;border:1px solid transparent;cursor:pointer;font-weight:600;white-space:nowrap;}
+  .sm-btn--primary{background:var(--persimmon);color:#fff;}
+  .sm-btn--primary:hover{background:var(--persimmon-deep);}
+  .sm-btn--ghost{background:#fff;border-color:var(--paper-line);color:var(--ink);}
+  .sm-btn--ghost:hover{background:var(--paper-dim);}
+  .sm-btn--text{background:none;border:none;color:var(--indigo);text-decoration:underline;padding:6px 4px;font-size:12.5px;cursor:pointer;}
+  .sm-file-label{display:inline-block;}
+  .sm-result-line{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
 
+  /* ランキング */
+  .sm-ranking{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 14px;margin-bottom:20px;}
+  .sm-ranking__header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+  .sm-ranking__title{font-family:'Shippori Mincho',serif;font-size:16px;color:var(--pine);margin:0;font-weight:700;}
+  .sm-ranking__filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .sm-ranking__select{font-family:inherit;font-size:12px;padding:5px 8px;border:1px solid var(--paper-line);border-radius:6px;background:var(--paper);color:var(--ink);}
+  .sm-rk-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .sm-rk-tab{font-size:12px;padding:6px 13px;border-radius:20px;border:1px solid var(--paper-line);background:#fff;color:var(--ink-soft);cursor:pointer;font-family:inherit;transition:all .12s;}
+  .sm-rk-tab.is-active{background:var(--pine);color:#fff;border-color:var(--pine);}
+  .sm-rk-podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+  .sm-rk-card{border-radius:10px;padding:14px 12px 12px;text-align:center;border:1px solid transparent;position:relative;}
+  .sm-rk-card--1{background:#FDF5E4;border-color:#E8C96A;}
+  .sm-rk-card--2{background:#F4F4F4;border-color:#C8C8C8;}
+  .sm-rk-card--3{background:#FBF0EA;border-color:#D4956A;}
+  .sm-rk-card__medal{font-size:22px;display:block;margin-bottom:4px;}
+  .sm-rk-card__name{font-size:12px;font-weight:700;color:var(--pine);display:block;margin-bottom:3px;word-break:break-all;line-height:1.4;}
+  .sm-rk-card__sub{font-size:10.5px;color:var(--ink-soft);display:block;margin-bottom:6px;}
+  .sm-rk-card__sales{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:var(--persimmon-deep);}
+  .sm-ranking__list{display:flex;flex-direction:column;gap:5px;}
+  .sm-ranking__row{display:grid;grid-template-columns:32px 1fr auto auto;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:var(--paper);border:1px solid transparent;cursor:pointer;transition:background .1s;}
+  .sm-ranking__row:hover{background:#FAF7EF;border-color:var(--paper-line);}
+  .sm-ranking__rank{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--ink-soft);text-align:center;}
+  .sm-ranking__name{font-size:12.5px;font-weight:600;color:var(--pine);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sm-ranking__date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);white-space:nowrap;}
+  .sm-ranking__sales{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--persimmon-deep);white-space:nowrap;}
+  .sm-ranking__empty{font-size:13px;color:var(--ink-soft);text-align:center;padding:20px 0;}
+  .sm-ranking__badge{font-size:10px;padding:2px 7px;border-radius:10px;color:#fff;margin-left:4px;vertical-align:middle;}
+  @media(max-width:600px){.sm-rk-podium{grid-template-columns:repeat(3,1fr);gap:6px;}.sm-rk-card__sales{font-size:13px;}}
 
-.list-header { padding: 10px 12px; background: var(--white); border-bottom: 1px solid var(--line);
-  display: flex; gap: 8px; flex-shrink: 0; }
-.list-header input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
-  background: var(--bg); }
-.list-header select { padding: 10px 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
-.list-scroll { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.supplier-card { background: var(--white); border-radius: 14px; border: 1px solid var(--line);
-  padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-.supplier-card:active { transform: scale(0.98); }
-.cat-chip { display: inline-block; border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 700; margin-bottom: 6px; }
-.card-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
-.card-meta { color: var(--soft); font-size: 13px; margin-bottom: 2px; }
-.card-actions { display: flex; gap: 14px; margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
-.card-actions a { color: var(--accent); font-weight: 700; font-size: 13px; text-decoration: none; }
-.card-actions button { background: transparent; border: none; color: var(--soft); font-weight: 600; font-size: 13px; padding: 0; }
-.card-actions .del { color: var(--danger); }
-.empty { text-align: center; padding: 40px; color: var(--soft); line-height: 1.8; white-space: pre-line; }
+  .sm-table-wrap{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);box-shadow:var(--shadow);overflow-x:auto;}
+  table.sm-table{width:100%;border-collapse:collapse;min-width:1040px;}
+  table.sm-table thead th{position:sticky;top:0;background:var(--paper-dim);text-align:left;font-size:11.5px;letter-spacing:0.04em;color:var(--ink-soft);padding:10px 12px;border-bottom:1px solid var(--paper-line);cursor:pointer;user-select:none;white-space:nowrap;}
+  table.sm-table thead th:hover{color:var(--pine);}
+  table.sm-table thead th.is-sorted{color:var(--pine);font-weight:700;}
+  table.sm-table thead th.no-sort{cursor:default;}
+  table.sm-table thead th.no-sort:hover{color:var(--ink-soft);}
+  .sm-sort-arrow{font-size:10px;margin-left:3px;opacity:0.7;}
+  table.sm-table tbody td{padding:10px 12px;border-bottom:1px solid var(--paper-line);font-size:13px;vertical-align:middle;}
+  table.sm-table tbody tr{cursor:pointer;transition:background .1s ease;}
+  table.sm-table tbody tr:hover{background:#FAF7EF;}
+  table.sm-table tbody tr.is-selected{background:#FBEEE2;box-shadow:inset 3px 0 0 var(--persimmon);}
+  .sm-name-cell{font-weight:600;color:var(--pine);}
+  .sm-pref-cell{color:var(--ink-soft);}
+  .sm-sales-cell{font-family:'JetBrains Mono',monospace;font-weight:600;display:flex;align-items:center;gap:7px;white-space:nowrap;}
+  .sm-tier-dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .sm-badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:11px;color:#fff;white-space:nowrap;}
+  .sm-muted-cell{color:var(--ink-soft);font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap;}
+  .sm-actions{display:flex;gap:5px;}
+  .sm-icon-btn{border:1px solid var(--paper-line);background:#fff;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);flex:none;}
+  .sm-icon-btn:hover{background:var(--paper-dim);color:var(--pine);}
+  .sm-icon-btn--danger:hover{color:#B23A2E;border-color:#E3B3A8;background:#FBEFEC;}
+  .sm-empty-row td{padding:34px 12px;text-align:center;color:var(--ink-soft);font-size:13px;}
 
+  .sm-overlay{position:fixed;inset:0;background:rgba(31,45,36,0.45);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px;z-index:1000;overflow-y:auto;}
+  .sm-modal{background:#fff;border-radius:12px;width:100%;max-width:520px;box-shadow:0 24px 60px rgba(0,0,0,0.25);padding:22px 24px 20px;margin-bottom:5vh;}
+  .sm-modal__title{font-family:'Shippori Mincho',serif;font-size:18px;color:var(--pine);margin:0 0 4px;}
+  .sm-modal__sub{font-size:12px;color:var(--ink-soft);margin:0 0 16px;line-height:1.6;}
+  .sm-field{margin-bottom:13px;}
+  .sm-field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;}
+  .sm-field input,.sm-field select{width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px;border:1px solid var(--paper-line);border-radius:7px;background:var(--paper);color:var(--ink);}
+  .sm-field-row{display:flex;gap:10px;}
+  .sm-field-row .sm-field{flex:1;}
+  .sm-geo-row{display:flex;gap:8px;align-items:flex-end;}
+  .sm-geo-hint{font-size:11px;color:var(--ink-soft);margin-top:5px;line-height:1.5;}
+  .sm-checkbox-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);margin:14px 0 4px;}
+  .sm-checkbox-row input{width:auto;}
+  .sm-modal__footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;flex-wrap:wrap;}
+  .sm-modal__footer-right{display:flex;gap:8px;}
 
-.photos-header { padding: 10px 12px; background: var(--white); border-bottom: 1px solid var(--line); flex-shrink: 0; }
-.photos-header select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
-.photos-hint { font-size: 12px; color: var(--soft); margin-top: 6px; }
-.photos-scroll { flex: 1; overflow-y: auto; padding: 12px; }
-.photos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.photo-card { background: var(--white); border-radius: 12px; border: 1px solid var(--line); overflow: hidden; }
-.photo-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; }
-.photo-card-body { padding: 8px; }
-.photo-name { font-weight: 700; font-size: 13px; }
-.photo-supplier { font-size: 11px; color: var(--soft); margin-top: 2px; }
+  .sm-history{max-width:560px;}
+  .sm-hist-list{max-height:240px;overflow-y:auto;border:1px solid var(--paper-line);border-radius:8px;margin:6px 0 16px;padding:2px 4px;}
+  .sm-hist-row{display:grid;grid-template-columns:96px 80px 100px 1fr 32px;gap:8px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--paper-line);font-size:12.5px;}
+  .sm-hist-row:last-child{border-bottom:none;}
+  .sm-hist-date{font-family:'JetBrains Mono',monospace;color:var(--ink-soft);}
+  .sm-hist-sales{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--persimmon-deep);}
+  .sm-hist-note{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sm-hist-empty{font-size:12.5px;color:var(--ink-soft);padding:16px 8px;text-align:center;}
+  .sm-hist-form{background:var(--paper);border-radius:8px;padding:14px;}
+  .sm-hist-form__title{font-size:12px;color:var(--ink-soft);margin:0 0 10px;letter-spacing:0.03em;}
 
+  .sm-confirm{max-width:380px;}
+  .sm-confirm p{font-size:13.5px;color:var(--ink-soft);line-height:1.6;margin:0 0 18px;}
 
-.cam-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.card { background: var(--white); border-radius: 14px; border: 1px solid var(--line); padding: 14px; }
-.card-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
-.card-desc { font-size: 13px; color: var(--soft); line-height: 1.6; }
-.notice { margin-top: 10px; background: var(--accentBg); border-radius: 8px; padding: 10px; font-size: 13px; line-height: 1.6; }
-.cam-stage { background: var(--ink); border-radius: 14px; aspect-ratio: 4/3;
-  overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.cam-stage video, .cam-stage img { width: 100%; height: 100%; object-fit: cover; }
-.cam-placeholder { color: rgba(255,255,255,0.5); font-size: 14px; }
-.err-msg { color: var(--danger); font-size: 13px; line-height: 1.5; }
-.loading-msg { text-align: center; color: var(--soft); font-size: 13px; padding: 10px; }
-.match-card { background: var(--white); border-radius: 14px; border: 1px solid var(--line); padding: 16px; }
-.match-title { font-weight: 700; font-size: 15px; margin-bottom: 12px; }
-.match-row { display: flex; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
-.match-row:last-of-type { border-bottom: none; }
-.match-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); flex-shrink: 0; }
-.match-rank { font-size: 11px; color: var(--accent); font-weight: 700; margin-bottom: 3px; }
-.match-name { font-weight: 700; font-size: 15px; }
-.match-info { color: var(--soft); font-size: 13px; }
-.match-meta { color: var(--soft); font-size: 12px; }
-.match-note { font-size: 11px; color: var(--soft); margin-top: 4px; line-height: 1.6; }
+  .sm-toast-host{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:2000;}
+  .sm-toast{background:var(--pine);color:#fff;padding:11px 16px;border-radius:8px;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,0.25);border-left:4px solid var(--gold);animation:sm-toast-in .18s ease;}
+  .sm-toast--error{border-left-color:#D8674F;}
+  @keyframes sm-toast-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
+  .sm-loading{padding:80px 20px;text-align:center;color:var(--ink-soft);font-size:13px;}
+  .sm-footnote{margin-top:22px;font-size:11.5px;color:var(--ink-soft);line-height:1.7;}
+  .sm-hidden{display:none!important;}
+  .sm-credit{background:var(--paper-dim);border-top:1px solid var(--paper-line);padding:16px 28px;text-align:center;font-size:11px;color:var(--ink-soft);letter-spacing:0.04em;}
+  .sm-credit b{color:var(--pine);font-weight:700;}
+  .sm-credit__sep{margin:0 8px;opacity:0.5;}
 
-.route-panel { flex-shrink: 0; overflow-y: auto; max-height: 55%;
-  padding: 14px; background: var(--white); border-bottom: 1px solid var(--line);
-  display: flex; flex-direction: column; gap: 12px; }
-.section-label { font-weight: 700; font-size: 13px; margin-bottom: 8px; color: var(--ink); }
-.stop-list { display: flex; flex-direction: column; gap: 8px; }
-.stop-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-  background: var(--bg); border-radius: 10px; border: 1px solid var(--line); }
-.stop-item input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
-.stop-name { font-weight: 600; font-size: 14px; flex: 1; }
-.no-coord { color: var(--danger); font-size: 11px; }
-.route-result { background: var(--accentBg); border-radius: 12px; padding: 14px; }
-.route-result-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
-.route-stop { margin-bottom: 10px; }
-.route-stop-name { font-weight: 700; font-size: 14px; }
-.route-leg { font-size: 12px; color: var(--soft); }
-.route-note { font-size: 11px; color: var(--soft); margin-top: 4px; line-height: 1.6; }
-.route-gmap { display: block; width: 100%; margin-top: 10px; padding: 12px; text-align: center;
-  background: #4285F4; color: #fff; border-radius: 10px; font-weight: 700; text-decoration: none; }
-
-
-.btn-primary { width: 100%; padding: 14px; border: none; border-radius: 12px;
-  background: var(--accent); color: #fff; font-weight: 700; font-size: 16px; }
-.btn-primary:active { transform: scale(0.98); }
-.btn-primary:disabled { opacity: 0.6; }
-.btn-outline { display: block; width: 100%; padding: 14px; border: 1px solid var(--accent); border-radius: 12px;
-  background: transparent; color: var(--accent); font-weight: 700; font-size: 15px; text-align: center; text-decoration: none; }
-.btn-outline.active { background: var(--accent); color: #fff; }
-.btn-outline:active { transform: scale(0.98); }
-.btn-danger-outline { flex: 1; padding: 14px; border-radius: 12px; border: 1px solid var(--danger);
-  background: transparent; color: var(--danger); font-weight: 700; font-size: 15px; }
-
-
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
-  display: none; align-items: flex-end; }
-.overlay.active { display: flex; }
-.sheet { background: var(--bg); border-radius: 20px 20px 0 0; width: 100%;
-  max-width: 480px; margin: 0 auto; max-height: 88vh; max-height: 88dvh;
-  display: flex; flex-direction: column; overflow: hidden;
-  animation: slideup 0.25s ease-out; padding-bottom: env(safe-area-inset-bottom); }
-@keyframes slideup { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.sheet-grip { width: 40px; height: 4px; background: var(--line); border-radius: 4px; margin: 12px auto 4px; }
-.sheet-header { padding: 4px 16px 12px; display: flex; justify-content: space-between; align-items: center; }
-.sheet-title { font-weight: 700; font-size: 17px; }
-.sheet-close { background: transparent; border: none; font-size: 24px; color: var(--soft); padding: 4px 8px; }
-.sheet-body { overflow-y: auto; flex: 1; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
-.sheet-footer { padding: 16px; border-top: 1px solid var(--line); display: flex; gap: 10px; background: var(--white); }
-
-
-.detail-line { margin-bottom: 12px; }
-.detail-label { font-size: 12px; color: var(--soft); margin-bottom: 2px; }
-.detail-value { font-size: 15px; }
-.detail-link { display: block; color: var(--accent); font-weight: 700; font-size: 15px; margin-bottom: 12px; text-decoration: none; }
-.detail-products { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.detail-product { width: 72px; }
-.detail-product img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); display: block; }
-.detail-product-name { font-size: 10px; text-align: center; margin-top: 3px; color: var(--soft); }
-.detail-actions { display: flex; gap: 10px; margin-top: 16px; }
-
-
-.field { display: block; }
-.field-label { font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--ink);
-  display: flex; gap: 8px; align-items: baseline; }
-.field-hint { font-size: 11px; font-weight: 400; color: var(--soft); }
-.input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 10px;
-  background: var(--white); color: var(--ink); }
-textarea.input { min-height: 72px; resize: vertical; }
-.field-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.thumb { position: relative; width: 72px; }
-.thumb img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); display: block; }
-.thumb-name { font-size: 10px; text-align: center; margin-top: 2px; color: var(--soft); word-break: break-all; }
-.thumb-del { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%;
-  border: none; background: var(--danger); color: #fff; font-size: 14px;
-  display: flex; align-items: center; justify-content: center; }
-
-
-.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-  background: var(--ink); color: #fff; padding: 10px 20px; border-radius: 24px;
-  font-size: 14px; white-space: nowrap; z-index: 1000;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25); max-width: 90%;
-  animation: fadein 0.2s; }
-@keyframes fadein { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
-.banner { position: absolute; top: 0; left: 0; right: 0; background: var(--dangerBg); color: var(--danger);
-  padding: 10px 16px; font-size: 13px; text-align: center; z-index: 50; }
-
-
-.splash { display: flex; align-items: center; justify-content: center; height: 100vh;
-  background: var(--bg); color: var(--soft); font-size: 16px; }
-#gate {
-  height: 100vh; height: 100dvh; background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-}
-.gate-inner {
-  width: 100%; max-width: 320px; padding: 32px 24px;
-  background: var(--white); border-radius: 20px;
-  border: 1px solid var(--line); margin: 0 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-}
+  @media(max-width:760px){
+    .sm-header{padding:18px 18px 16px;}.sm-main{padding:18px 16px 30px;}
+    .sm-header__meta{text-align:left;}.sm-credit{padding:14px 16px;}
+  }
 </style>
 </head>
 <body>
-<div id="gate" style="display:none">
-  <div class="gate-inner">
-    <div class="brand-mark" style="width:56px;height:56px;font-size:28px;margin:0 auto 16px">信</div>
-    <div style="font-weight:700;font-size:18px;text-align:center;margin-bottom:4px">仕入先マップ</div>
-    <div style="font-size:12px;color:var(--soft);text-align:center;margin-bottom:24px">信州マルシェ 業者管理（社内専用）</div>
-    <input type="password" id="gatePw" class="input" placeholder="パスワードを入力" autocomplete="current-password">
-    <button class="btn-primary" style="margin-top:12px" id="gateBtn">ログイン</button>
-    <div id="gateErr" style="color:var(--danger);font-size:13px;text-align:center;margin-top:10px;display:none">パスワードが違います</div>
+
+<!-- パスワードゲート -->
+<div id="sm-gate" style="
+  position:fixed;inset:0;z-index:9999;
+  background:#1F2D24;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+">
+  <div style="
+    background:#F7F3EA;border-radius:14px;
+    padding:40px 36px 32px;width:100%;max-width:360px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.4);
+    text-align:center;
+  ">
+    <p style="font-family:'Shippori Mincho',serif;font-size:22px;color:#1F2D24;margin:0 0 4px;font-weight:700;">信州<span style="color:#B08D57;">マルシェ</span></p>
+    <p style="font-size:12px;color:#5B5246;margin:0 0 24px;">拠点管理ボード — 社内専用</p>
+    <input id="gate-input" type="password" placeholder="パスワードを入力"
+      style="
+        width:100%;font-size:15px;padding:11px 14px;
+        border:1px solid rgba(31,45,36,0.2);border-radius:8px;
+        background:#fff;color:#2A2521;
+        font-family:inherit;box-sizing:border-box;margin-bottom:12px;
+      "
+    />
+    <p id="gate-error" style="color:#C8541E;font-size:12.5px;margin:0 0 10px;display:none;">パスワードが違います</p>
+    <button id="gate-btn" style="
+      width:100%;background:#C8541E;color:#fff;border:none;
+      border-radius:8px;padding:12px;font-size:14px;font-weight:700;
+      cursor:pointer;font-family:inherit;
+    ">ログイン</button>
+    <p style="font-size:11px;color:#5B5246;margin:16px 0 0;">© 2026 株式会社MONDOCOLO</p>
   </div>
 </div>
 
-<div id="splash" class="splash" style="display:none">読み込み中…</div>
-
-<div id="app" style="display:none">
-
-<div class="topbar">
-  <div class="brand">
-    <div class="brand-mark">信</div>
+<header class="sm-header">
+  <div class="sm-header__row">
     <div>
-      <div class="brand-title">仕入先マップ</div>
-      <div class="brand-sub" id="topSub">地図</div>
+      <p class="sm-header__title">信州<span>マルシェ</span> 拠点管理ボード</p>
+      <p class="sm-header__sub">道の駅・JA野菜直売所・イベント・高速SA — 開催実績マップ &amp; 一覧（社内共有）</p>
+    </div>
+    <div class="sm-header__actions">
+      <span id="sm-conn-badge" class="sm-header__badge">接続確認中…</span>
+      <div class="sm-header__meta" id="sm-updated-meta">読み込み中…</div>
     </div>
   </div>
-  <button class="btn-add" id="btnAdd">＋ 登録</button>
-</div>
+</header>
 
-<div class="main" id="main">
-  <div class="view active" data-view="map">
-    <div id="mainMap"></div>
-  </div>
+<main class="sm-main">
+  <div id="sm-loading" class="sm-loading">データを読み込んでいます…</div>
 
-  <div class="view" data-view="list">
-    <div class="list-header">
-      <input type="search" id="listSearch" placeholder="仕入先を検索…">
-      <select id="listCat"></select>
+  <div id="sm-app" class="sm-hidden">
+
+    <section class="sm-stats" id="sm-stats"></section>
+
+    <div class="sm-catbar-wrap">
+      <p class="sm-catbar-title">カテゴリー別 売上シェア（累計）</p>
+      <div class="sm-catbar" id="sm-catbar"></div>
+      <div class="sm-catlegend" id="sm-catlegend"></div>
     </div>
-    <div class="list-scroll" id="listScroll"></div>
-  </div>
 
-  <div class="view" data-view="photos">
-    <div class="photos-header">
-      <select id="photosFilter"></select>
-      <div class="photos-hint">倉庫で在庫切れの際、ここで商品の見た目を確認できます</div>
+    <div class="sm-map-card">
+      <div id="sm-map"></div>
+      <div class="sm-legend">
+        <p class="sm-legend__title">累計売上高（万円）でピンの色が変化</p>
+        <div class="sm-legend__grad">
+          <span style="background:var(--indigo)"></span><span style="background:var(--sage)"></span>
+          <span style="background:var(--gold)"></span><span style="background:var(--persimmon)"></span>
+          <span style="background:var(--persimmon-deep)"></span>
+        </div>
+        <div class="sm-legend__range"><span>〜300</span><span>1,500〜</span></div>
+        <p class="sm-legend__note">ピンの大きさは累計売上の相対比較。アイコンは施設カテゴリーです。</p>
+      </div>
     </div>
-    <div class="photos-scroll" id="photosScroll"></div>
+
+    <div class="sm-toolbar">
+      <input id="sm-search" class="sm-input" type="text" placeholder="施設名・担当者・電話番号で検索" />
+      <select id="sm-pref-filter" class="sm-select"></select>
+      <div class="sm-chip-group" id="sm-cat-filter"></div>
+      <div class="sm-toolbar__spacer"></div>
+      <button class="sm-btn--text" id="sm-clear-filters">条件をクリア</button>
+      <label class="sm-file-label">
+        <input type="file" id="sm-csv-input" accept=".csv" class="sm-hidden" />
+        <span class="sm-btn sm-btn--ghost" id="sm-csv-import-btn">CSV取込</span>
+      </label>
+      <button class="sm-btn sm-btn--ghost" id="sm-csv-export-facilities-btn">拠点CSV</button>
+      <button class="sm-btn sm-btn--ghost" id="sm-csv-export-records-btn">実績ログCSV</button>
+      <button class="sm-btn sm-btn--primary" id="sm-add-btn">＋ 拠点を追加</button>
+    </div>
+
+    <!-- ランキング -->
+    <div class="sm-ranking">
+      <div class="sm-ranking__header">
+        <p class="sm-ranking__title">🏆 ランキング</p>
+        <div class="sm-ranking__filters">
+          <select id="rk-year" class="sm-ranking__select"><option value="all">全期間</option></select>
+          <select id="rk-month" class="sm-ranking__select"><option value="all">全月</option></select>
+        </div>
+      </div>
+      <div class="sm-rk-tabs">
+        <button class="sm-rk-tab is-active" data-rk="single">単回売上高</button>
+        <button class="sm-rk-tab" data-rk="cumul">拠点累積売上高</button>
+        <button class="sm-rk-tab" data-rk="leader-single">軸リーダー単回売上高</button>
+        <button class="sm-rk-tab" data-rk="leader-cumul">軸リーダー累積売上高</button>
+      </div>
+      <div class="sm-rk-podium" id="sm-rk-podium"></div>
+      <div class="sm-ranking__list" id="sm-ranking-list"></div>
+    </div>
+
+    <p class="sm-result-line" id="sm-result-line"></p>
+
+    <div class="sm-table-wrap">
+      <table class="sm-table">
+        <thead>
+          <tr>
+            <th data-key="facilityName">施設名<span class="sm-sort-arrow"></span></th>
+            <th data-key="prefecture">都道府県<span class="sm-sort-arrow"></span></th>
+            <th data-key="category">カテゴリー<span class="sm-sort-arrow"></span></th>
+            <th data-key="sales">累計売上高（万円）<span class="sm-sort-arrow"></span></th>
+            <th data-key="recordCount">開催回数<span class="sm-sort-arrow"></span></th>
+            <th data-key="lastDate">直近開催日<span class="sm-sort-arrow"></span></th>
+            <th data-key="phone">施設電話番号<span class="sm-sort-arrow"></span></th>
+            <th data-key="contact">担当者名<span class="sm-sort-arrow"></span></th>
+            <th class="no-sort">操作</th>
+          </tr>
+        </thead>
+        <tbody id="sm-tbody"></tbody>
+      </table>
+    </div>
+
+    <p class="sm-footnote">
+      ※「拠点」は施設の基本情報、「実績」は開催ごとの売上記録です。マルシェを開催したら拠点の<strong>時計アイコン</strong>から実績を追加してください。記録は削除されるまで蓄積されます。<br/>
+      ※ データはサーバー経由で安全に共有されています。アクセスには社内ログインが必要です。APIキーの入力は不要です。
+    </p>
   </div>
+</main>
 
-  <div class="view" data-view="camera">
-    <div class="cam-scroll" id="camScroll"></div>
-  </div>
+<footer class="sm-credit">
+  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span style="display:block;margin-top:4px;">制作・運用管理：MONDOCOLO STUDIO.</span>
+</footer>
 
-  <div class="view" data-view="route">
-    <div class="route-panel" id="routePanel"></div>
-    <div id="routeMap"></div>
-  </div>
-</div>
-
-<div class="tabbar">
-  <div class="tabs">
-    <button class="tab active" data-tab="map"><span class="tab-icon">🗺️</span>地図</button>
-    <button class="tab" data-tab="list"><span class="tab-icon">📋</span>一覧</button>
-    <button class="tab" data-tab="photos"><span class="tab-icon">🖼️</span>写真</button>
-    <button class="tab" data-tab="camera"><span class="tab-icon">📷</span>照合</button>
-    <button class="tab" data-tab="route"><span class="tab-icon">🚗</span>ルート</button>
-  </div>
-  <div class="copyright">© 2026 MONDOCOLO Co., Ltd. ／ 制作・運用管理 MONDOCOLO STUDIO.</div>
-</div>
-
-</div>
-
-<div class="overlay" id="detailOverlay"><div class="sheet" id="detailSheet"></div></div>
-<div class="overlay" id="formOverlay"><div class="sheet" id="formSheet"></div></div>
+<div id="sm-toast-host" class="sm-toast-host"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
-'use strict';
+(function(){
+// パスワードゲート
+var PW = "mondocolo2026";
+var SK = "sm-auth-v1";
+function showGate(){
+  var gate=document.getElementById("sm-gate");
+  var btn=document.getElementById("gate-btn");
+  var inp=document.getElementById("gate-input");
+  var err=document.getElementById("gate-error");
+  if(sessionStorage.getItem(SK)==="ok"){gate.style.display="none";return;}
+  gate.style.display="flex";
+  function tryLogin(){
+    if(inp.value===PW){sessionStorage.setItem(SK,"ok");gate.style.display="none";}
+    else{err.style.display="block";inp.value="";inp.focus();}
+  }
+  btn.addEventListener("click",tryLogin);
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter")tryLogin();});
+  inp.focus();
+}
+showGate();
 
-const BIN_ID = '6a53a157da38895dfe52ce62';
-const ACCESS_KEY = '$2a$10$kMyZr3iN6OiEdf5OVXcPl.zg1d9GTJEeVqFLT3slJdDFalfn4Yj1e';
-const HQ_ADDRESS = '長野県大町市大町1903-1';
-const HQ_LABEL = '本社（大町市大町1903-1）';
+/* =========================================================
+   定数
+========================================================= */
+var DATA_ENDPOINT = "/api/data"; // Cloudflare Pages Functions が JSONBin を中継
 
-const CATS = [
-  { key: 'egg', label: '鶏卵・卵製品', color: '#D98E2B' },
-  { key: 'vegetable', label: '野菜・青果', color: '#5B8C5A' },
-  { key: 'pickle', label: '漬物・ザーサイ等', color: '#8C6BB1' },
-  { key: 'meat', label: '肉・加工品', color: '#B3452F' },
-  { key: 'seafood', label: '魚・海産物', color: '#3E7C9E' },
-  { key: 'dairy', label: '乳製品', color: '#C9A227' },
-  { key: 'grain', label: '米・穀物', color: '#A47C48' },
-  { key: 'other', label: 'その他', color: '#6B6B6B' },
-];
-const catLabel = k => (CATS.find(c => c.key === k) || {}).label || 'その他';
-const catColor = k => (CATS.find(c => c.key === k) || {}).color || '#6B6B6B';
-
-const SEED = [
-  { id: uid(), name: '信州たまご農場', category: 'egg', address: '長野県大町市常盤7000',
-    phone: '0261-22-0000', hours: '8:00-17:00', closedDay: '日曜', contact: '田中 様',
-    website: '', lat: 36.498, lng: 137.853, products: [], notes: '鶏卵を定期仕入れ。冷蔵車で集荷。' },
-  { id: uid(), name: 'ユーパレット', category: 'pickle', address: '長野県松本市大字今井3000',
-    phone: '0263-00-0000', hours: '9:00-18:00', closedDay: '水曜', contact: '佐藤 様',
-    website: '', lat: 36.178, lng: 137.95, products: [], notes: 'ザーサイなど中華系漬物を仕入れ。' },
-];
-
-const state = {
-  suppliers: [],
-  currentTab: 'map',
-  editTarget: null,
-  routeStops: [],
-  routeStart: HQ_ADDRESS,
-  routeStartCoord: null,
-  routeResult: null,
-  camStream: null,
-  captured: null,
-  matches: null,
-  mapObj: null,
-  mapMarkers: [],
-  routeMapObj: null,
-  routeMarkers: [],
-  routeLine: null,
+var CATEGORY_META = {
+  "道の駅":{hex:"#8C5A3C",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg>'},
+  "JA野菜直売所":{hex:"#3F7D6B",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-4 7-10 7-10s7 6 7 10a7 7 0 0 1-7 7z"/><path d="M11 20v-6"/></svg>'},
+  "イベント":{hex:"#6B5CA5",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4"/><path d="M4 4h14l-3 4 3 4H4"/></svg>'},
+  "高速SA":{hex:"#3E6B8A",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M5 11l1.5-4h11L19 11"/></svg>'},
+  "星空イベント":{hex:"#2E7EA6",glyph:'<svg viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>'}
 };
+var CATEGORY_ORDER = ["道の駅","JA野菜直売所","イベント","高速SA","星空イベント"];
+var TIERS = [
+  {max:300,color:"#34507A"},{max:600,color:"#5B7F66"},
+  {max:1000,color:"#B08D57"},{max:1500,color:"#C8541E"},{max:Infinity,color:"#8B2E1F"}
+];
 
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+var SAMPLE_FACILITIES = [
+  {id:"f1",prefecture:"長野県",facilityName:"道の駅 信州新町",category:"道の駅",phone:"026-262-0188",contact:"小林 直人",lat:36.5919,lng:138.0594},
+  {id:"f2",prefecture:"長野県",facilityName:"道の駅 安曇野松川",category:"道の駅",phone:"0263-78-3001",contact:"田中 美咲",lat:36.4115,lng:137.8773},
+  {id:"f3",prefecture:"長野県",facilityName:"JA松本ハイランド 産直市場",category:"JA野菜直売所",phone:"0263-25-7711",contact:"山田 健一",lat:36.2510,lng:137.9520},
+  {id:"f4",prefecture:"長野県",facilityName:"道の駅 こもれび館",category:"道の駅",phone:"026-245-1188",contact:"中村 真理",lat:36.6850,lng:138.3500},
+  {id:"f5",prefecture:"長野県",facilityName:"JAながの 農産物直売所アグリながの",category:"JA野菜直売所",phone:"026-296-7700",contact:"斉藤 修",lat:36.6800,lng:138.1850},
+  {id:"f6",prefecture:"長野県",facilityName:"道の駅 美麻",category:"道の駅",phone:"0261-23-2070",contact:"高橋 さとし",lat:36.6230,lng:137.9100},
+  {id:"f7",prefecture:"長野県",facilityName:"中央道 諏訪湖SA(下り)",category:"高速SA",phone:"0266-58-5757",contact:"渡辺 隼人",lat:36.0560,lng:138.1110},
+  {id:"f8",prefecture:"山梨県",facilityName:"中央道 双葉SA",category:"高速SA",phone:"055-273-2011",contact:"小川 翔太",lat:35.6660,lng:138.5340},
+  {id:"f9",prefecture:"群馬県",facilityName:"上信越道 横川SA",category:"高速SA",phone:"027-395-2017",contact:"木村 彩",lat:36.3350,lng:138.7950},
+  {id:"f10",prefecture:"新潟県",facilityName:"上信越道 名立谷浜SA",category:"高速SA",phone:"025-534-2002",contact:"林 大輔",lat:37.1480,lng:138.1700},
+  {id:"f11",prefecture:"東京都",facilityName:"信州フェア in 丸の内",category:"イベント",phone:"03-3211-4001",contact:"鈴木 陽子",lat:35.6812,lng:139.7671},
+  {id:"f12",prefecture:"東京都",facilityName:"ふるさと和み市(新宿)",category:"イベント",phone:"03-5321-7755",contact:"伊藤 健太",lat:35.6896,lng:139.6917},
+  {id:"f13",prefecture:"神奈川県",facilityName:"みなとみらい信州マルシェ",category:"イベント",phone:"045-682-2500",contact:"加藤 由美",lat:35.4555,lng:139.6320},
+  {id:"f14",prefecture:"埼玉県",facilityName:"さいたま新都心 軽井沢フェア",category:"イベント",phone:"048-601-3411",contact:"松本 亮",lat:35.8870,lng:139.6300},
+  {id:"f15",prefecture:"愛知県",facilityName:"名古屋 信州フェスタ(オアシス21)",category:"イベント",phone:"052-963-5252",contact:"佐々木 玲奈",lat:35.1709,lng:136.9088},
+  {id:"f16",prefecture:"長野県",facilityName:"JA上伊那 産直市場グリーンファーム",category:"JA野菜直売所",phone:"0265-71-7300",contact:"清水 大地",lat:35.8260,lng:137.9520},
+  {id:"f17",prefecture:"長野県",facilityName:"JA信州諏訪 ハイジ通り直売所",category:"JA野菜直売所",phone:"0266-52-1188",contact:"橋本 まどか",lat:36.0530,lng:138.1170},
+  {id:"f18",prefecture:"長野県",facilityName:"JA中野市 ぐりんぱる中野",category:"JA野菜直売所",phone:"0269-22-5566",contact:"石川 拓也",lat:36.7460,lng:138.3590},
+  {id:"f19",prefecture:"長野県",facilityName:"JAみなみ信州 アグリステーション飯田",category:"JA野菜直売所",phone:"0265-23-5005",contact:"後藤 千尋",lat:35.5147,lng:137.8217},
+  {id:"f20",prefecture:"長野県",facilityName:"道の駅 オアシスならわ",category:"道の駅",phone:"0265-49-2222",contact:"村上 拓実",lat:35.6500,lng:137.8200},
+  {id:"f21",prefecture:"長野県",facilityName:"道の駅 木曽ならかわ",category:"道の駅",phone:"0264-25-3393",contact:"西村 優子",lat:35.7650,lng:137.6750},
+  {id:"f22",prefecture:"長野県",facilityName:"道の駅 信越さかえ",category:"道の駅",phone:"026-262-1500",contact:"岡田 誠",lat:36.8460,lng:138.3320},
+  {id:"f23",prefecture:"静岡県",facilityName:"新東名 駿河湾沼津SA",category:"高速SA",phone:"055-941-0011",contact:"藤田 紗代",lat:35.0930,lng:138.8470},
+  {id:"f24",prefecture:"大阪府",facilityName:"うめだ信州マルシェ",category:"イベント",phone:"06-6361-7001",contact:"三浦 健二",lat:34.7050,lng:135.4960}
+];
+var SAMPLE_RECORDS = [
+  {id:"r1",facilityId:"f1",date:"2026-04-12",sales:850,note:""},{id:"r2",facilityId:"f2",date:"2025-11-03",sales:380,note:""},
+  {id:"r3",facilityId:"f2",date:"2026-02-08",sales:340,note:""},{id:"r4",facilityId:"f2",date:"2026-05-17",sales:400,note:""},
+  {id:"r5",facilityId:"f3",date:"2026-03-22",sales:670,note:""},{id:"r6",facilityId:"f4",date:"2026-01-18",sales:430,note:""},
+  {id:"r7",facilityId:"f5",date:"2026-02-14",sales:510,note:""},{id:"r8",facilityId:"f6",date:"2025-12-07",sales:280,note:""},
+  {id:"r9",facilityId:"f7",date:"2025-10-12",sales:520,note:""},{id:"r10",facilityId:"f7",date:"2026-01-11",sales:480,note:""},
+  {id:"r11",facilityId:"f7",date:"2026-04-19",sales:480,note:""},{id:"r12",facilityId:"f8",date:"2026-03-09",sales:990,note:""},
+  {id:"r13",facilityId:"f9",date:"2026-02-21",sales:770,note:""},{id:"r14",facilityId:"f10",date:"2026-01-25",sales:540,note:""},
+  {id:"r15",facilityId:"f11",date:"2025-11-22",sales:800,note:""},{id:"r16",facilityId:"f11",date:"2026-02-21",sales:750,note:""},
+  {id:"r17",facilityId:"f11",date:"2026-05-09",sales:800,note:""},{id:"r18",facilityId:"f12",date:"2025-12-13",sales:900,note:""},
+  {id:"r19",facilityId:"f12",date:"2026-04-04",sales:960,note:""},{id:"r20",facilityId:"f13",date:"2026-01-17",sales:700,note:""},
+  {id:"r21",facilityId:"f13",date:"2026-04-25",sales:730,note:""},{id:"r22",facilityId:"f14",date:"2026-03-01",sales:980,note:""},
+  {id:"r23",facilityId:"f15",date:"2025-12-06",sales:800,note:""},{id:"r24",facilityId:"f15",date:"2026-03-14",sales:870,note:""},
+  {id:"r25",facilityId:"f16",date:"2026-02-09",sales:605,note:""},{id:"r26",facilityId:"f17",date:"2026-01-30",sales:380,note:""},
+  {id:"r27",facilityId:"f18",date:"2026-03-19",sales:455,note:""},{id:"r28",facilityId:"f19",date:"2026-02-26",sales:520,note:""},
+  {id:"r29",facilityId:"f20",date:"2026-01-14",sales:360,note:""},{id:"r30",facilityId:"f21",date:"2025-12-20",sales:410,note:""},
+  {id:"r31",facilityId:"f22",date:"2026-03-07",sales:295,note:""},{id:"r32",facilityId:"f23",date:"2026-02-17",sales:1120,note:""},
+  {id:"r33",facilityId:"f24",date:"2025-11-15",sales:980,note:""},{id:"r34",facilityId:"f24",date:"2026-03-28",sales:1000,note:""}
+];
+
+/* =========================================================
+   状態
+========================================================= */
+var state = {
+  facilities:[], records:[],
+  search:"", prefecture:"all", activeCategories:new Set(CATEGORY_ORDER),
+  sortKey:"sales", sortDir:"desc", selectedId:null, editingId:null
+};
+var map, markersById={};
+
+/* =========================================================
+   ユーティリティ
+========================================================= */
+function tierFor(s){for(var i=0;i<TIERS.length;i++){if(s<=TIERS[i].max)return TIERS[i];}return TIERS[TIERS.length-1];}
+function fmtMan(n){return Number(n||0).toLocaleString("ja-JP");}
+function uid(){if(window.crypto&&window.crypto.randomUUID)return window.crypto.randomUUID();return"id-"+Date.now()+"-"+Math.random().toString(16).slice(2);}
+function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function escA(s){return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");}
+function escH(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+function showToast(msg,type){
+  var host=document.getElementById("sm-toast-host");
+  var el=document.createElement("div");
+  el.className="sm-toast"+(type==="error"?" sm-toast--error":"");
+  el.textContent=msg; host.appendChild(el);
+  setTimeout(function(){el.style.opacity="0";el.style.transition="opacity .25s ease";setTimeout(function(){el.remove();},260);},2800);
+}
+function setBadge(ok,msg){
+  var b=document.getElementById("sm-conn-badge");if(!b)return;
+  b.textContent=msg; b.className="sm-header__badge"+(ok?" is-ok":" is-err");
 }
 
-async function apiGet() {
-  const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-    headers: { 'X-Access-Key': ACCESS_KEY }
+/* =========================================================
+   集計
+========================================================= */
+function recordsFor(fid){return state.records.filter(function(r){return r.facilityId===fid;});}
+function totalSalesFor(fid){return recordsFor(fid).reduce(function(s,r){return s+Number(r.sales||0);},0);}
+function lastDateFor(fid){var recs=recordsFor(fid);if(!recs.length)return null;return recs.reduce(function(a,b){return a.date>b.date?a:b;}).date;}
+
+/* =========================================================
+   データ取得・保存（サーバープロキシ経由。鍵はブラウザに渡らない）
+========================================================= */
+async function apiGet(){
+  var resp=await fetch(DATA_ENDPOINT, {credentials:"same-origin"});
+  if(!resp.ok)throw new Error("GET "+resp.status);
+  return await resp.json();
+}
+async function apiPut(payload){
+  var resp=await fetch(DATA_ENDPOINT,{
+    method:"PUT",
+    credentials:"same-origin",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
   });
-  if (!r.ok) throw new Error('取得失敗: ' + r.status);
-  const d = await r.json();
-  const rec = d.record;
-  if (!Array.isArray(rec)) return [];
-  return rec.filter(s => !s._placeholder && !s.init);
+  if(!resp.ok)throw new Error("PUT "+resp.status);
+  return await resp.json();
 }
 
-async function apiPut(data) {
-  const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'X-Access-Key': ACCESS_KEY },
-    body: JSON.stringify(data.length === 0 ? [{ _placeholder: true }] : data),
-  });
-  if (!r.ok) throw new Error('保存失敗: ' + r.status);
-}
-
-function resizeImg(file, max = 800, q = 0.75) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        let w = img.width, h = img.height;
-        if (w > h && w > max) { h = Math.round(h * max / w); w = max; }
-        else if (h > max) { w = Math.round(w * max / h); h = max; }
-        const cv = document.createElement('canvas');
-        cv.width = w; cv.height = h;
-        cv.getContext('2d').drawImage(img, 0, 0, w, h);
-        res(cv.toDataURL('image/jpeg', q));
-      };
-      img.onerror = rej;
-      img.src = e.target.result;
-    };
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-async function geoOnce(addr) {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=jp&q=${encodeURIComponent(addr)}`;
-  const r = await fetch(url, { headers: { 'Accept-Language': 'ja' } });
-  if (!r.ok) throw new Error('geo');
-  const d = await r.json();
-  if (!d || d.length === 0) return null;
-  return { lat: parseFloat(d[0].lat), lng: parseFloat(d[0].lon) };
-}
-
-async function geocode(addr) {
-  const t = (addr || '').trim();
-  if (!t) return null;
-  const first = await geoOnce(t);
-  if (first) return first;
-  let s = t;
-  for (let i = 0; i < 3; i++) {
-    const n = s.replace(/[0-9０-９\-－ー番地号棟号室\s]+$/u, '');
-    if (!n || n === s) break;
-    s = n;
-    const c = await geoOnce(s);
-    if (c) return c;
-  }
-  return null;
-}
-
-function haversine(a, b) {
-  const R = 6371;
-  const dLat = (b.lat - a.lat) * Math.PI / 180;
-  const dLng = (b.lng - a.lng) * Math.PI / 180;
-  const lat1 = a.lat * Math.PI / 180;
-  const lat2 = b.lat * Math.PI / 180;
-  const s1 = Math.sin(dLat / 2), s2 = Math.sin(dLng / 2);
-  return 2 * R * Math.asin(Math.sqrt(s1 * s1 + Math.cos(lat1) * Math.cos(lat2) * s2 * s2));
-}
-
-function buildRoute(start, stops) {
-  const rem = stops.filter(s => typeof s.lat === 'number' && typeof s.lng === 'number' && !isNaN(s.lat));
-  const order = [];
-  let cur = start;
-  while (rem.length > 0) {
-    let bi = 0, bd = Infinity;
-    rem.forEach((s, i) => {
-      const d = haversine(cur, s);
-      if (d < bd) { bd = d; bi = i; }
-    });
-    const n = rem.splice(bi, 1)[0];
-    order.push(Object.assign({}, n, { legKm: bd }));
-    cur = n;
-  }
-  return order;
-}
-
-let _tfP = null;
-function loadTF() {
-  if (window.tf && window.mobilenet) return Promise.resolve();
-  if (_tfP) return _tfP;
-  _tfP = new Promise((res, rej) => {
-    const s1 = document.createElement('script');
-    s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.17.0/tf.min.js';
-    s1.onload = () => {
-      const s2 = document.createElement('script');
-      s2.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js';
-      s2.onload = res; s2.onerror = rej;
-      document.head.appendChild(s2);
-    };
-    s1.onerror = rej;
-    document.head.appendChild(s1);
-  });
-  return _tfP;
-}
-let _model = null;
-async function getModel() {
-  await loadTF();
-  if (!_model) _model = await window.mobilenet.load({ version: 2, alpha: 1.0 });
-  return _model;
-}
-function embedFromDataUrl(url) {
-  return new Promise((res, rej) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = async () => {
-      try {
-        const m = await getModel();
-        const emb = m.infer(img, true);
-        const arr = await emb.data();
-        emb.dispose();
-        res(Array.from(arr));
-      } catch (e) { rej(e); }
-    };
-    img.onerror = rej;
-    img.src = url;
-  });
-}
-function cosineSim(a, b) {
-  if (!a || !b || a.length !== b.length) return -1;
-  let dot = 0, na = 0, nb = 0;
-  for (let i = 0; i < a.length; i++) {
-    dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i];
-  }
-  if (na === 0 || nb === 0) return -1;
-  return dot / (Math.sqrt(na) * Math.sqrt(nb));
-}
-
-function el(tag, props, children) {
-  const e = document.createElement(tag);
-  if (props) {
-    for (const k in props) {
-      if (k === 'style' && typeof props[k] === 'object') Object.assign(e.style, props[k]);
-      else if (k === 'onclick') e.onclick = props[k];
-      else if (k === 'onchange') e.onchange = props[k];
-      else if (k === 'oninput') e.oninput = props[k];
-      else if (k === 'onsubmit') e.onsubmit = props[k];
-      else if (k in e) e[k] = props[k];
-      else e.setAttribute(k, props[k]);
+async function loadData(){
+  try{
+    var rec=await apiGet();
+    if(rec&&Array.isArray(rec.facilities)){
+      state.facilities=rec.facilities;
+      state.records=Array.isArray(rec.records)?rec.records:[];
+    } else {
+      state.facilities=SAMPLE_FACILITIES.map(function(f){return Object.assign({},f);});
+      state.records=SAMPLE_RECORDS.map(function(r){return Object.assign({},r);});
+      await apiPut({facilities:state.facilities,records:state.records});
     }
+    setBadge(true,"接続済み");
+  } catch(e){
+    setBadge(false,"接続エラー");
+    showToast("データの読み込みに失敗しました。時間をおいて再読み込みしてください","error");
+    state.facilities=SAMPLE_FACILITIES.map(function(f){return Object.assign({},f);});
+    state.records=SAMPLE_RECORDS.map(function(r){return Object.assign({},r);});
   }
-  if (children) {
-    (Array.isArray(children) ? children : [children]).forEach(c => {
-      if (c == null || c === false) return;
-      if (typeof c === 'string' || typeof c === 'number') e.appendChild(document.createTextNode(c));
-      else e.appendChild(c);
-    });
+}
+
+async function persist(){
+  try{
+    await apiPut({facilities:state.facilities,records:state.records});
+    updateMeta();
+    setBadge(true,"接続済み");
+  } catch(e){
+    setBadge(false,"接続エラー");
+    showToast("保存に失敗しました。通信状況をご確認ください","error");
   }
-  return e;
 }
 
-function showToast(msg) {
-  const existing = document.querySelector('.toast');
-  if (existing) existing.remove();
-  const t = el('div', { className: 'toast' }, msg);
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2800);
+function updateMeta(){
+  var el=document.getElementById("sm-updated-meta");if(!el)return;
+  var now=new Date();
+  var s=now.getFullYear()+"/"+String(now.getMonth()+1).padStart(2,"0")+"/"+String(now.getDate()).padStart(2,"0")+" "+String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0");
+  el.innerHTML="拠点数 "+state.facilities.length+" 件・実績 "+state.records.length+" 件<br/>最終更新 "+s;
 }
 
-function setTab(name) {
-  state.currentTab = name;
-  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
-  const labels = { map: '地図', list: '仕入先一覧', photos: '商品写真', camera: 'カメラ照合', route: 'ルート提案' };
-  document.getElementById('topSub').textContent = labels[name];
-  renderView(name);
-  if (name === 'map' && state.mapObj) setTimeout(() => state.mapObj.invalidateSize(), 100);
-  if (name === 'route' && state.routeMapObj) setTimeout(() => state.routeMapObj.invalidateSize(), 100);
-}
-
-function renderView(name) {
-  if (name === 'map') renderMap();
-  else if (name === 'list') renderList();
-  else if (name === 'photos') renderPhotos();
-  else if (name === 'camera') renderCamera();
-  else if (name === 'route') renderRoute();
-}
-
-function renderMap() {
-  if (!state.mapObj) {
-    const map = L.map('mainMap', { center: [36.35, 137.9], zoom: 9, zoomControl: true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19,
-    }).addTo(map);
-    state.mapObj = map;
-  }
-  state.mapMarkers.forEach(m => m.remove());
-  state.mapMarkers = [];
-  state.suppliers.forEach(s => {
-    if (typeof s.lat !== 'number' || isNaN(s.lat)) return;
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="width:38px;height:38px;border-radius:12px;background:${catColor(s.category)};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;font-weight:700;">${(s.name || '?').slice(0, 1)}</div>`,
-      iconSize: [38, 38], iconAnchor: [19, 19],
-    });
-    const m = L.marker([s.lat, s.lng], { icon }).addTo(state.mapObj);
-    m.on('click', () => openDetail(s.id));
-    state.mapMarkers.push(m);
+/* =========================================================
+   フィルタ・ソート
+========================================================= */
+function getFiltered(){
+  var q=state.search.trim().toLowerCase();
+  var allCats=state.activeCategories.size===0||state.activeCategories.size===CATEGORY_ORDER.length;
+  return state.facilities.filter(function(f){
+    if(state.prefecture!=="all"&&f.prefecture!==state.prefecture)return false;
+    if(!allCats&&!state.activeCategories.has(f.category))return false;
+    if(q){var hay=(f.facilityName+" "+f.contact+" "+f.phone).toLowerCase();if(hay.indexOf(q)===-1)return false;}
+    return true;
   });
-  setTimeout(() => state.mapObj.invalidateSize(), 100);
+}
+function getSorted(list){
+  var key=state.sortKey,dir=state.sortDir==="asc"?1:-1;
+  return list.slice().sort(function(a,b){
+    var av,bv;
+    if(key==="sales"){av=totalSalesFor(a.id);bv=totalSalesFor(b.id);return(av-bv)*dir;}
+    if(key==="recordCount"){av=recordsFor(a.id).length;bv=recordsFor(b.id).length;return(av-bv)*dir;}
+    if(key==="lastDate"){av=lastDateFor(a.id)||"";bv=lastDateFor(b.id)||"";return av.localeCompare(bv)*dir;}
+    av=String(a[key]||"");bv=String(b[key]||"");return av.localeCompare(bv,"ja")*dir;
+  });
 }
 
-let listQ = '', listCat = 'all';
-function renderList() {
-  const catSel = document.getElementById('listCat');
-  if (catSel.options.length === 0) {
-    catSel.innerHTML = '<option value="all">全品目</option>' +
-      CATS.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
-    catSel.value = listCat;
-    catSel.onchange = () => { listCat = catSel.value; renderList(); };
-    const s = document.getElementById('listSearch');
-    s.oninput = () => { listQ = s.value; renderList(); };
-  }
-  const scroll = document.getElementById('listScroll');
-  scroll.innerHTML = '';
-  const filtered = state.suppliers.filter(s => {
-    const mc = listCat === 'all' || s.category === listCat;
-    const mq = !listQ || (s.name || '').includes(listQ) || (s.address || '').includes(listQ);
-    return mc && mq;
+/* =========================================================
+   統計
+========================================================= */
+function renderStats(){
+  var list=state.facilities;
+  var totalSales=state.records.reduce(function(s,r){return s+Number(r.sales||0);},0);
+  var cnt=state.records.length;
+  var avg=list.length?Math.round(totalSales/list.length):0;
+  var top=list.slice().sort(function(a,b){return totalSalesFor(b.id)-totalSalesFor(a.id);})[0];
+  document.getElementById("sm-stats").innerHTML=
+    statCard("拠点数",list.length+" 件","")+
+    statCard("開催実績（累計）",cnt+" 回","")+
+    statCard("売上高合計",fmtMan(totalSales)+" 万円","",true)+
+    statCard("平均売上 / 拠点",fmtMan(avg)+" 万円","")+
+    statCard("最高売上拠点",top?top.facilityName:"—",top?(fmtMan(totalSalesFor(top.id))+" 万円・"+top.prefecture):"");
+
+  var byCat={};CATEGORY_ORDER.forEach(function(c){byCat[c]=0;});
+  list.forEach(function(f){byCat[f.category]=(byCat[f.category]||0)+totalSalesFor(f.id);});
+  var barH="",legH="";
+  CATEGORY_ORDER.forEach(function(c){
+    var pct=totalSales?(byCat[c]/totalSales*100):0,meta=CATEGORY_META[c];
+    barH+='<div class="sm-catbar__seg" style="width:'+pct.toFixed(2)+'%;background:'+meta.hex+';" title="'+c+' '+pct.toFixed(1)+'%"></div>';
+    legH+='<div class="sm-catlegend__item"><span class="sm-catlegend__dot" style="background:'+meta.hex+'"></span>'+c+'　'+fmtMan(byCat[c])+'万円（'+pct.toFixed(1)+'%）</div>';
   });
-  if (filtered.length === 0) {
-    scroll.appendChild(el('div', { className: 'empty' }, '仕入先が見つかりません'));
-    return;
-  }
-  filtered.forEach(s => {
-    const card = el('div', { className: 'supplier-card', onclick: () => openDetail(s.id) });
-    const chip = el('div', {
-      className: 'cat-chip',
-      style: { background: catColor(s.category) + '22', color: catColor(s.category) }
-    }, catLabel(s.category));
-    card.appendChild(chip);
-    card.appendChild(el('div', { className: 'card-name' }, s.name || ''));
-    if (s.address) card.appendChild(el('div', { className: 'card-meta' }, s.address));
-    const info = [s.phone, s.hours].filter(x => x).join(' ・ ');
-    if (info) card.appendChild(el('div', { className: 'card-meta' }, info));
-    if (s.contact) card.appendChild(el('div', { className: 'card-meta' }, '担当: ' + s.contact));
-    const actions = el('div', { className: 'card-actions' });
-    actions.onclick = e => e.stopPropagation();
-    if (s.website) {
-      actions.appendChild(el('a', { href: s.website, target: '_blank', rel: 'noreferrer' }, 'HP ↗'));
+  document.getElementById("sm-catbar").innerHTML=barH||'<div class="sm-catbar__seg" style="width:100%;background:var(--paper-line);"></div>';
+  document.getElementById("sm-catlegend").innerHTML=legH;
+}
+function statCard(label,value,sub,accent){
+  return '<div class="sm-stat"><p class="sm-stat__label">'+label+'</p><p class="sm-stat__value'+(accent?' sm-stat__value--accent':'')+'">'+value+'</p>'+(sub?'<p class="sm-stat__sub">'+sub+'</p>':'')+'</div>';
+}
+
+/* =========================================================
+   フィルタUI
+========================================================= */
+function renderFilterControls(){
+  var prefSel=document.getElementById("sm-pref-filter");
+  var prefs=Array.from(new Set(state.facilities.map(function(f){return f.prefecture;}))).sort(function(a,b){return a.localeCompare(b,"ja");});
+  prefSel.innerHTML='<option value="all">すべての都道府県</option>'+prefs.map(function(p){return'<option value="'+escA(p)+'"'+(p===state.prefecture?' selected':'')+'>'+p+'</option>';}).join("");
+  if(!prefs.includes(state.prefecture)){prefSel.value="all";state.prefecture="all";}
+  document.getElementById("sm-cat-filter").innerHTML=CATEGORY_ORDER.map(function(c){
+    var meta=CATEGORY_META[c],active=state.activeCategories.has(c);
+    return'<button type="button" class="sm-chip'+(active?' is-active':'')+'" data-cat="'+c+'" style="'+(active?'background:'+meta.hex+';':'')+'">'+'<span class="sm-chip__dot" style="background:'+meta.hex+'"></span>'+c+'</button>';
+  }).join("");
+}
+
+/* =========================================================
+   テーブル
+========================================================= */
+function renderTable(){
+  var filtered=getSorted(getFiltered());
+  document.getElementById("sm-result-line").textContent=filtered.length+" / "+state.facilities.length+" 拠点を表示中";
+  document.querySelectorAll("table.sm-table thead th[data-key]").forEach(function(th){
+    var key=th.getAttribute("data-key"),arrow=th.querySelector(".sm-sort-arrow");
+    th.classList.toggle("is-sorted",key===state.sortKey);
+    arrow.textContent=key===state.sortKey?(state.sortDir==="asc"?"▲":"▼"):"";
+  });
+  var tbody=document.getElementById("sm-tbody");
+  if(!filtered.length){tbody.innerHTML='<tr class="sm-empty-row"><td colspan="9">条件に一致する拠点がありません。</td></tr>';return;}
+  tbody.innerHTML=filtered.map(function(f){
+    var tot=totalSalesFor(f.id),tier=tierFor(tot),cat=CATEGORY_META[f.category]||CATEGORY_META["道の駅"];
+    var cnt=recordsFor(f.id).length,last=lastDateFor(f.id);
+    return'<tr data-id="'+f.id+'" class="'+(f.id===state.selectedId?"is-selected":"")+'" tabindex="0">'+
+      '<td class="sm-name-cell">'+escH(f.facilityName)+'</td>'+
+      '<td class="sm-pref-cell">'+escH(f.prefecture)+'</td>'+
+      '<td><span class="sm-badge" style="background:'+cat.hex+'">'+escH(f.category)+'</span></td>'+
+      '<td><span class="sm-sales-cell"><span class="sm-tier-dot" style="background:'+tier.color+'"></span>'+fmtMan(tot)+'</span></td>'+
+      '<td class="sm-muted-cell">'+cnt+' 回</td>'+
+      '<td class="sm-muted-cell">'+(last||"—")+'</td>'+
+      '<td>'+escH(f.phone)+'</td>'+
+      '<td>'+escH(f.contact)+'</td>'+
+      '<td><div class="sm-actions">'+
+        '<button class="sm-icon-btn" data-action="history" title="開催実績" aria-label="開催実績">'+iconClock()+'</button>'+
+        '<button class="sm-icon-btn" data-action="edit" title="編集" aria-label="編集">'+iconPencil()+'</button>'+
+        '<button class="sm-icon-btn sm-icon-btn--danger" data-action="delete" title="削除" aria-label="削除">'+iconTrash()+'</button>'+
+      '</div></td></tr>';
+  }).join("");
+}
+function iconPencil(){return'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';}
+function iconTrash(){return'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';}
+function iconClock(){return'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';}
+
+/* =========================================================
+   地図
+========================================================= */
+function initMap(){
+  map=L.map("sm-map",{scrollWheelZoom:true}).setView([36.4,138.0],7);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:18}).addTo(map);
+}
+function buildIcon(f,isActive){
+  var tot=totalSalesFor(f.id),tier=tierFor(tot),cat=CATEGORY_META[f.category]||CATEGORY_META["道の駅"];
+  var vals=state.facilities.map(function(x){return totalSalesFor(x.id);}),min2=Math.min.apply(null,vals),max2=Math.max.apply(null,vals);
+  var size=30;if(max2>min2){size=26+Math.round((tot-min2)/(max2-min2)*20);}
+  return L.divIcon({className:"marche-pin",html:'<div class="marche-pin__ring'+(isActive?" is-active":'')+'" style="--c:'+tier.color+';width:'+size+'px;height:'+size+'px;"><span class="marche-pin__glyph">'+cat.glyph+'</span></div>',iconSize:[size,size],iconAnchor:[size/2,size/2]});
+}
+function renderMarkers(){
+  var filteredIds=new Set(getFiltered().map(function(f){return f.id;}));
+  Object.keys(markersById).forEach(function(id){
+    if(!filteredIds.has(id)||!state.facilities.find(function(f){return f.id===id;})){map.removeLayer(markersById[id]);delete markersById[id];}
+  });
+  state.facilities.forEach(function(f){
+    if(!filteredIds.has(f.id))return;
+    var icon=buildIcon(f,f.id===state.selectedId);
+    if(markersById[f.id]){markersById[f.id].setIcon(icon);markersById[f.id].setLatLng([f.lat,f.lng]);}
+    else{var m=L.marker([f.lat,f.lng],{icon:icon});m.on("click",function(){selectFacility(f.id,false);});m.addTo(map);markersById[f.id]=m;}
+    markersById[f.id].setPopupContent(buildPopup(f));
+  });
+}
+function buildPopup(f){
+  var cat=CATEGORY_META[f.category]||CATEGORY_META["道の駅"],tot=totalSalesFor(f.id),cnt=recordsFor(f.id).length;
+  return'<div class="sm-popup"><span class="sm-popup__cat" style="background:'+cat.hex+'">'+escH(f.category)+'</span><p class="sm-popup__name">'+escH(f.facilityName)+'</p><p class="sm-popup__row">'+escH(f.prefecture)+'</p><p class="sm-popup__row">累計売上: <span class="sm-popup__sales">'+fmtMan(tot)+' 万円</span>（'+cnt+'回開催）</p><p class="sm-popup__row">担当: '+escH(f.contact)+'（'+escH(f.phone)+'）</p><div class="sm-popup__links"><button class="sm-popup__edit" data-history-id="'+f.id+'">実績を記録</button><button class="sm-popup__edit" data-edit-id="'+f.id+'">基本情報を編集</button></div></div>';
+}
+function selectFacility(id,panMap){
+  state.selectedId=id;renderTable();renderMarkers();
+  var row=document.querySelector('tr[data-id="'+id+'"]');if(row)row.scrollIntoView({block:"nearest"});
+  if(panMap){var f=state.facilities.find(function(x){return x.id===id;});if(f){map.flyTo([f.lat,f.lng],Math.max(map.getZoom(),10),{duration:0.6});markersById[id]&&markersById[id].openPopup();}}
+}
+
+document.addEventListener("click",function(e){
+  var eb=e.target.closest("[data-edit-id]");if(eb){openModal(eb.getAttribute("data-edit-id"));return;}
+  var hb=e.target.closest("[data-history-id]");if(hb){openHistoryModal(hb.getAttribute("data-history-id"));return;}
+});
+
+/* =========================================================
+   モーダル: 拠点追加・編集
+========================================================= */
+function openModal(id){
+  state.editingId=id||null;
+  var f=id?state.facilities.find(function(x){return x.id===id;}):null;
+  var overlay=document.createElement("div");
+  overlay.className="sm-overlay";overlay.id="sm-modal-overlay";
+  overlay.innerHTML=
+    '<div class="sm-modal">'+
+      '<p class="sm-modal__title">'+(f?"拠点の基本情報を編集":"拠点を追加")+'</p>'+
+      '<p class="sm-modal__sub">売上高は「実績」から都度記録します。ここでは施設の基本情報のみ入力してください。</p>'+
+      '<div class="sm-field"><label>施設名</label><input id="mf-name" type="text" value="'+escA(f?f.facilityName:"")+'" placeholder="例：道の駅 信州新町" /></div>'+
+      '<div class="sm-field-row">'+
+        '<div class="sm-field"><label>都道府県</label><input id="mf-pref" type="text" value="'+escA(f?f.prefecture:"長野県")+'" /></div>'+
+        '<div class="sm-field"><label>カテゴリー</label><select id="mf-cat">'+CATEGORY_ORDER.map(function(c){return'<option value="'+c+'"'+(f&&f.category===c?" selected":"")+'>'+c+'</option>';}).join("")+'</select></div>'+
+      '</div>'+
+      '<div class="sm-field-row">'+
+        '<div class="sm-field"><label>施設電話番号</label><input id="mf-phone" type="text" value="'+escA(f?f.phone:"")+'" placeholder="026-000-0000" /></div>'+
+        '<div class="sm-field"><label>担当者名</label><input id="mf-contact" type="text" value="'+escA(f?f.contact:"")+'" placeholder="山田 太郎" /></div>'+
+      '</div>'+
+      '<div class="sm-field"><label>住所・地点名から座標を検索</label><div class="sm-geo-row"><input id="mf-address" type="text" placeholder="例：長野県 道の駅 信州新町" /><button class="sm-btn sm-btn--ghost" id="mf-geocode" type="button">検索</button></div></div>'+
+      '<div class="sm-field-row">'+
+        '<div class="sm-field"><label>緯度</label><input id="mf-lat" type="number" step="0.000001" value="'+(f?f.lat:"")+'" /></div>'+
+        '<div class="sm-field"><label>経度</label><input id="mf-lng" type="number" step="0.000001" value="'+(f?f.lng:"")+'" /></div>'+
+      '</div>'+
+      '<p class="sm-geo-hint">地図を見たい場所まで動かしてから下のボタンを押すと中心座標が入力されます。</p>'+
+      '<button class="sm-btn sm-btn--ghost" id="mf-use-center" type="button" style="margin-top:6px;">地図の中心を取得</button>'+
+      (!f?'<div class="sm-checkbox-row"><input id="mf-open-history" type="checkbox" checked /><label for="mf-open-history">保存後にこの拠点の開催実績を入力する</label></div>':'')+
+      '<div class="sm-modal__footer">'+
+        (f?'<button class="sm-btn--text" id="mf-delete" type="button" style="color:#B23A2E;">この拠点を削除</button>':'<span></span>')+
+        '<div class="sm-modal__footer-right">'+
+          '<button class="sm-btn sm-btn--ghost" id="mf-cancel" type="button">キャンセル</button>'+
+          '<button class="sm-btn sm-btn--primary" id="mf-save" type="button">保存</button>'+
+        '</div></div>'+
+    '</div>';
+  document.body.appendChild(overlay);
+  document.getElementById("mf-name").focus();
+  overlay.addEventListener("click",function(e){if(e.target===overlay)closeModal();});
+  document.getElementById("mf-cancel").addEventListener("click",closeModal);
+  document.getElementById("mf-use-center").addEventListener("click",function(){var c=map.getCenter();document.getElementById("mf-lat").value=c.lat.toFixed(6);document.getElementById("mf-lng").value=c.lng.toFixed(6);});
+  document.getElementById("mf-geocode").addEventListener("click",doGeocode);
+  document.getElementById("mf-save").addEventListener("click",saveModal);
+  if(f){document.getElementById("mf-delete").addEventListener("click",function(){closeModal();confirmDialog("拠点を削除しますか？","「"+f.facilityName+"」と紐づく開催実績（"+recordsFor(f.id).length+"件）をすべて削除します。",function(){deleteFacility(f.id);});});}
+  function escKey(e){if(e.key==="Escape")closeModal();}
+  document.addEventListener("keydown",escKey);overlay._escHandler=escKey;
+}
+function closeModal(){var o=document.getElementById("sm-modal-overlay");if(!o)return;if(o._escHandler)document.removeEventListener("keydown",o._escHandler);o.remove();state.editingId=null;}
+
+async function doGeocode(){
+  var addr=document.getElementById("mf-address").value.trim();
+  if(!addr){showToast("検索する住所・地点名を入力してください","error");return;}
+  var btn=document.getElementById("mf-geocode"),orig=btn.textContent;
+  btn.textContent="検索中…";btn.disabled=true;
+  try{
+    // 国土地理院 住所検索API（日本の住所に最適）
+    var gsiUrl="https://msearch.gsi.go.jp/address-search/AddressSearch?q="+encodeURIComponent(addr);
+    var gsiResp=await fetch(gsiUrl);
+    var gsiData=await gsiResp.json();
+    if(gsiData&&gsiData.length){
+      var coords=gsiData[0].geometry.coordinates;
+      document.getElementById("mf-lng").value=Number(coords[0]).toFixed(6);
+      document.getElementById("mf-lat").value=Number(coords[1]).toFixed(6);
+      showToast("座標を取得しました（"+gsiData[0].properties.title+"）");
+      return;
     }
-    actions.appendChild(el('button', { onclick: () => openForm(s) }, '編集'));
-    actions.appendChild(el('button', { className: 'del', onclick: () => handleDelete(s.id) }, '削除'));
-    card.appendChild(actions);
-    scroll.appendChild(card);
+    // フォールバック: Nominatim
+    var nomUrl="https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=jp&q="+encodeURIComponent(addr);
+    var nomResp=await fetch(nomUrl,{headers:{"Accept-Language":"ja","User-Agent":"ShinshuMarche/1.0"}});
+    var nomData=await nomResp.json();
+    if(nomData&&nomData.length){
+      document.getElementById("mf-lat").value=Number(nomData[0].lat).toFixed(6);
+      document.getElementById("mf-lng").value=Number(nomData[0].lon).toFixed(6);
+      showToast("座標を取得しました");
+      return;
+    }
+    showToast("見つかりませんでした。住所をより詳しく入力してみてください","error");
+  }catch(e){
+    showToast("検索に失敗しました。手動で座標を入力してください","error");
+  }finally{
+    btn.textContent=orig;btn.disabled=false;
+  }
+}
+
+async function saveModal(){
+  var name=document.getElementById("mf-name").value.trim();
+  var pref=document.getElementById("mf-pref").value.trim();
+  var cat=document.getElementById("mf-cat").value;
+  var phone=document.getElementById("mf-phone").value.trim();
+  var contact=document.getElementById("mf-contact").value.trim();
+  var lat=Number(document.getElementById("mf-lat").value);
+  var lng=Number(document.getElementById("mf-lng").value);
+  var openH=document.getElementById("mf-open-history");openH=openH?openH.checked:false;
+  if(!name||!pref){showToast("施設名と都道府県は必須です","error");return;}
+  if(!isFinite(lat)||!isFinite(lng)){showToast("緯度・経度を入力してください","error");return;}
+  var newId=state.editingId;
+  if(state.editingId){var f=state.facilities.find(function(x){return x.id===state.editingId;});Object.assign(f,{facilityName:name,prefecture:pref,category:cat,phone:phone,contact:contact,lat:lat,lng:lng});showToast("拠点情報を更新しました");}
+  else{newId=uid();state.facilities.push({id:newId,facilityName:name,prefecture:pref,category:cat,phone:phone,contact:contact,lat:lat,lng:lng});showToast("拠点を追加しました");}
+  closeModal();await persist();renderAll();
+  if(openH&&newId)openHistoryModal(newId);
+}
+
+async function deleteFacility(id){
+  state.facilities=state.facilities.filter(function(f){return f.id!==id;});
+  state.records=state.records.filter(function(r){return r.facilityId!==id;});
+  if(state.selectedId===id)state.selectedId=null;
+  await persist();renderAll();showToast("拠点を削除しました");
+}
+
+/* =========================================================
+   モーダル: 開催実績
+========================================================= */
+function openHistoryModal(facilityId){
+  var facility=state.facilities.find(function(f){return f.id===facilityId;});if(!facility)return;
+  var overlay=document.createElement("div");
+  overlay.className="sm-overlay";overlay.id="sm-history-overlay";
+  overlay.innerHTML=historyModalHtml(facility);
+  document.body.appendChild(overlay);
+  bindHistoryModalEvents(facility,overlay);
+  overlay.addEventListener("click",function(e){if(e.target===overlay)closeHistoryModal(overlay);});
+  function escKey(e){if(e.key==="Escape")closeHistoryModal(overlay);}
+  document.addEventListener("keydown",escKey);overlay._escHandler=escKey;
+}
+function closeHistoryModal(overlay){if(overlay._escHandler)document.removeEventListener("keydown",overlay._escHandler);overlay.remove();}
+
+function historyModalHtml(facility){
+  var recs=recordsFor(facility.id).slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  var tot=recs.reduce(function(s,r){return s+Number(r.sales||0);},0);
+  var rowsHtml=recs.length?recs.map(function(r){
+    return'<div class="sm-hist-row" data-rid="'+r.id+'">'+
+      '<span class="sm-hist-date">'+escH(r.date)+'</span>'+
+      '<span class="sm-hist-sales">'+fmtMan(r.sales)+' 万円</span>'+
+      '<span class="sm-hist-note" style="color:var(--indigo);font-size:12px;">'+escH(r.leader||"")+'</span>'+
+      '<span class="sm-hist-note">'+escH(r.note||"")+'</span>'+
+      '<button class="sm-icon-btn sm-icon-btn--danger" data-del-record="'+r.id+'" title="削除" aria-label="削除">'+iconTrash()+'</button>'+
+    '</div>';
+  }).join(""):'<p class="sm-hist-empty">まだ実績が記録されていません。下のフォームから登録してください。</p>';
+  return'<div class="sm-modal sm-history">'+
+    '<p class="sm-modal__title">'+escH(facility.facilityName)+' の開催実績</p>'+
+    '<p class="sm-modal__sub">これまでの開催 '+recs.length+' 回・累計売上 <strong>'+fmtMan(tot)+' 万円</strong></p>'+
+    '<div class="sm-hist-list">'+rowsHtml+'</div>'+
+    '<div class="sm-hist-form"><p class="sm-hist-form__title">新しい実績を記録</p>'+
+      '<div class="sm-field-row">'+
+        '<div class="sm-field"><label>開催日</label><input id="hf-date" type="date" value="'+todayStr()+'" /></div>'+
+        '<div class="sm-field"><label>売上高（万円）</label><input id="hf-sales" type="number" min="0" step="1" placeholder="850" /></div>'+
+      '</div>'+
+      '<div class="sm-field"><label>軸リーダー（販売員名）</label><input id="hf-leader" type="text" placeholder="例：山田 太郎" /></div>'+
+      '<div class="sm-field"><label>メモ（任意）</label><input id="hf-note" type="text" placeholder="例：雨天で客足少なめ" /></div>'+
+      '<button class="sm-btn sm-btn--primary" id="hf-add" type="button">実績を追加</button>'+
+    '</div>'+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="hf-close" type="button">閉じる</button></div></div>'+
+  '</div>';
+}
+
+function bindHistoryModalEvents(facility,overlay){
+  overlay.querySelector("#hf-close").addEventListener("click",function(){closeHistoryModal(overlay);});
+  overlay.querySelector("#hf-add").addEventListener("click",async function(){
+    var date=overlay.querySelector("#hf-date").value;
+    var sales=Number(overlay.querySelector("#hf-sales").value);
+    var leader=overlay.querySelector("#hf-leader").value.trim();
+    var note=overlay.querySelector("#hf-note").value.trim();
+    if(!date){showToast("開催日を入力してください","error");return;}
+    if(!isFinite(sales)||sales<0){showToast("売上高は0以上の数値で入力してください","error");return;}
+    state.records.push({id:uid(),facilityId:facility.id,date:date,sales:sales,leader:leader,note:note});
+    await persist();renderAll();showToast("実績を記録しました");
+    overlay.innerHTML=historyModalHtml(facility);bindHistoryModalEvents(facility,overlay);
+  });
+  overlay.querySelectorAll("[data-del-record]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var rid=btn.getAttribute("data-del-record");
+      confirmDialog("実績を削除しますか？","この開催実績を削除します。取り消せません。",async function(){
+        state.records=state.records.filter(function(r){return r.id!==rid;});
+        await persist();renderAll();
+        overlay.innerHTML=historyModalHtml(facility);bindHistoryModalEvents(facility,overlay);
+        showToast("実績を削除しました");
+      });
+    });
   });
 }
 
-let photosSid = 'all';
-function renderPhotos() {
-  const sel = document.getElementById('photosFilter');
-  sel.innerHTML = '<option value="all">すべての仕入先</option>' +
-    state.suppliers.map(s => `<option value="${s.id}">${escapeAttr(s.name || '')}</option>`).join('');
-  sel.value = photosSid;
-  sel.onchange = () => { photosSid = sel.value; renderPhotos(); };
-  const scroll = document.getElementById('photosScroll');
-  scroll.innerHTML = '';
-  const all = state.suppliers.flatMap(s =>
-    (s.products || []).map(p => Object.assign({}, p, { supplierName: s.name, supplierId: s.id }))
-  );
-  const items = photosSid === 'all' ? all : all.filter(p => p.supplierId === photosSid);
-  if (items.length === 0) {
-    scroll.appendChild(el('div', { className: 'empty' },
-      '商品写真がまだ登録されていません。\n仕入先の編集から写真を追加してください。'));
-    return;
-  }
-  const grid = el('div', { className: 'photos-grid' });
-  items.forEach(p => {
-    const card = el('div', { className: 'photo-card' });
-    card.appendChild(el('img', { src: p.image, alt: p.name }));
-    const body = el('div', { className: 'photo-card-body' });
-    body.appendChild(el('div', { className: 'photo-name' }, p.name));
-    body.appendChild(el('div', { className: 'photo-supplier' }, p.supplierName));
-    card.appendChild(body);
-    grid.appendChild(card);
+/* =========================================================
+   確認ダイアログ
+========================================================= */
+function confirmDialog(title,message,onConfirm){
+  var overlay=document.createElement("div");overlay.className="sm-overlay";
+  overlay.innerHTML='<div class="sm-modal sm-confirm"><p class="sm-modal__title">'+escH(title)+'</p><p>'+escH(message)+'</p>'+
+    '<div class="sm-field" style="margin-top:12px;"><label style="font-size:12px;color:var(--ink-soft);">管理者パスワード</label>'+
+    '<input id="cf-pw" type="password" placeholder="パスワードを入力" style="width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px;border:1px solid var(--paper-line);border-radius:7px;background:var(--paper);color:var(--ink);" /></div>'+
+    '<p id="cf-pw-err" style="color:#C8541E;font-size:12px;margin:4px 0 0;display:none;">パスワードが違います</p>'+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="cf-cancel" type="button">キャンセル</button><button class="sm-btn sm-btn--primary" id="cf-ok" type="button" style="background:#B23A2E;">削除する</button></div></div></div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",function(e){if(e.target===overlay)overlay.remove();});
+  document.getElementById("cf-cancel").addEventListener("click",function(){overlay.remove();});
+  document.getElementById("cf-ok").addEventListener("click",function(){
+    var pw=document.getElementById("cf-pw").value;
+    if(pw!=="0120"){
+      document.getElementById("cf-pw-err").style.display="block";
+      document.getElementById("cf-pw").value="";
+      document.getElementById("cf-pw").focus();
+      return;
+    }
+    overlay.remove();onConfirm();
   });
-  scroll.appendChild(grid);
+  document.getElementById("cf-pw").addEventListener("keydown",function(e){
+    if(e.key==="Enter")document.getElementById("cf-ok").click();
+  });
+  setTimeout(function(){var el=document.getElementById("cf-pw");if(el)el.focus();},50);
 }
 
-function renderCamera() {
-  const scroll = document.getElementById('camScroll');
-  scroll.innerHTML = '';
+/* =========================================================
+   CSV
+========================================================= */
+function exportFacilitiesCsv(){
+  var headers=["都道府県","施設名","カテゴリー","累計売上高(万円)","開催回数","直近開催日","施設電話番号","担当者名","緯度","経度"];
+  var rows=[headers].concat(state.facilities.map(function(f){return[f.prefecture,f.facilityName,f.category,totalSalesFor(f.id),recordsFor(f.id).length,lastDateFor(f.id)||"",f.phone,f.contact,f.lat,f.lng];}));
+  downloadCsv(rows,"shinshu-marche-facilities-"+todayStr()+".csv");showToast("拠点CSVを書き出しました");
+}
+function exportRecordsCsv(){
+  var headers=["施設名","都道府県","開催日","売上高(万円)","メモ"];
+  var rows=[headers].concat(state.records.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).map(function(r){
+    var f=state.facilities.find(function(x){return x.id===r.facilityId;});
+    return[f?f.facilityName:"(削除済み)",f?f.prefecture:"",r.date,r.sales,r.note||""];
+  }));
+  downloadCsv(rows,"shinshu-marche-records-"+todayStr()+".csv");showToast("実績ログCSVを書き出しました");
+}
+function downloadCsv(rows,filename){
+  var csv=rows.map(function(r){return r.map(function(v){var s=String(v==null?"":v);if(s.indexOf(",")!==-1||s.indexOf('"')!==-1||s.indexOf("\n")!==-1){s='"'+s.replace(/"/g,'""')+'"';}return s;}).join(",");}).join("\r\n");
+  var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  var url=URL.createObjectURL(blob);var a=document.createElement("a");
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+function importCsv(file){
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete:async function(results){
+    var rows=results.data;if(!rows.length){showToast("CSVにデータが見つかりませんでした","error");return;}
+    var added=0,skipped=0;
+    rows.forEach(function(r){
+      var name=(r["施設名"]||"").trim(),pref=(r["都道府県"]||"").trim(),lat=Number(r["緯度"]),lng=Number(r["経度"]);
+      if(!name||!pref||!isFinite(lat)||!isFinite(lng)){skipped++;return;}
+      var cat=(r["カテゴリー"]||"").trim();if(CATEGORY_ORDER.indexOf(cat)===-1)cat="道の駅";
+      var fid=uid();
+      state.facilities.push({id:fid,prefecture:pref,facilityName:name,category:cat,phone:(r["施設電話番号"]||"").trim(),contact:(r["担当者名"]||"").trim(),lat:lat,lng:lng});
+      var sv=Number(r["累計売上高(万円)"]||r["売上高(万円)"]||0);
+      if(sv>0)state.records.push({id:uid(),facilityId:fid,date:(r["開催日"]||todayStr()),sales:sv,note:"CSV取込"});
+      added++;
+    });
+    await persist();renderAll();showToast(added+"件の拠点を取り込みました"+(skipped?"（"+skipped+"件はスキップ）":""));
+  },error:function(){showToast("CSVの読み込みに失敗しました","error");}});
+}
 
-  const allProducts = state.suppliers.flatMap(s =>
-    (s.products || []).map(p => Object.assign({}, p, { supplierName: s.name, supplierId: s.id }))
-  );
-  const registered = allProducts.filter(p => p.embedding).length;
+/* =========================================================
+   一括描画 & イベントバインド
+========================================================= */
+function renderAll(){renderStats();renderFilterControls();renderTable();renderMarkers();renderRanking();updateMeta();}
 
-  const intro = el('div', { className: 'card' });
-  intro.appendChild(el('div', { className: 'card-title' }, '商品をカメラで照合'));
-  intro.appendChild(el('div', { className: 'card-desc' },
-    '商品をカメラに映すと、登録済みの写真と比較して発注先の候補を提示します。画像はデバイス内でのみ処理されます。'));
-  if (registered === 0) {
-    intro.appendChild(el('div', { className: 'notice' },
-      'まだ照合できる商品写真がありません。仕入先を編集して写真を登録してください。'));
-  }
-  scroll.appendChild(intro);
+/* =========================================================
+   ランキング
+========================================================= */
+var rkMode="single";
 
-  const stage = el('div', { className: 'cam-stage' });
-  if (state.captured) {
-    stage.appendChild(el('img', { src: state.captured, alt: '撮影' }));
-  } else if (state.camStream) {
-    const video = el('video', { autoplay: true, playsinline: true, muted: true });
-    video.srcObject = state.camStream;
-    stage.appendChild(video);
-    setTimeout(() => video.play().catch(() => {}), 50);
+function renderRanking(){
+  var yearSel=document.getElementById("rk-year");
+  var monthSel=document.getElementById("rk-month");
+  if(!yearSel)return;
+
+  var selYear=yearSel.value;
+  var selMonth=monthSel.value;
+
+  // 年の選択肢
+  var years=Array.from(new Set(state.records.map(function(r){return r.date.slice(0,4);}))).sort().reverse();
+  var curYear=yearSel.value;
+  yearSel.innerHTML='<option value="all">全期間</option>'+years.map(function(y){return'<option value="'+y+'"'+(y===curYear?' selected':'')+'>'+y+'年</option>';}).join("");
+  yearSel.value=curYear;
+
+  // 月の選択肢
+  if(selYear!=="all"){
+    var months=Array.from(new Set(state.records.filter(function(r){return r.date.slice(0,4)===selYear;}).map(function(r){return r.date.slice(5,7);}))).sort();
+    var curMonth=monthSel.value;
+    monthSel.innerHTML='<option value="all">全月</option>'+months.map(function(m){return'<option value="'+m+'"'+(m===curMonth?' selected':'')+'>'+parseInt(m)+'月</option>';}).join("");
+    monthSel.value=curMonth;
+    monthSel.disabled=false;
+    selMonth=monthSel.value;
   } else {
-    stage.appendChild(el('div', { className: 'cam-placeholder' }, 'カメラを起動してください'));
-  }
-  scroll.appendChild(stage);
-
-  if (state.camErr) scroll.appendChild(el('div', { className: 'err-msg' }, state.camErr));
-
-  const btns = el('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px' } });
-  if (!state.captured && !state.camStream) {
-    btns.appendChild(el('button', { className: 'btn-primary', onclick: startCam }, '📷 カメラを起動する'));
-  }
-  if (!state.captured && state.camStream) {
-    btns.appendChild(el('button', { className: 'btn-primary', onclick: capture }, '📸 撮影して照合する'));
-  }
-  if (!state.captured) {
-    const lbl = el('label', { className: 'btn-outline' }, '写真を選んで照合する');
-    const inp = el('input', { type: 'file', accept: 'image/*', capture: 'environment', style: { display: 'none' } });
-    inp.onchange = handleFileCapture;
-    lbl.appendChild(inp);
-    btns.appendChild(lbl);
-  }
-  if (state.captured) {
-    btns.appendChild(el('button', { className: 'btn-outline', onclick: resetCam }, 'もう一度撮影する'));
-  }
-  scroll.appendChild(btns);
-
-  if (state.analyzing || state.modelLoading) {
-    scroll.appendChild(el('div', { className: 'loading-msg' },
-      state.modelLoading ? 'AIモデルを準備中…（初回のみ時間がかかります）' : '照合中…'));
+    monthSel.innerHTML='<option value="all">全月</option>';
+    monthSel.disabled=true;
+    monthSel.value="all";
+    selMonth="all";
   }
 
-  if (state.matches && state.matches.length === 0) {
-    scroll.appendChild(el('div', { className: 'match-card empty', style: { textAlign: 'center' } },
-      '候補が見つかりませんでした'));
-  }
-  if (state.matches && state.matches.length > 0) {
-    const box = el('div', { className: 'match-card' });
-    box.appendChild(el('div', { className: 'match-title' }, '発注先の候補'));
-    state.matches.forEach((m, i) => {
-      const s = state.suppliers.find(x => x.id === m.supplierId);
-      const row = el('div', { className: 'match-row' });
-      row.appendChild(el('img', { src: m.image, alt: m.name, className: 'match-thumb' }));
-      const body = el('div');
-      body.appendChild(el('div', { className: 'match-rank' },
-        `候補${i + 1} ・ 一致度 約${Math.round(Math.max(0, Math.min(1, m.score)) * 100)}%`));
-      body.appendChild(el('div', { className: 'match-name' }, m.name));
-      body.appendChild(el('div', { className: 'match-info' }, m.supplierName));
-      if (s) body.appendChild(el('div', { className: 'match-meta' },
-        s.phone + (s.contact ? ' ・担当: ' + s.contact : '')));
-      row.appendChild(body);
-      box.appendChild(row);
+  // 期間で絞り込んだレコード
+  var filtered=state.records.filter(function(r){
+    if(selYear!=="all"&&r.date.slice(0,4)!==selYear)return false;
+    if(selMonth!=="all"&&r.date.slice(5,7)!==selMonth)return false;
+    return true;
+  });
+
+  var items=[];
+
+  if(rkMode==="single"){
+    // 単回売上高
+    items=filtered.slice().sort(function(a,b){return Number(b.sales)-Number(a.sales);}).map(function(r){
+      var f=state.facilities.find(function(x){return x.id===r.facilityId;});
+      return{name:f?f.facilityName:"(削除済み)",sub:r.date+(r.leader?" · "+r.leader:""),sales:Number(r.sales),fid:r.facilityId,cat:f?f.category:""};
     });
-    box.appendChild(el('div', { className: 'match-note' },
-      '※見た目の類似度による簡易判定です。同じ品目を複数業者から仕入れている場合は、候補を確認のうえ判断してください。'));
-    scroll.appendChild(box);
-  }
-}
-
-async function startCam() {
-  state.camErr = null; state.matches = null; state.captured = null;
-  try {
-    const st = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' }, audio: false
+  } else if(rkMode==="cumul"){
+    // 拠点累積売上高
+    var byFac={};
+    filtered.forEach(function(r){byFac[r.facilityId]=(byFac[r.facilityId]||0)+Number(r.sales);});
+    items=Object.keys(byFac).map(function(fid){
+      var f=state.facilities.find(function(x){return x.id===fid;});
+      return{name:f?f.facilityName:"(削除済み)",sub:recordsFor(fid).length+"回開催",sales:byFac[fid],fid:fid,cat:f?f.category:""};
+    }).sort(function(a,b){return b.sales-a.sales;});
+  } else if(rkMode==="leader-single"){
+    // 軸リーダー単回売上高
+    items=filtered.filter(function(r){return r.leader;}).slice().sort(function(a,b){return Number(b.sales)-Number(a.sales);}).map(function(r){
+      var f=state.facilities.find(function(x){return x.id===r.facilityId;});
+      return{name:r.leader,sub:(f?f.facilityName:"")+" · "+r.date,sales:Number(r.sales),fid:r.facilityId,cat:f?f.category:""};
     });
-    state.camStream = st;
-    renderCamera();
-  } catch (e) {
-    state.camErr = 'カメラを起動できませんでした。ブラウザの設定をご確認ください。';
-    renderCamera();
-  }
-}
-
-function stopCam() {
-  if (state.camStream) {
-    state.camStream.getTracks().forEach(t => t.stop());
-    state.camStream = null;
-  }
-}
-
-async function capture() {
-  const video = document.querySelector('#camScroll video');
-  if (!video) return;
-  const cv = document.createElement('canvas');
-  cv.width = video.videoWidth; cv.height = video.videoHeight;
-  cv.getContext('2d').drawImage(video, 0, 0);
-  const url = cv.toDataURL('image/jpeg', 0.85);
-  state.captured = url;
-  stopCam();
-  renderCamera();
-  await runMatch(url);
-}
-
-async function handleFileCapture(e) {
-  const f = e.target.files && e.target.files[0];
-  if (!f) return;
-  const url = await resizeImg(f, 700, 0.8);
-  state.captured = url;
-  state.matches = null;
-  renderCamera();
-  await runMatch(url);
-  e.target.value = '';
-}
-
-async function runMatch(url) {
-  const allProducts = state.suppliers.flatMap(s =>
-    (s.products || []).map(p => Object.assign({}, p, { supplierName: s.name, supplierId: s.id }))
-  );
-  const cands = allProducts.filter(p => p.embedding);
-  if (cands.length === 0) { state.matches = []; renderCamera(); return; }
-  state.analyzing = true; state.modelLoading = true;
-  renderCamera();
-  try {
-    const emb = await embedFromDataUrl(url);
-    state.modelLoading = false;
-    const scored = cands
-      .map(p => Object.assign({}, p, { score: cosineSim(emb, p.embedding) }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3);
-    state.matches = scored;
-  } catch (e) {
-    state.matches = [];
-    state.camErr = '解析に失敗しました。もう一度お試しください。';
-  } finally {
-    state.analyzing = false; state.modelLoading = false;
-    renderCamera();
-  }
-}
-
-function resetCam() {
-  state.captured = null;
-  state.matches = null;
-  state.camErr = null;
-  renderCamera();
-}
-
-function renderRoute() {
-  const panel = document.getElementById('routePanel');
-  panel.innerHTML = '';
-
-  const secStart = el('div');
-  secStart.appendChild(el('div', { className: 'section-label' }, '出発地点'));
-  const hqBtn = el('button', {
-    className: 'btn-outline' + (state.routeStart === HQ_ADDRESS ? ' active' : ''),
-    style: { marginBottom: '8px' },
-    onclick: () => { state.routeStart = HQ_ADDRESS; state.routeStartCoord = null; renderRoute(); }
-  }, '🏠 本社から出発');
-  secStart.appendChild(hqBtn);
-  const startInput = el('input', {
-    type: 'text', className: 'input',
-    value: state.routeStart,
-    placeholder: '出先から出発する場合は住所を入力',
-    oninput: e => { state.routeStart = e.target.value; state.routeStartCoord = null; }
-  });
-  secStart.appendChild(startInput);
-  secStart.appendChild(el('div', { style: { fontSize: '11px', color: 'var(--soft)', marginTop: '4px' } },
-    state.routeStart === HQ_ADDRESS ? HQ_LABEL : '入力した住所が出発地点になります'));
-  panel.appendChild(secStart);
-
-  const secStops = el('div');
-  secStops.appendChild(el('div', { className: 'section-label' }, '回りたい仕入先（車移動）'));
-  const list = el('div', { className: 'stop-list' });
-  state.suppliers.forEach(s => {
-    const has = typeof s.lat === 'number' && !isNaN(s.lat);
-    const item = el('label', { className: 'stop-item' });
-    const cb = el('input', {
-      type: 'checkbox',
-      checked: state.routeStops.indexOf(s.id) >= 0,
-      onchange: e => {
-        if (e.target.checked) state.routeStops.push(s.id);
-        else state.routeStops = state.routeStops.filter(x => x !== s.id);
-      }
+  } else if(rkMode==="leader-cumul"){
+    // 軸リーダー累積売上高
+    var byLeader={};
+    filtered.filter(function(r){return r.leader;}).forEach(function(r){
+      byLeader[r.leader]=(byLeader[r.leader]||0)+Number(r.sales);
     });
-    item.appendChild(cb);
-    item.appendChild(el('span', {
-      className: 'cat-chip',
-      style: { background: catColor(s.category) + '22', color: catColor(s.category), marginBottom: 0 }
-    }, catLabel(s.category)));
-    item.appendChild(el('span', { className: 'stop-name' }, s.name));
-    if (!has) item.appendChild(el('span', { className: 'no-coord' }, '（位置情報なし）'));
-    list.appendChild(item);
-  });
-  secStops.appendChild(list);
-  panel.appendChild(secStops);
-
-  panel.appendChild(el('button', {
-    className: 'btn-primary',
-    onclick: calculateRoute
-  }, '🚗 ルートを提案する'));
-
-  if (state.routeResult) {
-    const box = el('div', { className: 'route-result' });
-    const total = state.routeResult.reduce((s, r) => s + r.legKm, 0);
-    box.appendChild(el('div', { className: 'route-result-title' },
-      `提案ルート（合計 約${total.toFixed(1)}km）`));
-    state.routeResult.forEach((r, i) => {
-      const s = el('div', { className: 'route-stop' });
-      s.appendChild(el('div', { className: 'route-stop-name' }, `${i + 1}. ${r.name}`));
-      s.appendChild(el('div', { className: 'route-leg' }, `前の地点から約${r.legKm.toFixed(1)}km`));
-      box.appendChild(s);
-    });
-    box.appendChild(el('div', { className: 'route-note' },
-      '※直線距離をもとにした簡易的な順序提案です。実際の道路経路と所要時間はGoogleマップでご確認ください。'));
-
-    const gmapUrl = buildGmapUrl(state.routeStartCoord, state.routeResult);
-    if (gmapUrl) {
-      box.appendChild(el('a', {
-        href: gmapUrl, target: '_blank', rel: 'noreferrer', className: 'route-gmap'
-      }, '🌐 Googleマップで開く'));
-    }
-    panel.appendChild(box);
+    var leaderCount={};
+    filtered.filter(function(r){return r.leader;}).forEach(function(r){leaderCount[r.leader]=(leaderCount[r.leader]||0)+1;});
+    items=Object.keys(byLeader).map(function(l){
+      return{name:l,sub:leaderCount[l]+"回出場",sales:byLeader[l],fid:null,cat:""};
+    }).sort(function(a,b){return b.sales-a.sales;});
   }
 
-  if (!state.routeMapObj) {
-    const map = L.map('routeMap', { center: [36.35, 137.9], zoom: 9 });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19,
-    }).addTo(map);
-    state.routeMapObj = map;
+  // トップ3ポディウム
+  var podium=document.getElementById("sm-rk-podium");
+  var medals=["🥇","🥈","🥉"];
+  var cls=["sm-rk-card--1","sm-rk-card--2","sm-rk-card--3"];
+  if(items.length){
+    podium.innerHTML=items.slice(0,3).map(function(item,i){
+      return'<div class="sm-rk-card '+cls[i]+'" data-rk-fid="'+(item.fid||"")+'">'+
+        '<span class="sm-rk-card__medal">'+medals[i]+'</span>'+
+        '<span class="sm-rk-card__name">'+escH(item.name)+'</span>'+
+        '<span class="sm-rk-card__sub">'+escH(item.sub)+'</span>'+
+        '<span class="sm-rk-card__sales">'+fmtMan(item.sales)+' 万円</span>'+
+      '</div>';
+    }).join("");
+  } else {
+    podium.innerHTML='';
   }
-  drawRouteOnMap();
-  setTimeout(() => state.routeMapObj && state.routeMapObj.invalidateSize(), 100);
-}
 
-function buildGmapUrl(start, result) {
-  if (!start || !result || result.length === 0) return null;
-  const params = new URLSearchParams();
-  params.set('api', '1');
-  params.set('travelmode', 'driving');
-  params.set('origin', `${start.lat},${start.lng}`);
-  const last = result[result.length - 1];
-  params.set('destination', `${last.lat},${last.lng}`);
-  if (result.length > 1) {
-    const waypoints = result.slice(0, -1).map(r => `${r.lat},${r.lng}`).join('|');
-    params.set('waypoints', waypoints);
-  }
-  return 'https://www.google.com/maps/dir/?' + params.toString();
-}
-
-function drawRouteOnMap() {
-  if (!state.routeMapObj) return;
-  state.routeMarkers.forEach(m => m.remove());
-  state.routeMarkers = [];
-  if (state.routeLine) { state.routeLine.remove(); state.routeLine = null; }
-  if (!state.routeResult || !state.routeStartCoord) return;
-  const valid = state.routeResult.filter(r => typeof r.lat === 'number' && !isNaN(r.lat));
-  if (valid.length === 0) return;
-  const pts = [state.routeStartCoord].concat(valid.map(r => ({ lat: r.lat, lng: r.lng })));
-  const lls = pts.map(p => [p.lat, p.lng]);
-  state.routeLine = L.polyline(lls, { color: '#D98E2B', weight: 4, dashArray: '8 6' }).addTo(state.routeMapObj);
-  const si = L.divIcon({
-    className: '',
-    html: `<div style="width:34px;height:34px;border-radius:50%;background:#1F2E26;border:3px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.4)">出発</div>`,
-    iconSize: [34, 34], iconAnchor: [17, 17]
-  });
-  state.routeMarkers.push(L.marker([state.routeStartCoord.lat, state.routeStartCoord.lng], { icon: si }).addTo(state.routeMapObj));
-  valid.forEach((s, i) => {
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="width:34px;height:34px;border-radius:10px;background:${catColor(s.category)};border:3px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.35)">${i + 1}</div>`,
-      iconSize: [34, 34], iconAnchor: [17, 17]
-    });
-    const m = L.marker([s.lat, s.lng], { icon }).addTo(state.routeMapObj);
-    m.bindPopup(`<div style="font-family:sans-serif"><b>${i + 1}. ${escapeHtml(s.name)}</b><br/>${escapeHtml(s.address || '')}</div>`);
-    state.routeMarkers.push(m);
-  });
-  state.routeMapObj.fitBounds(lls, { padding: [40, 40] });
-}
-
-async function calculateRoute() {
-  if (state.routeStops.length === 0) { showToast('仕入先を1件以上選んでください'); return; }
-  try {
-    let sc = state.routeStartCoord;
-    if (!sc || isNaN(sc.lat)) {
-      if (!state.routeStart.trim()) { showToast('出発地点を入力してください'); return; }
-      sc = await geocode(state.routeStart);
-      if (!sc) { showToast('出発地点の位置を特定できませんでした'); state.routeStartCoord = null; return; }
-      state.routeStartCoord = sc;
-    }
-    const all = state.suppliers.filter(s => state.routeStops.indexOf(s.id) >= 0);
-    const valid = all.filter(s => typeof s.lat === 'number' && !isNaN(s.lat));
-    if (valid.length === 0) { showToast('選択した仕入先に位置情報がありません'); return; }
-    const skip = all.length - valid.length;
-    state.routeResult = buildRoute(sc, valid);
-    if (skip > 0) showToast(`位置情報のない ${skip} 件を除外して計算しました`);
-    renderRoute();
-  } catch (e) {
-    showToast('エラーが発生しました');
-  }
-}
-
-function openDetail(id) {
-  const s = state.suppliers.find(x => x.id === id);
-  if (!s) return;
-  const sheet = document.getElementById('detailSheet');
-  sheet.innerHTML = '';
-  sheet.appendChild(el('div', { className: 'sheet-grip' }));
-  sheet.appendChild(el('div', { className: 'sheet-header' }, [
-    el('div', {
-      className: 'cat-chip',
-      style: { background: catColor(s.category) + '22', color: catColor(s.category), marginBottom: 0 }
-    }, catLabel(s.category)),
-    el('button', { className: 'sheet-close', onclick: closeDetail }, '×')
-  ]));
-  const body = el('div', { className: 'sheet-body' });
-  body.appendChild(el('div', { style: { fontWeight: 700, fontSize: '20px', marginBottom: '14px' } }, s.name || ''));
-  const fields = [
-    ['📍 住所', s.address],
-    ['📞 電話', s.phone],
-    ['⏰ 営業時間', s.hours],
-    ['🚫 定休日', s.closedDay],
-    ['👤 担当者', s.contact],
-    ['📝 メモ', s.notes],
-  ];
-  fields.forEach(([label, val]) => {
-    if (!val) return;
-    const line = el('div', { className: 'detail-line' });
-    line.appendChild(el('div', { className: 'detail-label' }, label));
-    line.appendChild(el('div', { className: 'detail-value' }, val));
-    body.appendChild(line);
-  });
-  if (s.website) {
-    body.appendChild(el('a', {
-      href: s.website, target: '_blank', rel: 'noreferrer', className: 'detail-link'
-    }, '🔗 ホームページ ↗'));
-  }
-  if (typeof s.lat === 'number' && !isNaN(s.lat)) {
-    body.appendChild(el('a', {
-      href: `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`,
-      target: '_blank', rel: 'noreferrer', className: 'route-gmap'
-    }, '🌐 Googleマップで経路案内'));
-  }
-  if (s.products && s.products.length > 0) {
-    body.appendChild(el('div', { style: { fontSize: '12px', color: 'var(--soft)', marginTop: '16px', marginBottom: '8px' } }, '🛒 取扱商品'));
-    const grid = el('div', { className: 'detail-products' });
-    s.products.forEach(p => {
-      const w = el('div', { className: 'detail-product' });
-      w.appendChild(el('img', { src: p.image, alt: p.name }));
-      w.appendChild(el('div', { className: 'detail-product-name' }, p.name));
-      grid.appendChild(w);
-    });
-    body.appendChild(grid);
-  }
-  const actions = el('div', { className: 'detail-actions' });
-  actions.appendChild(el('button', {
-    className: 'btn-primary',
-    onclick: () => { closeDetail(); openForm(s); }
-  }, '編集'));
-  actions.appendChild(el('button', {
-    className: 'btn-danger-outline',
-    onclick: () => { closeDetail(); handleDelete(s.id); }
-  }, '削除'));
-  body.appendChild(actions);
-  sheet.appendChild(body);
-  document.getElementById('detailOverlay').classList.add('active');
-}
-function closeDetail() {
-  document.getElementById('detailOverlay').classList.remove('active');
-}
-
-function openForm(initial) {
-  state.editTarget = initial || null;
-  const form = initial ? Object.assign({}, initial, { products: (initial.products || []).slice() }) : {
-    name: '', category: 'vegetable', address: '', phone: '', hours: '',
-    closedDay: '', contact: '', website: '', notes: '', products: [],
-    lat: null, lng: null
-  };
-  const sheet = document.getElementById('formSheet');
-  sheet.innerHTML = '';
-
-  const container = el('form', {
-    style: { display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' },
-    onsubmit: e => { e.preventDefault(); submitForm(form); }
-  });
-
-  container.appendChild(el('div', { className: 'sheet-grip' }));
-  const header = el('div', { className: 'sheet-header' });
-  header.appendChild(el('div', { className: 'sheet-title' }, initial ? '仕入先を編集' : '仕入先を新規登録'));
-  header.appendChild(el('button', { type: 'button', className: 'sheet-close', onclick: closeForm }, '×'));
-  container.appendChild(header);
-
-  const body = el('div', { className: 'sheet-body' });
-
-  body.appendChild(makeField('仕入先名 *',
-    el('input', { className: 'input', value: form.name, required: true,
-      placeholder: '例：信州たまご農場',
-      oninput: e => form.name = e.target.value })));
-
-  const catSel = el('select', {
-    className: 'input',
-    onchange: e => form.category = e.target.value
-  });
-  CATS.forEach(c => {
-    const o = el('option', { value: c.key }, c.label);
-    if (c.key === form.category) o.selected = true;
-    catSel.appendChild(o);
-  });
-  body.appendChild(makeField('主な品目', catSel));
-
-  body.appendChild(makeField('住所',
-    el('input', { className: 'input', value: form.address,
-      placeholder: '例：長野県大町市常盤7000',
-      oninput: e => form.address = e.target.value }),
-    '保存時に自動で地図ピンを生成'));
-
-  const row1 = el('div', { className: 'field-row2' });
-  row1.appendChild(makeField('電話番号',
-    el('input', { className: 'input', type: 'tel', value: form.phone,
-      placeholder: '0261-00-0000', oninput: e => form.phone = e.target.value })));
-  row1.appendChild(makeField('担当者名',
-    el('input', { className: 'input', value: form.contact, placeholder: '〇〇 様',
-      oninput: e => form.contact = e.target.value })));
-  body.appendChild(row1);
-
-  const row2 = el('div', { className: 'field-row2' });
-  row2.appendChild(makeField('営業時間',
-    el('input', { className: 'input', value: form.hours, placeholder: '9:00-18:00',
-      oninput: e => form.hours = e.target.value })));
-  row2.appendChild(makeField('定休日',
-    el('input', { className: 'input', value: form.closedDay, placeholder: '水曜',
-      oninput: e => form.closedDay = e.target.value })));
-  body.appendChild(row2);
-
-  body.appendChild(makeField('ホームページ',
-    el('input', { className: 'input', type: 'url', value: form.website,
-      placeholder: 'https://...', oninput: e => form.website = e.target.value })));
-
-  body.appendChild(makeField('メモ',
-    el('textarea', { className: 'input', value: form.notes,
-      oninput: e => form.notes = e.target.value })));
-
-  const photoSection = el('div');
-  const photoLabel = el('label', { className: 'btn-outline' }, '＋ 写真を追加（タップ）');
-  const photoInput = el('input', { type: 'file', accept: 'image/*', style: { display: 'none' } });
-  photoInput.onchange = async e => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    photoLabel.textContent = '解析中…';
-    try {
-      const url = await resizeImg(f, 800, 0.75);
-      const name = window.prompt('商品名を入力してください', f.name.replace(/\.[^.]+$/, '')) || f.name;
-      let emb = null;
-      try { emb = await embedFromDataUrl(url); } catch (err) {}
-      form.products.push({ id: uid(), name, image: url, embedding: emb });
-      renderThumbs();
-    } catch (err) {
-      window.alert('画像の読み込みに失敗しました');
-    } finally {
-      photoLabel.textContent = '＋ 写真を追加（タップ）';
-      e.target.value = '';
-    }
-  };
-  photoLabel.appendChild(photoInput);
-  photoSection.appendChild(photoLabel);
-  const thumbsWrap = el('div', { className: 'thumbs' });
-  photoSection.appendChild(thumbsWrap);
-
-  function renderThumbs() {
-    thumbsWrap.innerHTML = '';
-    form.products.forEach(p => {
-      const t = el('div', { className: 'thumb' });
-      t.appendChild(el('img', { src: p.image, alt: p.name }));
-      t.appendChild(el('div', { className: 'thumb-name' }, p.name));
-      t.appendChild(el('button', {
-        type: 'button', className: 'thumb-del',
-        onclick: () => { form.products = form.products.filter(x => x.id !== p.id); renderThumbs(); }
-      }, '×'));
-      thumbsWrap.appendChild(t);
-    });
-  }
-  renderThumbs();
-  body.appendChild(makeField('商品写真', photoSection, '在庫確認・照合に使います'));
-
-  container.appendChild(body);
-
-  const footer = el('div', { className: 'sheet-footer' });
-  footer.appendChild(el('button', {
-    type: 'button', className: 'btn-outline', style: { flex: 1, marginTop: 0 }, onclick: closeForm
-  }, 'キャンセル'));
-  const submitBtn = el('button', {
-    type: 'submit', className: 'btn-primary', style: { flex: 2 }
-  }, '保存する');
-  footer.appendChild(submitBtn);
-  container.appendChild(footer);
-
-  sheet.appendChild(container);
-  document.getElementById('formOverlay').classList.add('active');
-}
-
-function makeField(label, control, hint) {
-  const f = el('div', { className: 'field' });
-  const lbl = el('div', { className: 'field-label' }, label);
-  if (hint) lbl.appendChild(el('span', { className: 'field-hint' }, hint));
-  f.appendChild(lbl);
-  f.appendChild(control);
-  return f;
-}
-
-function closeForm() {
-  document.getElementById('formOverlay').classList.remove('active');
-  state.editTarget = null;
-}
-
-async function submitForm(form) {
-  if (!(form.name || '').trim()) {
-    window.alert('仕入先名を入力してください');
+  // 4位以下のリスト
+  var rest=items.slice(3);
+  var list=document.getElementById("sm-ranking-list");
+  if(!rest.length){
+    list.innerHTML='';
+    if(!items.length)podium.innerHTML='<p class="sm-ranking__empty" style="grid-column:1/-1">該当する実績がありません</p>';
     return;
   }
-  let { lat, lng } = form;
-  if ((lat == null || lng == null) && form.address) {
-    try {
-      const c = await geocode(form.address);
-      if (c) { lat = c.lat; lng = c.lng; }
-      else showToast('住所から位置を特定できませんでした');
-    } catch { showToast('位置情報の取得に失敗しました'); }
-  }
-  const record = Object.assign({}, form, { lat, lng });
-  const next = state.editTarget
-    ? state.suppliers.map(s => s.id === state.editTarget.id ? Object.assign({}, record, { id: s.id }) : s)
-    : state.suppliers.concat([Object.assign({}, record, { id: uid() })]);
-  state.suppliers = next;
-  try {
-    await apiPut(next);
-    showToast(state.editTarget ? '更新しました' : '登録しました');
-  } catch {
-    showToast('サーバーへの保存に失敗しました');
-  }
-  closeForm();
-  renderView(state.currentTab);
+  list.innerHTML=rest.map(function(item,i){
+    var rank=i+4;
+    var catMeta=CATEGORY_META[item.cat];
+    return'<div class="sm-ranking__row" data-rk-fid="'+(item.fid||"")+'">'+
+      '<div class="sm-ranking__rank">'+rank+'</div>'+
+      '<div class="sm-ranking__name">'+escH(item.name)+(catMeta?'<span class="sm-ranking__badge" style="background:'+catMeta.hex+'">'+escH(item.cat)+'</span>':'')+'</div>'+
+      '<div class="sm-ranking__date">'+escH(item.sub)+'</div>'+
+      '<div class="sm-ranking__sales">'+fmtMan(item.sales)+' 万円</div>'+
+    '</div>';
+  }).join("");
 }
 
-async function handleDelete(id) {
-  if (!window.confirm('この仕入先を削除しますか？')) return;
-  state.suppliers = state.suppliers.filter(s => s.id !== id);
-  try {
-    await apiPut(state.suppliers);
-    showToast('削除しました');
-  } catch {
-    showToast('保存に失敗しました');
-  }
-  renderView(state.currentTab);
-}
-
-function escapeHtml(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
-}
-function escapeAttr(s) { return escapeHtml(s); }
-
-async function init() {
-  document.querySelectorAll('.tab').forEach(b => {
-    b.onclick = () => setTab(b.dataset.tab);
+function bindRankingEvents(){
+  ["rk-year","rk-month"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.addEventListener("change",renderRanking);
   });
-  document.getElementById('btnAdd').onclick = () => openForm(null);
-  document.getElementById('detailOverlay').onclick = e => {
-    if (e.target.id === 'detailOverlay') closeDetail();
-  };
-  try {
-    const data = await apiGet();
-    if (data && data.length > 0) {
-      state.suppliers = data;
-    } else {
-      state.suppliers = SEED;
-      try { await apiPut(SEED); } catch {}
+  document.querySelectorAll(".sm-rk-tab").forEach(function(tab){
+    tab.addEventListener("click",function(){
+      rkMode=tab.getAttribute("data-rk");
+      document.querySelectorAll(".sm-rk-tab").forEach(function(t){t.classList.remove("is-active");});
+      tab.classList.add("is-active");
+      renderRanking();
+    });
+  });
+  function onRkClick(e){
+    var row=e.target.closest("[data-rk-fid]");
+    if(row&&row.getAttribute("data-rk-fid"))selectFacility(row.getAttribute("data-rk-fid"),true);
+  }
+  document.getElementById("sm-rk-podium").addEventListener("click",onRkClick);
+  document.getElementById("sm-ranking-list").addEventListener("click",onRkClick);
+}
+
+function bindEvents(){
+  document.getElementById("sm-search").addEventListener("input",function(e){state.search=e.target.value;renderTable();renderMarkers();});
+  document.getElementById("sm-pref-filter").addEventListener("change",function(e){state.prefecture=e.target.value;renderTable();renderMarkers();});
+  document.getElementById("sm-cat-filter").addEventListener("click",function(e){
+    var chip=e.target.closest(".sm-chip");if(!chip)return;
+    var cat=chip.getAttribute("data-cat");
+    if(state.activeCategories.has(cat))state.activeCategories.delete(cat);else state.activeCategories.add(cat);
+    renderFilterControls();renderTable();renderMarkers();
+  });
+  document.getElementById("sm-clear-filters").addEventListener("click",function(){
+    state.search="";state.prefecture="all";state.activeCategories=new Set(CATEGORY_ORDER);
+    document.getElementById("sm-search").value="";
+    renderFilterControls();renderTable();renderMarkers();
+  });
+  document.querySelectorAll("table.sm-table thead th[data-key]").forEach(function(th){
+    th.addEventListener("click",function(){
+      var key=th.getAttribute("data-key");
+      if(state.sortKey===key){state.sortDir=state.sortDir==="asc"?"desc":"asc";}
+      else{state.sortKey=key;state.sortDir=(key==="sales"||key==="recordCount"||key==="lastDate")?"desc":"asc";}
+      renderTable();
+    });
+  });
+  document.getElementById("sm-tbody").addEventListener("click",function(e){
+    var ab=e.target.closest("[data-action]");var row=e.target.closest("tr[data-id]");if(!row)return;
+    var id=row.getAttribute("data-id");
+    if(ab){
+      var action=ab.getAttribute("data-action");
+      if(action==="history")openHistoryModal(id);
+      if(action==="edit")openModal(id);
+      if(action==="delete"){var f=state.facilities.find(function(x){return x.id===id;});confirmDialog("拠点を削除しますか？","「"+(f?f.facilityName:"")+"」と紐づく開催実績（"+recordsFor(id).length+"件）をすべて削除します。",function(){deleteFacility(id);});}
+      return;
     }
-  } catch (e) {
-    console.error(e);
-    state.suppliers = SEED;
-    const banner = el('div', { className: 'banner' }, 'データの読み込みに失敗しました');
-    document.getElementById('main').appendChild(banner);
-    setTimeout(() => banner.remove(), 5000);
-  }
-  document.getElementById('splash').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  setTab('map');
+    selectFacility(id,true);
+  });
+  document.getElementById("sm-tbody").addEventListener("keydown",function(e){if(e.key!=="Enter")return;var row=e.target.closest("tr[data-id]");if(row)selectFacility(row.getAttribute("data-id"),true);});
+  document.getElementById("sm-add-btn").addEventListener("click",function(){openModal(null);});
+  document.getElementById("sm-csv-export-facilities-btn").addEventListener("click",exportFacilitiesCsv);
+  document.getElementById("sm-csv-export-records-btn").addEventListener("click",exportRecordsCsv);
+  document.getElementById("sm-csv-import-btn").addEventListener("click",function(){document.getElementById("sm-csv-input").click();});
+  document.getElementById("sm-csv-input").addEventListener("change",function(e){var file=e.target.files[0];if(file)importCsv(file);e.target.value="";});
+  bindRankingEvents();
 }
 
-const GATE_PW = 'mondocolo2026';
-const GATE_KEY = 'supplier_map_auth';
-
-function checkGate() {
-  if (sessionStorage.getItem(GATE_KEY) === '1') {
-    startApp();
-    return;
-  }
-  document.getElementById('gate').style.display = 'flex';
-
-  const pwInput = document.getElementById('gatePw');
-  const btn = document.getElementById('gateBtn');
-  const err = document.getElementById('gateErr');
-
-  function tryLogin() {
-    if (pwInput.value === GATE_PW) {
-      sessionStorage.setItem(GATE_KEY, '1');
-      document.getElementById('gate').style.display = 'none';
-      startApp();
-    } else {
-      err.style.display = 'block';
-      pwInput.value = '';
-      pwInput.focus();
-    }
-  }
-
-  btn.onclick = tryLogin;
-  pwInput.onkeydown = e => { if (e.key === 'Enter') tryLogin(); };
-  pwInput.focus();
+/* =========================================================
+   起動
+========================================================= */
+async function init(){
+  await loadData();
+  document.getElementById("sm-loading").classList.add("sm-hidden");
+  document.getElementById("sm-app").classList.remove("sm-hidden");
+  initMap();
+  bindEvents();
+  renderAll();
 }
 
-function startApp() {
-  document.getElementById('splash').style.display = 'flex';
-  init();
-}
-
-checkGate();
+init();
+})();
 </script>
 </body>
 </html>
