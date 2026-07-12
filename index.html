@@ -242,7 +242,7 @@
 
     <p class="sm-footnote">
       ※「拠点」は施設の基本情報、「実績」は開催ごとの売上記録です。マルシェを開催したら拠点の<strong>時計アイコン</strong>から実績を追加してください。記録は削除されるまで蓄積されます。<br/>
-      ※ データはサーバー経由で安全に共有されています。アクセスには社内ログインが必要です。APIキーの入力は不要です。
+      ※ データはサーバー経由で安全に共有されています。アクセスには社内ログインが必要です。
     </p>
   </div>
 </main>
@@ -262,7 +262,7 @@
 /* =========================================================
    定数
 ========================================================= */
-var DATA_ENDPOINT = "/api/data"; // Cloudflare Pages Functions が JSONBin を中継
+var DATA_ENDPOINT = "/api/data"; 
 
 var CATEGORY_META = {
   "道の駅":{hex:"#8C5A3C",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg>'},
@@ -322,9 +322,7 @@ var SAMPLE_RECORDS = [
   {id:"r33",facilityId:"f24",date:"2025-11-15",sales:980,note:""},{id:"r34",facilityId:"f24",date:"2026-03-28",sales:1000,note:""}
 ];
 
-/* =========================================================
-   状態
-========================================================= */
+
 var state = {
   facilities:[], records:[],
   search:"", prefecture:"all", activeCategories:new Set(CATEGORY_ORDER),
@@ -332,9 +330,6 @@ var state = {
 };
 var map, markersById={};
 
-/* =========================================================
-   ユーティリティ
-========================================================= */
 function tierFor(s){for(var i=0;i<TIERS.length;i++){if(s<=TIERS[i].max)return TIERS[i];}return TIERS[TIERS.length-1];}
 function fmtMan(n){return Number(n||0).toLocaleString("ja-JP");}
 function uid(){if(window.crypto&&window.crypto.randomUUID)return window.crypto.randomUUID();return"id-"+Date.now()+"-"+Math.random().toString(16).slice(2);}
@@ -354,16 +349,11 @@ function setBadge(ok,msg){
   b.textContent=msg; b.className="sm-header__badge"+(ok?" is-ok":" is-err");
 }
 
-/* =========================================================
-   集計
-========================================================= */
+
 function recordsFor(fid){return state.records.filter(function(r){return r.facilityId===fid;});}
 function totalSalesFor(fid){return recordsFor(fid).reduce(function(s,r){return s+Number(r.sales||0);},0);}
 function lastDateFor(fid){var recs=recordsFor(fid);if(!recs.length)return null;return recs.reduce(function(a,b){return a.date>b.date?a:b;}).date;}
 
-/* =========================================================
-   データ取得・保存（サーバープロキシ経由。鍵はブラウザに渡らない）
-========================================================= */
 async function apiGet(){
   var resp=await fetch(DATA_ENDPOINT, {credentials:"same-origin"});
   if(!resp.ok)throw new Error("GET "+resp.status);
@@ -418,9 +408,7 @@ function updateMeta(){
   el.innerHTML="拠点数 "+state.facilities.length+" 件・実績 "+state.records.length+" 件<br/>最終更新 "+s;
 }
 
-/* =========================================================
-   フィルタ・ソート
-========================================================= */
+
 function getFiltered(){
   var q=state.search.trim().toLowerCase();
   var allCats=state.activeCategories.size===0||state.activeCategories.size===CATEGORY_ORDER.length;
@@ -442,9 +430,6 @@ function getSorted(list){
   });
 }
 
-/* =========================================================
-   統計
-========================================================= */
 function renderStats(){
   var list=state.facilities;
   var totalSales=state.records.reduce(function(s,r){return s+Number(r.sales||0);},0);
@@ -473,9 +458,6 @@ function statCard(label,value,sub,accent){
   return '<div class="sm-stat"><p class="sm-stat__label">'+label+'</p><p class="sm-stat__value'+(accent?' sm-stat__value--accent':'')+'">'+value+'</p>'+(sub?'<p class="sm-stat__sub">'+sub+'</p>':'')+'</div>';
 }
 
-/* =========================================================
-   フィルタUI
-========================================================= */
 function renderFilterControls(){
   var prefSel=document.getElementById("sm-pref-filter");
   var prefs=Array.from(new Set(state.facilities.map(function(f){return f.prefecture;}))).sort(function(a,b){return a.localeCompare(b,"ja");});
@@ -487,9 +469,6 @@ function renderFilterControls(){
   }).join("");
 }
 
-/* =========================================================
-   テーブル
-========================================================= */
 function renderTable(){
   var filtered=getSorted(getFiltered());
   document.getElementById("sm-result-line").textContent=filtered.length+" / "+state.facilities.length+" 拠点を表示中";
@@ -523,9 +502,6 @@ function iconPencil(){return'<svg width="14" height="14" viewBox="0 0 24 24" fil
 function iconTrash(){return'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';}
 function iconClock(){return'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';}
 
-/* =========================================================
-   地図
-========================================================= */
 function initMap(){
   map=L.map("sm-map",{scrollWheelZoom:true}).setView([36.4,138.0],7);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:18}).addTo(map);
@@ -564,9 +540,7 @@ document.addEventListener("click",function(e){
   var hb=e.target.closest("[data-history-id]");if(hb){openHistoryModal(hb.getAttribute("data-history-id"));return;}
 });
 
-/* =========================================================
-   モーダル: 拠点追加・編集
-========================================================= */
+ 
 function openModal(id){
   state.editingId=id||null;
   var f=id?state.facilities.find(function(x){return x.id===id;}):null;
@@ -652,9 +626,6 @@ async function deleteFacility(id){
   await persist();renderAll();showToast("拠点を削除しました");
 }
 
-/* =========================================================
-   モーダル: 開催実績
-========================================================= */
 function openHistoryModal(facilityId){
   var facility=state.facilities.find(function(f){return f.id===facilityId;});if(!facility)return;
   var overlay=document.createElement("div");
@@ -720,9 +691,6 @@ function bindHistoryModalEvents(facility,overlay){
   });
 }
 
-/* =========================================================
-   確認ダイアログ
-========================================================= */
 function confirmDialog(title,message,onConfirm){
   var overlay=document.createElement("div");overlay.className="sm-overlay";
   overlay.innerHTML='<div class="sm-modal sm-confirm"><p class="sm-modal__title">'+escH(title)+'</p><p>'+escH(message)+'</p><div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="cf-cancel" type="button">キャンセル</button><button class="sm-btn sm-btn--primary" id="cf-ok" type="button" style="background:#B23A2E;">削除する</button></div></div></div>';
@@ -732,9 +700,6 @@ function confirmDialog(title,message,onConfirm){
   document.getElementById("cf-ok").addEventListener("click",function(){overlay.remove();onConfirm();});
 }
 
-/* =========================================================
-   CSV
-========================================================= */
 function exportFacilitiesCsv(){
   var headers=["都道府県","施設名","カテゴリー","累計売上高(万円)","開催回数","直近開催日","施設電話番号","担当者名","緯度","経度"];
   var rows=[headers].concat(state.facilities.map(function(f){return[f.prefecture,f.facilityName,f.category,totalSalesFor(f.id),recordsFor(f.id).length,lastDateFor(f.id)||"",f.phone,f.contact,f.lat,f.lng];}));
@@ -772,9 +737,6 @@ function importCsv(file){
   },error:function(){showToast("CSVの読み込みに失敗しました","error");}});
 }
 
-/* =========================================================
-   一括描画 & イベントバインド
-========================================================= */
 function renderAll(){renderStats();renderFilterControls();renderTable();renderMarkers();updateMeta();}
 
 function bindEvents(){
@@ -819,9 +781,6 @@ function bindEvents(){
   document.getElementById("sm-csv-input").addEventListener("change",function(e){var file=e.target.files[0];if(file)importCsv(file);e.target.value="";});
 }
 
-/* =========================================================
-   起動
-========================================================= */
 async function init(){
   await loadData();
   document.getElementById("sm-loading").classList.add("sm-hidden");
