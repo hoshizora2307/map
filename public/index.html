@@ -94,26 +94,33 @@
   .sm-result-line{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
 
   /* ランキング */
-  .sm-ranking{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px 14px;margin-bottom:20px;}
-  .sm-ranking__header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .sm-ranking{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 14px;margin-bottom:20px;}
+  .sm-ranking__header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
   .sm-ranking__title{font-family:'Shippori Mincho',serif;font-size:16px;color:var(--pine);margin:0;font-weight:700;}
   .sm-ranking__filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .sm-ranking__select{font-family:inherit;font-size:12px;padding:5px 8px;border:1px solid var(--paper-line);border-radius:6px;background:var(--paper);color:var(--ink);}
-  .sm-ranking__list{display:flex;flex-direction:column;gap:6px;}
-  .sm-ranking__row{display:grid;grid-template-columns:32px 1fr auto auto;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--paper);border:1px solid transparent;cursor:pointer;transition:background .1s;}
+  .sm-rk-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .sm-rk-tab{font-size:12px;padding:6px 13px;border-radius:20px;border:1px solid var(--paper-line);background:#fff;color:var(--ink-soft);cursor:pointer;font-family:inherit;transition:all .12s;}
+  .sm-rk-tab.is-active{background:var(--pine);color:#fff;border-color:var(--pine);}
+  .sm-rk-podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+  .sm-rk-card{border-radius:10px;padding:14px 12px 12px;text-align:center;border:1px solid transparent;position:relative;}
+  .sm-rk-card--1{background:#FDF5E4;border-color:#E8C96A;}
+  .sm-rk-card--2{background:#F4F4F4;border-color:#C8C8C8;}
+  .sm-rk-card--3{background:#FBF0EA;border-color:#D4956A;}
+  .sm-rk-card__medal{font-size:22px;display:block;margin-bottom:4px;}
+  .sm-rk-card__name{font-size:12px;font-weight:700;color:var(--pine);display:block;margin-bottom:3px;word-break:break-all;line-height:1.4;}
+  .sm-rk-card__sub{font-size:10.5px;color:var(--ink-soft);display:block;margin-bottom:6px;}
+  .sm-rk-card__sales{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:var(--persimmon-deep);}
+  .sm-ranking__list{display:flex;flex-direction:column;gap:5px;}
+  .sm-ranking__row{display:grid;grid-template-columns:32px 1fr auto auto;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:var(--paper);border:1px solid transparent;cursor:pointer;transition:background .1s;}
   .sm-ranking__row:hover{background:#FAF7EF;border-color:var(--paper-line);}
-  .sm-ranking__row--gold{background:#FDF5E4;border-color:#E8C96A;}
-  .sm-ranking__row--silver{background:#F4F4F4;border-color:#C8C8C8;}
-  .sm-ranking__row--bronze{background:#FBF0EA;border-color:#D4956A;}
-  .sm-ranking__rank{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--ink-soft);text-align:center;}
-  .sm-ranking__rank--1{color:#C8A020;}
-  .sm-ranking__rank--2{color:#888;}
-  .sm-ranking__rank--3{color:#A0603A;}
-  .sm-ranking__name{font-size:13px;font-weight:600;color:var(--pine);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sm-ranking__rank{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--ink-soft);text-align:center;}
+  .sm-ranking__name{font-size:12.5px;font-weight:600;color:var(--pine);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .sm-ranking__date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);white-space:nowrap;}
-  .sm-ranking__sales{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--persimmon-deep);white-space:nowrap;}
+  .sm-ranking__sales{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--persimmon-deep);white-space:nowrap;}
   .sm-ranking__empty{font-size:13px;color:var(--ink-soft);text-align:center;padding:20px 0;}
   .sm-ranking__badge{font-size:10px;padding:2px 7px;border-radius:10px;color:#fff;margin-left:4px;vertical-align:middle;}
+  @media(max-width:600px){.sm-rk-podium{grid-template-columns:repeat(3,1fr);gap:6px;}.sm-rk-card__sales{font-size:13px;}}
 
   .sm-table-wrap{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);box-shadow:var(--shadow);overflow-x:auto;}
   table.sm-table{width:100%;border-collapse:collapse;min-width:1040px;}
@@ -157,7 +164,7 @@
 
   .sm-history{max-width:560px;}
   .sm-hist-list{max-height:240px;overflow-y:auto;border:1px solid var(--paper-line);border-radius:8px;margin:6px 0 16px;padding:2px 4px;}
-  .sm-hist-row{display:grid;grid-template-columns:96px 92px 1fr 32px;gap:8px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--paper-line);font-size:12.5px;}
+  .sm-hist-row{display:grid;grid-template-columns:96px 80px 100px 1fr 32px;gap:8px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--paper-line);font-size:12.5px;}
   .sm-hist-row:last-child{border-bottom:none;}
   .sm-hist-date{font-family:'JetBrains Mono',monospace;color:var(--ink-soft);}
   .sm-hist-sales{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--persimmon-deep);}
@@ -280,18 +287,19 @@
     <!-- ランキング -->
     <div class="sm-ranking">
       <div class="sm-ranking__header">
-        <p class="sm-ranking__title">🏆 単回売上ランキング</p>
+        <p class="sm-ranking__title">🏆 ランキング</p>
         <div class="sm-ranking__filters">
           <select id="rk-year" class="sm-ranking__select"><option value="all">全期間</option></select>
           <select id="rk-month" class="sm-ranking__select"><option value="all">全月</option></select>
-          <select id="rk-limit" class="sm-ranking__select">
-            <option value="5">TOP 5</option>
-            <option value="10" selected>TOP 10</option>
-            <option value="20">TOP 20</option>
-            <option value="0">全件</option>
-          </select>
         </div>
       </div>
+      <div class="sm-rk-tabs">
+        <button class="sm-rk-tab is-active" data-rk="single">単回売上高</button>
+        <button class="sm-rk-tab" data-rk="cumul">拠点累積売上高</button>
+        <button class="sm-rk-tab" data-rk="leader-single">軸リーダー単回売上高</button>
+        <button class="sm-rk-tab" data-rk="leader-cumul">軸リーダー累積売上高</button>
+      </div>
+      <div class="sm-rk-podium" id="sm-rk-podium"></div>
       <div class="sm-ranking__list" id="sm-ranking-list"></div>
     </div>
 
@@ -363,9 +371,9 @@ var CATEGORY_META = {
   "JA野菜直売所":{hex:"#3F7D6B",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-4 7-10 7-10s7 6 7 10a7 7 0 0 1-7 7z"/><path d="M11 20v-6"/></svg>'},
   "イベント":{hex:"#6B5CA5",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4"/><path d="M4 4h14l-3 4 3 4H4"/></svg>'},
   "高速SA":{hex:"#3E6B8A",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M5 11l1.5-4h11L19 11"/></svg>'},
-  "景水":{hex:"#2E7EA6",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6 8 4 12 4 15a8 8 0 0 0 16 0c0-3-2-7-8-13z"/></svg>'}
+  "星空イベント":{hex:"#2E7EA6",glyph:'<svg viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>'}
 };
-var CATEGORY_ORDER = ["道の駅","JA野菜直売所","イベント","高速SA","景水"];
+var CATEGORY_ORDER = ["道の駅","JA野菜直売所","イベント","高速SA","星空イベント"];
 var TIERS = [
   {max:300,color:"#34507A"},{max:600,color:"#5B7F66"},
   {max:1000,color:"#B08D57"},{max:1500,color:"#C8541E"},{max:Infinity,color:"#8B2E1F"}
@@ -791,6 +799,7 @@ function historyModalHtml(facility){
     return'<div class="sm-hist-row" data-rid="'+r.id+'">'+
       '<span class="sm-hist-date">'+escH(r.date)+'</span>'+
       '<span class="sm-hist-sales">'+fmtMan(r.sales)+' 万円</span>'+
+      '<span class="sm-hist-note" style="color:var(--indigo);font-size:12px;">'+escH(r.leader||"")+'</span>'+
       '<span class="sm-hist-note">'+escH(r.note||"")+'</span>'+
       '<button class="sm-icon-btn sm-icon-btn--danger" data-del-record="'+r.id+'" title="削除" aria-label="削除">'+iconTrash()+'</button>'+
     '</div>';
@@ -804,7 +813,8 @@ function historyModalHtml(facility){
         '<div class="sm-field"><label>開催日</label><input id="hf-date" type="date" value="'+todayStr()+'" /></div>'+
         '<div class="sm-field"><label>売上高（万円）</label><input id="hf-sales" type="number" min="0" step="1" placeholder="850" /></div>'+
       '</div>'+
-      '<div class="sm-field"><label>メモ・記録者名（任意）</label><input id="hf-note" type="text" placeholder="例：雨天で客足少なめ／記録：佐藤" /></div>'+
+      '<div class="sm-field"><label>軸リーダー（販売員名）</label><input id="hf-leader" type="text" placeholder="例：山田 太郎" /></div>'+
+      '<div class="sm-field"><label>メモ（任意）</label><input id="hf-note" type="text" placeholder="例：雨天で客足少なめ" /></div>'+
       '<button class="sm-btn sm-btn--primary" id="hf-add" type="button">実績を追加</button>'+
     '</div>'+
     '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="hf-close" type="button">閉じる</button></div></div>'+
@@ -816,10 +826,11 @@ function bindHistoryModalEvents(facility,overlay){
   overlay.querySelector("#hf-add").addEventListener("click",async function(){
     var date=overlay.querySelector("#hf-date").value;
     var sales=Number(overlay.querySelector("#hf-sales").value);
+    var leader=overlay.querySelector("#hf-leader").value.trim();
     var note=overlay.querySelector("#hf-note").value.trim();
     if(!date){showToast("開催日を入力してください","error");return;}
     if(!isFinite(sales)||sales<0){showToast("売上高は0以上の数値で入力してください","error");return;}
-    state.records.push({id:uid(),facilityId:facility.id,date:date,sales:sales,note:note});
+    state.records.push({id:uid(),facilityId:facility.id,date:date,sales:sales,leader:leader,note:note});
     await persist();renderAll();showToast("実績を記録しました");
     overlay.innerHTML=historyModalHtml(facility);bindHistoryModalEvents(facility,overlay);
   });
@@ -896,29 +907,30 @@ function renderAll(){renderStats();renderFilterControls();renderTable();renderMa
 /* =========================================================
    ランキング
 ========================================================= */
+var rkMode="single";
+
 function renderRanking(){
   var yearSel=document.getElementById("rk-year");
   var monthSel=document.getElementById("rk-month");
-  var limitSel=document.getElementById("rk-limit");
   if(!yearSel)return;
 
   var selYear=yearSel.value;
   var selMonth=monthSel.value;
-  var limit=parseInt(limitSel.value)||0;
 
-  // 年の選択肢を動的生成
+  // 年の選択肢
   var years=Array.from(new Set(state.records.map(function(r){return r.date.slice(0,4);}))).sort().reverse();
   var curYear=yearSel.value;
   yearSel.innerHTML='<option value="all">全期間</option>'+years.map(function(y){return'<option value="'+y+'"'+(y===curYear?' selected':'')+'>'+y+'年</option>';}).join("");
   yearSel.value=curYear;
 
-  // 月の選択肢（年が選ばれているときだけ有効）
+  // 月の選択肢
   if(selYear!=="all"){
     var months=Array.from(new Set(state.records.filter(function(r){return r.date.slice(0,4)===selYear;}).map(function(r){return r.date.slice(5,7);}))).sort();
     var curMonth=monthSel.value;
     monthSel.innerHTML='<option value="all">全月</option>'+months.map(function(m){return'<option value="'+m+'"'+(m===curMonth?' selected':'')+'>'+parseInt(m)+'月</option>';}).join("");
     monthSel.value=curMonth;
     monthSel.disabled=false;
+    selMonth=monthSel.value;
   } else {
     monthSel.innerHTML='<option value="all">全月</option>';
     monthSel.disabled=true;
@@ -926,50 +938,104 @@ function renderRanking(){
     selMonth="all";
   }
 
-  // レコードを絞り込む
+  // 期間で絞り込んだレコード
   var filtered=state.records.filter(function(r){
     if(selYear!=="all"&&r.date.slice(0,4)!==selYear)return false;
     if(selMonth!=="all"&&r.date.slice(5,7)!==selMonth)return false;
     return true;
   });
 
-  // 売上降順でソート
-  var sorted=filtered.slice().sort(function(a,b){return Number(b.sales)-Number(a.sales);});
-  if(limit>0)sorted=sorted.slice(0,limit);
+  var items=[];
 
-  var list=document.getElementById("sm-ranking-list");
-  if(!sorted.length){
-    list.innerHTML='<p class="sm-ranking__empty">該当する実績がありません</p>';
-    return;
+  if(rkMode==="single"){
+    // 単回売上高
+    items=filtered.slice().sort(function(a,b){return Number(b.sales)-Number(a.sales);}).map(function(r){
+      var f=state.facilities.find(function(x){return x.id===r.facilityId;});
+      return{name:f?f.facilityName:"(削除済み)",sub:r.date+(r.leader?" · "+r.leader:""),sales:Number(r.sales),fid:r.facilityId,cat:f?f.category:""};
+    });
+  } else if(rkMode==="cumul"){
+    // 拠点累積売上高
+    var byFac={};
+    filtered.forEach(function(r){byFac[r.facilityId]=(byFac[r.facilityId]||0)+Number(r.sales);});
+    items=Object.keys(byFac).map(function(fid){
+      var f=state.facilities.find(function(x){return x.id===fid;});
+      return{name:f?f.facilityName:"(削除済み)",sub:recordsFor(fid).length+"回開催",sales:byFac[fid],fid:fid,cat:f?f.category:""};
+    }).sort(function(a,b){return b.sales-a.sales;});
+  } else if(rkMode==="leader-single"){
+    // 軸リーダー単回売上高
+    items=filtered.filter(function(r){return r.leader;}).slice().sort(function(a,b){return Number(b.sales)-Number(a.sales);}).map(function(r){
+      var f=state.facilities.find(function(x){return x.id===r.facilityId;});
+      return{name:r.leader,sub:(f?f.facilityName:"")+" · "+r.date,sales:Number(r.sales),fid:r.facilityId,cat:f?f.category:""};
+    });
+  } else if(rkMode==="leader-cumul"){
+    // 軸リーダー累積売上高
+    var byLeader={};
+    filtered.filter(function(r){return r.leader;}).forEach(function(r){
+      byLeader[r.leader]=(byLeader[r.leader]||0)+Number(r.sales);
+    });
+    var leaderCount={};
+    filtered.filter(function(r){return r.leader;}).forEach(function(r){leaderCount[r.leader]=(leaderCount[r.leader]||0)+1;});
+    items=Object.keys(byLeader).map(function(l){
+      return{name:l,sub:leaderCount[l]+"回出場",sales:byLeader[l],fid:null,cat:""};
+    }).sort(function(a,b){return b.sales-a.sales;});
   }
 
-  list.innerHTML=sorted.map(function(r,i){
-    var f=state.facilities.find(function(x){return x.id===r.facilityId;});
-    var fname=f?f.facilityName:"(削除済み拠点)";
-    var fcat=f?f.category:"";
-    var catMeta=CATEGORY_META[fcat];
-    var rank=i+1;
-    var rowCls="sm-ranking__row"+(rank===1?" sm-ranking__row--gold":rank===2?" sm-ranking__row--silver":rank===3?" sm-ranking__row--bronze":"");
-    var rankCls="sm-ranking__rank"+(rank<=3?" sm-ranking__rank--"+rank:"");
-    var medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":rank;
-    return'<div class="'+rowCls+'" data-record-fid="'+r.facilityId+'">'+
-      '<div class="'+rankCls+'">'+medal+'</div>'+
-      '<div class="sm-ranking__name">'+escH(fname)+(catMeta?'<span class="sm-ranking__badge" style="background:'+catMeta.hex+'">'+escH(fcat)+'</span>':'')+'</div>'+
-      '<div class="sm-ranking__date">'+escH(r.date)+'</div>'+
-      '<div class="sm-ranking__sales">'+fmtMan(r.sales)+' 万円</div>'+
+  // トップ3ポディウム
+  var podium=document.getElementById("sm-rk-podium");
+  var medals=["🥇","🥈","🥉"];
+  var cls=["sm-rk-card--1","sm-rk-card--2","sm-rk-card--3"];
+  if(items.length){
+    podium.innerHTML=items.slice(0,3).map(function(item,i){
+      return'<div class="sm-rk-card '+cls[i]+'" data-rk-fid="'+(item.fid||"")+'">'+
+        '<span class="sm-rk-card__medal">'+medals[i]+'</span>'+
+        '<span class="sm-rk-card__name">'+escH(item.name)+'</span>'+
+        '<span class="sm-rk-card__sub">'+escH(item.sub)+'</span>'+
+        '<span class="sm-rk-card__sales">'+fmtMan(item.sales)+' 万円</span>'+
+      '</div>';
+    }).join("");
+  } else {
+    podium.innerHTML='';
+  }
+
+  // 4位以下のリスト
+  var rest=items.slice(3);
+  var list=document.getElementById("sm-ranking-list");
+  if(!rest.length){
+    list.innerHTML='';
+    if(!items.length)podium.innerHTML='<p class="sm-ranking__empty" style="grid-column:1/-1">該当する実績がありません</p>';
+    return;
+  }
+  list.innerHTML=rest.map(function(item,i){
+    var rank=i+4;
+    var catMeta=CATEGORY_META[item.cat];
+    return'<div class="sm-ranking__row" data-rk-fid="'+(item.fid||"")+'">'+
+      '<div class="sm-ranking__rank">'+rank+'</div>'+
+      '<div class="sm-ranking__name">'+escH(item.name)+(catMeta?'<span class="sm-ranking__badge" style="background:'+catMeta.hex+'">'+escH(item.cat)+'</span>':'')+'</div>'+
+      '<div class="sm-ranking__date">'+escH(item.sub)+'</div>'+
+      '<div class="sm-ranking__sales">'+fmtMan(item.sales)+' 万円</div>'+
     '</div>';
   }).join("");
 }
 
 function bindRankingEvents(){
-  ["rk-year","rk-month","rk-limit"].forEach(function(id){
+  ["rk-year","rk-month"].forEach(function(id){
     var el=document.getElementById(id);
     if(el)el.addEventListener("change",renderRanking);
   });
-  document.getElementById("sm-ranking-list").addEventListener("click",function(e){
-    var row=e.target.closest("[data-record-fid]");
-    if(row)selectFacility(row.getAttribute("data-record-fid"),true);
+  document.querySelectorAll(".sm-rk-tab").forEach(function(tab){
+    tab.addEventListener("click",function(){
+      rkMode=tab.getAttribute("data-rk");
+      document.querySelectorAll(".sm-rk-tab").forEach(function(t){t.classList.remove("is-active");});
+      tab.classList.add("is-active");
+      renderRanking();
+    });
   });
+  function onRkClick(e){
+    var row=e.target.closest("[data-rk-fid]");
+    if(row&&row.getAttribute("data-rk-fid"))selectFacility(row.getAttribute("data-rk-fid"),true);
+  }
+  document.getElementById("sm-rk-podium").addEventListener("click",onRkClick);
+  document.getElementById("sm-ranking-list").addEventListener("click",onRkClick);
 }
 
 function bindEvents(){
