@@ -714,12 +714,33 @@ async function doGeocode(){
   var btn=document.getElementById("mf-geocode"),orig=btn.textContent;
   btn.textContent="検索中…";btn.disabled=true;
   try{
-    var resp=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(addr),{headers:{"Accept-Language":"ja"}});
-    var data=await resp.json();
-    if(data&&data.length){document.getElementById("mf-lat").value=Number(data[0].lat).toFixed(6);document.getElementById("mf-lng").value=Number(data[0].lon).toFixed(6);showToast("座標を取得しました");}
-    else{showToast("見つかりませんでした。別の表記でお試しください","error");}
-  }catch(e){showToast("検索に失敗しました。手動で座標を入力してください","error");}
-  finally{btn.textContent=orig;btn.disabled=false;}
+    // 国土地理院 住所検索API（日本の住所に最適）
+    var gsiUrl="https://msearch.gsi.go.jp/address-search/AddressSearch?q="+encodeURIComponent(addr);
+    var gsiResp=await fetch(gsiUrl);
+    var gsiData=await gsiResp.json();
+    if(gsiData&&gsiData.length){
+      var coords=gsiData[0].geometry.coordinates;
+      document.getElementById("mf-lng").value=Number(coords[0]).toFixed(6);
+      document.getElementById("mf-lat").value=Number(coords[1]).toFixed(6);
+      showToast("座標を取得しました（"+gsiData[0].properties.title+"）");
+      return;
+    }
+    // フォールバック: Nominatim
+    var nomUrl="https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=jp&q="+encodeURIComponent(addr);
+    var nomResp=await fetch(nomUrl,{headers:{"Accept-Language":"ja","User-Agent":"ShinshuMarche/1.0"}});
+    var nomData=await nomResp.json();
+    if(nomData&&nomData.length){
+      document.getElementById("mf-lat").value=Number(nomData[0].lat).toFixed(6);
+      document.getElementById("mf-lng").value=Number(nomData[0].lon).toFixed(6);
+      showToast("座標を取得しました");
+      return;
+    }
+    showToast("見つかりませんでした。住所をより詳しく入力してみてください","error");
+  }catch(e){
+    showToast("検索に失敗しました。手動で座標を入力してください","error");
+  }finally{
+    btn.textContent=orig;btn.disabled=false;
+  }
 }
 
 async function saveModal(){
