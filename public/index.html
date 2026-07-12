@@ -332,7 +332,7 @@
 </main>
 
 <footer class="sm-credit">
-  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span>制作・運用管理：MONDOCOLO STUDIO.</span>
+  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span style="display:block;margin-top:4px;">制作・運用管理：MONDOCOLO STUDIO.</span>
 </footer>
 
 <div id="sm-toast-host" class="sm-toast-host"></div>
@@ -852,11 +852,28 @@ function bindHistoryModalEvents(facility,overlay){
 ========================================================= */
 function confirmDialog(title,message,onConfirm){
   var overlay=document.createElement("div");overlay.className="sm-overlay";
-  overlay.innerHTML='<div class="sm-modal sm-confirm"><p class="sm-modal__title">'+escH(title)+'</p><p>'+escH(message)+'</p><div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="cf-cancel" type="button">キャンセル</button><button class="sm-btn sm-btn--primary" id="cf-ok" type="button" style="background:#B23A2E;">削除する</button></div></div></div>';
+  overlay.innerHTML='<div class="sm-modal sm-confirm"><p class="sm-modal__title">'+escH(title)+'</p><p>'+escH(message)+'</p>'+
+    '<div class="sm-field" style="margin-top:12px;"><label style="font-size:12px;color:var(--ink-soft);">管理者パスワード</label>'+
+    '<input id="cf-pw" type="password" placeholder="パスワードを入力" style="width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px;border:1px solid var(--paper-line);border-radius:7px;background:var(--paper);color:var(--ink);" /></div>'+
+    '<p id="cf-pw-err" style="color:#C8541E;font-size:12px;margin:4px 0 0;display:none;">パスワードが違います</p>'+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="cf-cancel" type="button">キャンセル</button><button class="sm-btn sm-btn--primary" id="cf-ok" type="button" style="background:#B23A2E;">削除する</button></div></div></div>';
   document.body.appendChild(overlay);
   overlay.addEventListener("click",function(e){if(e.target===overlay)overlay.remove();});
   document.getElementById("cf-cancel").addEventListener("click",function(){overlay.remove();});
-  document.getElementById("cf-ok").addEventListener("click",function(){overlay.remove();onConfirm();});
+  document.getElementById("cf-ok").addEventListener("click",function(){
+    var pw=document.getElementById("cf-pw").value;
+    if(pw!=="0120"){
+      document.getElementById("cf-pw-err").style.display="block";
+      document.getElementById("cf-pw").value="";
+      document.getElementById("cf-pw").focus();
+      return;
+    }
+    overlay.remove();onConfirm();
+  });
+  document.getElementById("cf-pw").addEventListener("keydown",function(e){
+    if(e.key==="Enter")document.getElementById("cf-ok").click();
+  });
+  setTimeout(function(){var el=document.getElementById("cf-pw");if(el)el.focus();},50);
 }
 
 /* =========================================================
