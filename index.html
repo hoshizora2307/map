@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>信州マルシェ 拠点管理ボード</title>
+<title>信州マルシェ 拠点管理ボード ver.1.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
@@ -439,7 +439,12 @@ var map, markersById={};
    ユーティリティ
 ========================================================= */
 function tierFor(s){for(var i=0;i<TIERS.length;i++){if(s<=TIERS[i].max)return TIERS[i];}return TIERS[TIERS.length-1];}
-function fmtMan(n){return Number(n||0).toLocaleString("ja-JP");}
+function fmtMan(n){
+  var v=Number(n||0);
+  if(v===0)return"0";
+  if(Number.isInteger(v))return v.toLocaleString("ja-JP");
+  return v.toLocaleString("ja-JP",{minimumFractionDigits:1,maximumFractionDigits:1});
+}
 function uid(){if(window.crypto&&window.crypto.randomUUID)return window.crypto.randomUUID();return"id-"+Date.now()+"-"+Math.random().toString(16).slice(2);}
 function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function escA(s){return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");}
@@ -552,7 +557,7 @@ function renderStats(){
   var list=state.facilities;
   var totalSales=state.records.reduce(function(s,r){return s+Number(r.sales||0);},0);
   var cnt=state.records.length;
-  var avg=list.length?Math.round(totalSales/list.length):0;
+  var avg=list.length?totalSales/list.length:0;
   var top=list.slice().sort(function(a,b){return totalSalesFor(b.id)-totalSalesFor(a.id);})[0];
   document.getElementById("sm-stats").innerHTML=
     statCard("拠点数",list.length+" 件","")+
@@ -562,7 +567,10 @@ function renderStats(){
     statCard("最高売上拠点",top?top.facilityName:"—",top?(fmtMan(totalSalesFor(top.id))+" 万円・"+top.prefecture):"");
 
   var byCat={};CATEGORY_ORDER.forEach(function(c){byCat[c]=0;});
-  list.forEach(function(f){byCat[f.category]=(byCat[f.category]||0)+totalSalesFor(f.id);});
+  state.records.forEach(function(r){
+    var f=state.facilities.find(function(x){return x.id===r.facilityId;});
+    if(f)byCat[f.category]=(byCat[f.category]||0)+Number(r.sales||0);
+  });
   var barH="",legH="";
   CATEGORY_ORDER.forEach(function(c){
     var pct=totalSales?(byCat[c]/totalSales*100):0,meta=CATEGORY_META[c];
