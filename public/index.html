@@ -164,6 +164,39 @@
 </head>
 <body>
 
+<!-- パスワードゲート -->
+<div id="sm-gate" style="
+  position:fixed;inset:0;z-index:9999;
+  background:#1F2D24;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+">
+  <div style="
+    background:#F7F3EA;border-radius:14px;
+    padding:40px 36px 32px;width:100%;max-width:360px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.4);
+    text-align:center;
+  ">
+    <p style="font-family:'Shippori Mincho',serif;font-size:22px;color:#1F2D24;margin:0 0 4px;font-weight:700;">信州<span style="color:#B08D57;">マルシェ</span></p>
+    <p style="font-size:12px;color:#5B5246;margin:0 0 24px;">拠点管理ボード — 社内専用</p>
+    <input id="gate-input" type="password" placeholder="パスワードを入力"
+      style="
+        width:100%;font-size:15px;padding:11px 14px;
+        border:1px solid rgba(31,45,36,0.2);border-radius:8px;
+        background:#fff;color:#2A2521;
+        font-family:inherit;box-sizing:border-box;margin-bottom:12px;
+      "
+    />
+    <p id="gate-error" style="color:#C8541E;font-size:12.5px;margin:0 0 10px;display:none;">パスワードが違います</p>
+    <button id="gate-btn" style="
+      width:100%;background:#C8541E;color:#fff;border:none;
+      border-radius:8px;padding:12px;font-size:14px;font-weight:700;
+      cursor:pointer;font-family:inherit;
+    ">ログイン</button>
+    <p style="font-size:11px;color:#5B5246;margin:16px 0 0;">© 2026 株式会社MONDOCOLO</p>
+  </div>
+</div>
+
 <header class="sm-header">
   <div class="sm-header__row">
     <div>
@@ -256,6 +289,28 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
+(function(){
+// パスワードゲート
+var PW = "mondocolo2026";
+var SK = "sm-auth-v1";
+function showGate(){
+  var gate=document.getElementById("sm-gate");
+  var btn=document.getElementById("gate-btn");
+  var inp=document.getElementById("gate-input");
+  var err=document.getElementById("gate-error");
+  if(sessionStorage.getItem(SK)==="ok"){gate.style.display="none";return;}
+  gate.style.display="flex";
+  function tryLogin(){
+    if(inp.value===PW){sessionStorage.setItem(SK,"ok");gate.style.display="none";}
+    else{err.style.display="block";inp.value="";inp.focus();}
+  }
+  btn.addEventListener("click",tryLogin);
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter")tryLogin();});
+  inp.focus();
+}
+showGate();
+}());
+
 (function(){
 "use strict";
 
