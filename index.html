@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>信州マルシェ 拠点管理ボード ver.1.0</title>
+<title>信州マルシェ 拠点管理ボード v1.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
@@ -135,6 +135,23 @@
   table.sm-table tbody tr:hover{background:#FAF7EF;}
   table.sm-table tbody tr.is-selected{background:#FBEEE2;box-shadow:inset 3px 0 0 var(--persimmon);}
   .sm-name-cell{font-weight:600;color:var(--pine);}
+  .sm-name-btn{background:none;border:none;padding:0;font-weight:700;color:var(--pine);font-size:13px;font-family:inherit;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:rgba(31,45,36,0.25);text-underline-offset:3px;}
+  .sm-name-btn:hover{color:var(--persimmon-deep);text-decoration-color:var(--persimmon);}
+
+  /* 開催履歴ビューモーダル */
+  .sm-hv-list{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;margin-bottom:8px;}
+  .sm-hv-card{border:1px solid var(--paper-line);border-radius:8px;background:var(--paper);cursor:pointer;transition:background .1s,border-color .1s;}
+  .sm-hv-card:hover{background:#FAF7EF;border-color:var(--gold);}
+  .sm-hv-card__head{display:flex;align-items:center;gap:10px;padding:11px 14px;}
+  .sm-hv-card__num{font-family:'Shippori Mincho',serif;font-size:13px;font-weight:700;color:var(--ink-soft);white-space:nowrap;}
+  .sm-hv-card__date{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);}
+  .sm-hv-card__leader{font-size:12.5px;color:var(--indigo);font-weight:600;}
+  .sm-hv-card__sales{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--persimmon-deep);margin-left:auto;white-space:nowrap;}
+  .sm-hv-detail{padding:0 14px 13px;border-top:1px solid var(--paper-line);margin-top:0;}
+  .sm-hv-detail-row{display:flex;gap:8px;font-size:12.5px;color:var(--ink-soft);margin-top:8px;align-items:baseline;}
+  .sm-hv-detail-label{font-size:11px;color:var(--ink-soft);min-width:72px;flex:none;}
+  .sm-hv-detail-value{color:var(--ink);font-weight:600;}
+  .sm-hv-empty{font-size:13px;color:var(--ink-soft);text-align:center;padding:28px 0;}
   .sm-pref-cell{color:var(--ink-soft);}
   .sm-sales-cell{font-family:'JetBrains Mono',monospace;font-weight:600;display:flex;align-items:center;gap:7px;white-space:nowrap;}
   .sm-tier-dot{width:9px;height:9px;border-radius:50%;flex:none;}
@@ -332,7 +349,7 @@
 </main>
 
 <footer class="sm-credit">
-  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span style="display:block;margin-top:4px;">制作・運用管理：MONDOCOLO STUDIO.</span>
+  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span style="display:block;margin-top:4px;">制作・運用管理：MONDOCOLO STUDIO. <span style="opacity:0.6;font-size:10px;">v1.0</span></span>
 </footer>
 
 <div id="sm-toast-host" class="sm-toast-host"></div>
@@ -615,7 +632,7 @@ function renderTable(){
     var tot=totalSalesFor(f.id),tier=tierFor(tot),cat=CATEGORY_META[f.category]||CATEGORY_META["道の駅"];
     var cnt=recordsFor(f.id).length,last=lastDateFor(f.id);
     return'<tr data-id="'+f.id+'" class="'+(f.id===state.selectedId?"is-selected":"")+'" tabindex="0">'+
-      '<td class="sm-name-cell">'+escH(f.facilityName)+'</td>'+
+      '<td class="sm-name-cell"><button class="sm-name-btn" data-action="viewhistory">'+escH(f.facilityName)+'</button></td>'+
       '<td class="sm-pref-cell">'+escH(f.prefecture)+'</td>'+
       '<td><span class="sm-badge" style="background:'+cat.hex+'">'+escH(f.category)+'</span></td>'+
       '<td><span class="sm-sales-cell"><span class="sm-tier-dot" style="background:'+tier.color+'"></span>'+fmtMan(tot)+'</span></td>'+
@@ -785,8 +802,87 @@ async function deleteFacility(id){
 }
 
 /* =========================================================
-   モーダル: 開催実績
+   モーダル: 開催履歴ビュー（施設名タップで開く）
 ========================================================= */
+function openHistoryViewModal(facilityId){
+  var facility=state.facilities.find(function(f){return f.id===facilityId;});
+  if(!facility)return;
+  var recs=recordsFor(facilityId).slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+  var overlay=document.createElement("div");
+  overlay.className="sm-overlay";
+  overlay.innerHTML=historyViewHtml(facility,recs,null);
+  document.body.appendChild(overlay);
+  bindHistoryViewEvents(facility,recs,overlay);
+  overlay.addEventListener("click",function(e){if(e.target===overlay)overlay.remove();});
+  function escKey(e){if(e.key==="Escape")overlay.remove();}
+  document.addEventListener("keydown",escKey);
+  overlay._escHandler=escKey;
+}
+
+function historyViewHtml(facility,recs,openIdx){
+  var tot=recs.reduce(function(s,r){return s+Number(r.sales||0);},0);
+  var cat=CATEGORY_META[facility.category]||CATEGORY_META["道の駅"];
+  var cardsHtml=recs.length?recs.map(function(r,i){
+    var num=i+1;
+    var isOpen=openIdx===i;
+    var detailHtml=isOpen?
+      '<div class="sm-hv-detail">'+
+        '<div class="sm-hv-detail-row"><span class="sm-hv-detail-label">開催日</span><span class="sm-hv-detail-value">'+escH(r.date)+'</span></div>'+
+        '<div class="sm-hv-detail-row"><span class="sm-hv-detail-label">売上高</span><span class="sm-hv-detail-value" style="color:var(--persimmon-deep);">'+fmtMan(r.sales)+' 万円</span></div>'+
+        (r.leader?'<div class="sm-hv-detail-row"><span class="sm-hv-detail-label">軸リーダー</span><span class="sm-hv-detail-value" style="color:var(--indigo);">'+escH(r.leader)+'</span></div>':'')+
+        (r.note?'<div class="sm-hv-detail-row"><span class="sm-hv-detail-label">メモ</span><span class="sm-hv-detail-value" style="font-weight:400;">'+escH(r.note)+'</span></div>':'')+
+      '</div>':'';
+    return'<div class="sm-hv-card'+(isOpen?' sm-hv-card--open':'')+'" data-hv-idx="'+i+'" style="'+(isOpen?'border-color:var(--gold);background:#FDF9F0;':'')+'">'+
+      '<div class="sm-hv-card__head">'+
+        '<span class="sm-hv-card__num">第'+num+'回</span>'+
+        '<span class="sm-hv-card__date">'+escH(r.date)+'</span>'+
+        (r.leader?'<span class="sm-hv-card__leader">'+escH(r.leader)+'</span>':'')+
+        '<span class="sm-hv-card__sales">'+fmtMan(r.sales)+' 万円</span>'+
+        '<span style="font-size:12px;color:var(--ink-soft);margin-left:4px;">'+(isOpen?'▲':'▼')+'</span>'+
+      '</div>'+
+      detailHtml+
+    '</div>';
+  }).join(""):'<p class="sm-hv-empty">まだ開催実績が記録されていません。<br/>時計アイコンから実績を登録してください。</p>';
+
+  return'<div class="sm-modal sm-history">'+
+    '<p class="sm-modal__title">'+escH(facility.facilityName)+'</p>'+
+    '<p class="sm-modal__sub">'+
+      '<span class="sm-badge" style="background:'+cat.hex+'">'+escH(facility.category)+'</span>　'+
+      escH(facility.prefecture)+'　累計 <strong>'+fmtMan(tot)+' 万円</strong>（'+recs.length+'回開催）'+
+    '</p>'+
+    '<div class="sm-hv-list">'+cardsHtml+'</div>'+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right">'+
+      '<button class="sm-btn sm-btn--ghost" id="hv-add" type="button">＋ 実績を記録</button>'+
+      '<button class="sm-btn sm-btn--ghost" id="hv-close" type="button">閉じる</button>'+
+    '</div></div>'+
+  '</div>';
+}
+
+function bindHistoryViewEvents(facility,recs,overlay){
+  overlay.querySelector("#hv-close").addEventListener("click",function(){
+    if(overlay._escHandler)document.removeEventListener("keydown",overlay._escHandler);
+    overlay.remove();
+  });
+  overlay.querySelector("#hv-add").addEventListener("click",function(){
+    if(overlay._escHandler)document.removeEventListener("keydown",overlay._escHandler);
+    overlay.remove();
+    openHistoryModal(facility.id);
+  });
+  overlay.querySelectorAll(".sm-hv-card").forEach(function(card){
+    card.addEventListener("click",function(e){
+      if(e.target.closest("button"))return;
+      var idx=parseInt(card.getAttribute("data-hv-idx"));
+      var updatedRecs=recordsFor(facility.id).slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+      var currentOpen=overlay.querySelector(".sm-hv-card--open");
+      var currentIdx=currentOpen?parseInt(currentOpen.getAttribute("data-hv-idx")):null;
+      var newIdx=(currentIdx===idx)?null:idx;
+      overlay.innerHTML=historyViewHtml(facility,updatedRecs,newIdx);
+      bindHistoryViewEvents(facility,updatedRecs,overlay);
+    });
+  });
+}
+
+
 function openHistoryModal(facilityId){
   var facility=state.facilities.find(function(f){return f.id===facilityId;});if(!facility)return;
   var overlay=document.createElement("div");
@@ -1090,6 +1186,7 @@ function bindEvents(){
     var id=row.getAttribute("data-id");
     if(ab){
       var action=ab.getAttribute("data-action");
+      if(action==="viewhistory")openHistoryViewModal(id);
       if(action==="history")openHistoryModal(id);
       if(action==="edit")openModal(id);
       if(action==="delete"){var f=state.facilities.find(function(x){return x.id===id;});confirmDialog("拠点を削除しますか？","「"+(f?f.facilityName:"")+"」と紐づく開催実績（"+recordsFor(id).length+"件）をすべて削除します。",function(){deleteFacility(id);});}
