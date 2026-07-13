@@ -919,14 +919,29 @@ function historyModalHtml(facility){
       '</div>'+
       '<div class="sm-field"><label>軸リーダー（販売員名）</label><input id="hf-leader" type="text" placeholder="例：山田 太郎" /></div>'+
       '<div class="sm-field"><label>メモ（任意）</label><input id="hf-note" type="text" placeholder="例：雨天で客足少なめ" /></div>'+
-      '<button class="sm-btn sm-btn--primary" id="hf-add" type="button">実績を追加</button>'+
+      '<input type="file" id="hf-airregi-input" accept=".csv" class="sm-hidden" />'+
+      '<div style="display:flex;gap:8px;margin-top:6px;">'+
+        '<button class="sm-btn sm-btn--primary" id="hf-add" type="button" style="flex:1;">実績を追加</button>'+
+        '<button class="sm-btn sm-btn--ghost" id="hf-airregi-btn" type="button" title="AirレジのCSVを読み込んで売上を自動入力">Airレジ取込</button>'+
+      '</div>'+
     '</div>'+
     '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="hf-close" type="button">閉じる</button></div></div>'+
   '</div>';
 }
 
 function bindHistoryModalEvents(facility,overlay){
-  overlay.querySelector("#hf-close").addEventListener("click",function(){closeHistoryModal(overlay);});
+  overlay.querySelector("#hf-airregi-btn").addEventListener("click",function(){
+    overlay.querySelector("#hf-airregi-input").click();
+  });
+  overlay.querySelector("#hf-airregi-input").addEventListener("change",async function(e){
+    var file=e.target.files[0];if(!file)return;
+    e.target.value="";
+    try{
+      var entries=await parseAirregiCsv(file);
+      if(!entries.length){showToast("売上データが見つかりませんでした","error");return;}
+      showAirregiPreview(entries,facility,overlay);
+    }catch(err){showToast("CSVの読み込みに失敗しました。Airレジの会計明細CSVを選択してください","error");}
+  });
   overlay.querySelector("#hf-add").addEventListener("click",async function(){
     var date=overlay.querySelector("#hf-date").value;
     var sales=Number(overlay.querySelector("#hf-sales").value);
@@ -952,8 +967,86 @@ function bindHistoryModalEvents(facility,overlay){
 }
 
 /* =========================================================
-   確認ダイアログ
+   Airレジ CSV 取込
 ========================================================= */
+function parseAirregiCsv(file){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        // Shift-JISデコード
+        var decoder=new TextDecoder("shift-jis");
+        var text=decoder.decode(e.target.result);
+        var result=Papa.parse(text,{header:false,skipEmptyLines:false});
+        var rows=result.data;
+        var salesByDate={};
+        // 1行目はヘッダーなのでスキップ。日付(col[1])がある行のみ集計
+        rows.slice(1).forEach(function(row){
+          var date=(row[1]||"").trim();
+          var totalStr=(row[6]||"").trim();
+          var total=parseInt(totalStr,10);
+          // 日付形式 YYYY/MM/DD かつ正の合計金額の行のみ
+          if(/^\d{4}\/\d{2}\/\d{2}$/.test(date)&&!isNaN(total)&&total>0){
+            var dateKey=date.replace(/\//g,"-");
+            salesByDate[dateKey]=(salesByDate[dateKey]||0)+total;
+          }
+        });
+        var entries=Object.keys(salesByDate).sort().map(function(d){
+          return{date:d,salesYen:salesByDate[d]};
+        });
+        resolve(entries);
+      }catch(err){reject(err);}
+    };
+    reader.onerror=reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function showAirregiPreview(entries,facility,parentOverlay){
+  var ov=document.createElement("div");
+  ov.className="sm-overlay";
+  ov.style.zIndex="1100";
+
+  var rowsHtml=entries.map(function(e){
+    var manYen=Math.round(e.salesYen)/10000;
+    var manStr=manYen.toLocaleString("ja-JP",{minimumFractionDigits:1,maximumFractionDigits:1});
+    return'<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--paper-line);flex-wrap:wrap;">'+
+      '<span style="font-family:\'JetBrains Mono\',monospace;font-size:13px;">'+escH(e.date)+'</span>'+
+      '<span style="font-family:\'JetBrains Mono\',monospace;font-weight:700;font-size:14px;color:var(--persimmon-deep);">'+manStr+' 万円</span>'+
+      '<span style="font-size:11px;color:var(--ink-soft);">（'+e.salesYen.toLocaleString("ja-JP")+'円）</span>'+
+      '<button class="sm-btn sm-btn--primary" data-ar-date="'+escA(e.date)+'" data-ar-sales="'+manYen+'" style="margin-left:auto;font-size:12px;padding:5px 12px;">この日付で取込</button>'+
+    '</div>';
+  }).join("");
+
+  ov.innerHTML='<div class="sm-modal" style="max-width:500px;">'+
+    '<p class="sm-modal__title">Airレジ取込確認</p>'+
+    '<p class="sm-modal__sub">「'+escH(facility.facilityName)+'」の実績として取り込みます。同じ日付で複数の会計がある場合は合算した金額になります。</p>'+
+    '<div style="border:1px solid var(--paper-line);border-radius:8px;overflow:hidden;margin-bottom:16px;">'+rowsHtml+'</div>'+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right">'+
+      '<button class="sm-btn sm-btn--ghost" id="ar-cancel">キャンセル</button>'+
+    '</div></div>'+
+  '</div>';
+
+  document.body.appendChild(ov);
+
+  ov.querySelector("#ar-cancel").addEventListener("click",function(){ov.remove();});
+  ov.addEventListener("click",function(e){if(e.target===ov)ov.remove();});
+
+  ov.querySelectorAll("[data-ar-date]").forEach(function(btn){
+    btn.addEventListener("click",async function(){
+      var date=btn.getAttribute("data-ar-date");
+      var sales=parseFloat(btn.getAttribute("data-ar-sales"));
+      state.records.push({id:uid(),facilityId:facility.id,date:date,sales:sales,leader:"",note:"Airレジ取込"});
+      await persist();
+      renderAll();
+      ov.remove();
+      // 親モーダルを更新
+      parentOverlay.innerHTML=historyModalHtml(facility);
+      bindHistoryModalEvents(facility,parentOverlay);
+      showToast("Airレジのデータを取り込みました（"+date+"）");
+    });
+  });
+}
 function confirmDialog(title,message,onConfirm){
   var overlay=document.createElement("div");overlay.className="sm-overlay";
   overlay.innerHTML='<div class="sm-modal sm-confirm"><p class="sm-modal__title">'+escH(title)+'</p><p>'+escH(message)+'</p>'+
