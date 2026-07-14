@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>信州マルシェ 拠点管理ボード v1.1</title>
+<title>信州マルシェ 拠点管理ボード v1.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
@@ -298,6 +298,7 @@
       </label>
       <button class="sm-btn sm-btn--ghost" id="sm-csv-export-facilities-btn">拠点CSV</button>
       <button class="sm-btn sm-btn--ghost" id="sm-csv-export-records-btn">実績ログCSV</button>
+      <button class="sm-btn sm-btn--ghost" id="sm-cat-manage-btn">カテゴリー管理</button>
       <button class="sm-btn sm-btn--primary" id="sm-add-btn">＋ 拠点を追加</button>
     </div>
 
@@ -349,7 +350,7 @@
 </main>
 
 <footer class="sm-credit">
-  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span style="display:block;margin-top:4px;">制作・運用管理：MONDOCOLO STUDIO. <span style="opacity:0.6;font-size:10px;">v1.1</span></span>
+  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span style="display:block;margin-top:4px;">制作・運用管理：MONDOCOLO STUDIO. <span style="opacity:0.6;font-size:10px;">v1.0</span></span>
 </footer>
 
 <div id="sm-toast-host" class="sm-toast-host"></div>
@@ -383,14 +384,44 @@ showGate();
 ========================================================= */
 var DATA_ENDPOINT = "/api/data"; // Cloudflare Pages Functions が JSONBin を中継
 
-var CATEGORY_META = {
-  "道の駅":{hex:"#8C5A3C",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg>'},
-  "JA野菜直売所":{hex:"#3F7D6B",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-4 7-10 7-10s7 6 7 10a7 7 0 0 1-7 7z"/><path d="M11 20v-6"/></svg>'},
-  "イベント":{hex:"#6B5CA5",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4"/><path d="M4 4h14l-3 4 3 4H4"/></svg>'},
-  "高速SA":{hex:"#3E6B8A",glyph:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M5 11l1.5-4h11L19 11"/></svg>'},
-  "星空イベント":{hex:"#2E7EA6",glyph:'<svg viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>'}
+/* カテゴリーのアイコングリフ（固定）新規カテゴリーはFALLBACK_GLYPHを使用 */
+var CATEGORY_GLYPHS = {
+  "道の駅":'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg>',
+  "JA野菜直売所":'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-4 7-10 7-10s7 6 7 10a7 7 0 0 1-7 7z"/><path d="M11 20v-6"/></svg>',
+  "イベント":'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4"/><path d="M4 4h14l-3 4 3 4H4"/></svg>',
+  "高速SA":'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M5 11l1.5-4h11L19 11"/></svg>',
+  "星空イベント":'<svg viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>'
 };
-var CATEGORY_ORDER = ["道の駅","JA野菜直売所","イベント","高速SA","星空イベント"];
+var FALLBACK_GLYPH='<svg viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="0"><circle cx="12" cy="12" r="6"/></svg>';
+
+/* カラーパレット（新規カテゴリー用） */
+var CAT_COLOR_PALETTE=["#8C5A3C","#3F7D6B","#6B5CA5","#3E6B8A","#2E7EA6","#C8541E","#5B7F66","#B08D57","#34507A","#8B2E1F","#2E8A6B","#7A3060","#5A7A30","#A05020","#306090"];
+
+/* デフォルトカテゴリー */
+var DEFAULT_CATEGORIES=[
+  {name:"道の駅",hex:"#8C5A3C"},
+  {name:"JA野菜直売所",hex:"#3F7D6B"},
+  {name:"イベント",hex:"#6B5CA5"},
+  {name:"高速SA",hex:"#3E6B8A"},
+  {name:"星空イベント",hex:"#2E7EA6"}
+];
+
+/* 動的に更新される変数（recomputeCategories()で再計算） */
+var CATEGORY_META={};
+var CATEGORY_ORDER=[];
+
+function recomputeCategories(){
+  CATEGORY_META={};
+  CATEGORY_ORDER=[];
+  state.categories.forEach(function(c){
+    CATEGORY_META[c.name]={hex:c.hex, glyph:CATEGORY_GLYPHS[c.name]||FALLBACK_GLYPH};
+    CATEGORY_ORDER.push(c.name);
+  });
+  // activeCategories に新カテゴリーを追加
+  CATEGORY_ORDER.forEach(function(n){
+    if(!state.activeCategories.has(n)) state.activeCategories.add(n);
+  });
+}
 var TIERS = [
   {max:300,color:"#34507A"},{max:600,color:"#5B7F66"},
   {max:1000,color:"#B08D57"},{max:1500,color:"#C8541E"},{max:Infinity,color:"#8B2E1F"}
@@ -447,7 +478,8 @@ var SAMPLE_RECORDS = [
 ========================================================= */
 var state = {
   facilities:[], records:[],
-  search:"", prefecture:"all", activeCategories:new Set(CATEGORY_ORDER),
+  categories:DEFAULT_CATEGORIES.map(function(c){return Object.assign({},c);}),
+  search:"", prefecture:"all", activeCategories:new Set(DEFAULT_CATEGORIES.map(function(c){return c.name;})),
   sortKey:"sales", sortDir:"desc", selectedId:null, editingId:null
 };
 var map, markersById={};
@@ -511,10 +543,12 @@ async function loadData(){
     if(rec&&Array.isArray(rec.facilities)){
       state.facilities=rec.facilities;
       state.records=Array.isArray(rec.records)?rec.records:[];
+      if(Array.isArray(rec.categories)&&rec.categories.length) state.categories=rec.categories;
+      recomputeCategories();
     } else {
       state.facilities=SAMPLE_FACILITIES.map(function(f){return Object.assign({},f);});
       state.records=SAMPLE_RECORDS.map(function(r){return Object.assign({},r);});
-      await apiPut({facilities:state.facilities,records:state.records});
+      await apiPut({facilities:state.facilities,records:state.records,categories:state.categories});
     }
     setBadge(true,"接続済み");
   } catch(e){
@@ -527,7 +561,7 @@ async function loadData(){
 
 async function persist(){
   try{
-    await apiPut({facilities:state.facilities,records:state.records});
+    await apiPut({facilities:state.facilities,records:state.records,categories:state.categories});
     updateMeta();
     setBadge(true,"接続済み");
   } catch(e){
@@ -1048,6 +1082,107 @@ function showAirregiPreview(entries,facility,parentOverlay){
     });
   });
 }
+
+/* =========================================================
+   カテゴリー管理モーダル
+========================================================= */
+function openCategoryModal(){
+  var overlay=document.createElement("div");
+  overlay.className="sm-overlay";
+  overlay.innerHTML=buildCategoryModalHtml();
+  document.body.appendChild(overlay);
+  bindCategoryModalEvents(overlay);
+  overlay.addEventListener("click",function(e){if(e.target===overlay)overlay.remove();});
+  function escKey(e){if(e.key==="Escape")overlay.remove();}
+  document.addEventListener("keydown",escKey);
+  overlay._escKey=escKey;
+}
+
+function buildCategoryModalHtml(){
+  var listHtml=state.categories.map(function(c,i){
+    return'<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-bottom:1px solid var(--paper-line);">'+
+      '<span style="width:14px;height:14px;border-radius:50%;background:'+escA(c.hex)+';flex:none;display:inline-block;"></span>'+
+      '<span style="font-size:13px;font-weight:600;color:var(--pine);flex:1;">'+escH(c.name)+'</span>'+
+      (i>=5?'<button class="sm-icon-btn sm-icon-btn--danger" data-del-cat="'+i+'" title="削除（要パスワード）">'+iconTrash()+'</button>':'<span style="font-size:10px;color:var(--ink-soft);">デフォルト</span>')+
+    '</div>';
+  }).join("");
+
+  var paletteHtml=CAT_COLOR_PALETTE.map(function(hex){
+    return'<button type="button" data-color="'+hex+'" style="width:24px;height:24px;border-radius:50%;background:'+hex+';border:2px solid transparent;cursor:pointer;transition:transform .1s;" title="'+hex+'"></button>';
+  }).join("");
+
+  return'<div class="sm-modal" style="max-width:460px;">'+
+    '<p class="sm-modal__title">カテゴリー管理</p>'+
+    '<p class="sm-modal__sub">施設のカテゴリーを追加・削除できます。デフォルトの5つは削除できません。</p>'+
+    '<div style="border:1px solid var(--paper-line);border-radius:8px;overflow:hidden;margin-bottom:18px;">'+listHtml+'</div>'+
+    '<div style="background:var(--paper);border-radius:8px;padding:14px;">'+
+      '<p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;font-weight:600;">新しいカテゴリーを追加</p>'+
+      '<div class="sm-field"><label>カテゴリー名</label><input id="nc-name" type="text" placeholder="例：温泉施設" /></div>'+
+      '<div class="sm-field"><label>カラーを選択</label>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;" id="nc-palette">'+paletteHtml+'</div>'+
+        '<input type="hidden" id="nc-color" value="'+CAT_COLOR_PALETTE[0]+'" />'+
+      '</div>'+
+      '<button class="sm-btn sm-btn--primary" id="nc-add" type="button">追加する</button>'+
+    '</div>'+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right">'+
+      '<button class="sm-btn sm-btn--ghost" id="nc-close" type="button">閉じる</button>'+
+    '</div></div>'+
+  '</div>';
+}
+
+function bindCategoryModalEvents(overlay){
+  overlay.querySelector("#nc-close").addEventListener("click",function(){
+    if(overlay._escKey)document.removeEventListener("keydown",overlay._escKey);
+    overlay.remove();
+  });
+  // カラーパレット選択
+  overlay.querySelectorAll("[data-color]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      overlay.querySelectorAll("[data-color]").forEach(function(b){b.style.border="2px solid transparent";b.style.transform="";});
+      btn.style.border="2px solid var(--pine)";btn.style.transform="scale(1.2)";
+      overlay.querySelector("#nc-color").value=btn.getAttribute("data-color");
+    });
+  });
+  var firstBtn=overlay.querySelector("[data-color]");
+  if(firstBtn){firstBtn.style.border="2px solid var(--pine)";firstBtn.style.transform="scale(1.2)";}
+  // 追加
+  overlay.querySelector("#nc-add").addEventListener("click",async function(){
+    var name=overlay.querySelector("#nc-name").value.trim();
+    var hex=overlay.querySelector("#nc-color").value;
+    if(!name){showToast("カテゴリー名を入力してください","error");return;}
+    if(state.categories.find(function(c){return c.name===name;})){showToast("同じ名前のカテゴリーが既にあります","error");return;}
+    state.categories.push({name:name,hex:hex});
+    recomputeCategories();
+    await persist();
+    renderAll();
+    overlay.innerHTML=buildCategoryModalHtml();
+    bindCategoryModalEvents(overlay);
+    showToast("「"+name+"」を追加しました");
+  });
+  // 削除（パスワード確認付き）
+  overlay.querySelectorAll("[data-del-cat]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var idx=parseInt(btn.getAttribute("data-del-cat"));
+      var cat=state.categories[idx];
+      confirmDialog(
+        "カテゴリーを削除しますか？",
+        "「"+cat.name+"」を削除します。このカテゴリーの拠点は「道の駅」に変更されます。",
+        async function(){
+          var inUse=state.facilities.filter(function(f){return f.category===cat.name;});
+          inUse.forEach(function(f){f.category="道の駅";});
+          state.categories.splice(idx,1);
+          recomputeCategories();
+          await persist();
+          renderAll();
+          overlay.innerHTML=buildCategoryModalHtml();
+          bindCategoryModalEvents(overlay);
+          showToast("「"+cat.name+"」を削除しました");
+        }
+      );
+    });
+  });
+}
+
 function confirmDialog(title,message,onConfirm){
   var overlay=document.createElement("div");overlay.className="sm-overlay";
   overlay.innerHTML='<div class="sm-modal sm-confirm"><p class="sm-modal__title">'+escH(title)+'</p><p>'+escH(message)+'</p>'+
@@ -1290,6 +1425,7 @@ function bindEvents(){
   });
   document.getElementById("sm-tbody").addEventListener("keydown",function(e){if(e.key!=="Enter")return;var row=e.target.closest("tr[data-id]");if(row)selectFacility(row.getAttribute("data-id"),true);});
   document.getElementById("sm-add-btn").addEventListener("click",function(){openModal(null);});
+  document.getElementById("sm-cat-manage-btn").addEventListener("click",openCategoryModal);
   document.getElementById("sm-csv-export-facilities-btn").addEventListener("click",exportFacilitiesCsv);
   document.getElementById("sm-csv-export-records-btn").addEventListener("click",exportRecordsCsv);
   document.getElementById("sm-csv-import-btn").addEventListener("click",function(){document.getElementById("sm-csv-input").click();});
@@ -1302,6 +1438,7 @@ function bindEvents(){
 ========================================================= */
 async function init(){
   await loadData();
+  recomputeCategories();
   document.getElementById("sm-loading").classList.add("sm-hidden");
   document.getElementById("sm-app").classList.remove("sm-hidden");
   initMap();
