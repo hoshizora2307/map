@@ -298,6 +298,7 @@
       </label>
       <button class="sm-btn sm-btn--ghost" id="sm-csv-export-facilities-btn">拠点CSV</button>
       <button class="sm-btn sm-btn--ghost" id="sm-csv-export-records-btn">実績ログCSV</button>
+      <button class="sm-btn sm-btn--ghost" id="sm-backup-btn" title="このブラウザに保存されたバックアップから復元">🔄 復元</button>
       <button class="sm-btn sm-btn--ghost" id="sm-cat-manage-btn">カテゴリー管理</button>
       <button class="sm-btn sm-btn--primary" id="sm-add-btn">＋ 拠点を追加</button>
     </div>
@@ -537,31 +538,73 @@ async function apiPut(payload){
   return await resp.json();
 }
 
+/* =========================================================
+   ローカルバックアップ（localStorage）
+========================================================= */
+var BACKUP_KEY = "sm-backup-v1";
+var BACKUP_MAX = 5; // 最大保存世代数
+
+function saveBackup(data){
+  try{
+    var backups=loadBackups();
+    backups.unshift({
+      savedAt: new Date().toISOString(),
+      data: data
+    });
+    if(backups.length>BACKUP_MAX) backups=backups.slice(0,BACKUP_MAX);
+    localStorage.setItem(BACKUP_KEY, JSON.stringify(backups));
+  } catch(e){ /* localStorage容量不足などは無視 */ }
+}
+
+function loadBackups(){
+  try{
+    var s=localStorage.getItem(BACKUP_KEY);
+    return s?JSON.parse(s):[];
+  } catch(e){ return []; }
+}
+
 async function loadData(){
+  state._saveDisabled=false;
   try{
     var rec=await apiGet();
-    if(rec&&Array.isArray(rec.facilities)){
+    if(rec&&Array.isArray(rec.facilities)&&rec.facilities.length>0){
       state.facilities=rec.facilities;
       state.records=Array.isArray(rec.records)?rec.records:[];
       if(Array.isArray(rec.categories)&&rec.categories.length) state.categories=rec.categories;
       recomputeCategories();
-    } else {
+      // 正常に読み込めたらバックアップを保存
+      saveBackup({facilities:state.facilities,records:state.records,categories:state.categories});
+      setBadge(true,"接続済み");
+    } else if(!rec||rec.facilities===undefined||rec.facilities===null){
+      // Binが空 → 初回のみサンプルデータで初期化
       state.facilities=SAMPLE_FACILITIES.map(function(f){return Object.assign({},f);});
       state.records=SAMPLE_RECORDS.map(function(r){return Object.assign({},r);});
       await apiPut({facilities:state.facilities,records:state.records,categories:state.categories});
+      setBadge(true,"接続済み（初期データを作成しました）");
+    } else {
+      // 空配列など正常なデータ
+      state.facilities=rec.facilities;
+      state.records=Array.isArray(rec.records)?rec.records:[];
+      if(Array.isArray(rec.categories)&&rec.categories.length) state.categories=rec.categories;
+      recomputeCategories();
+      setBadge(true,"接続済み");
     }
-    setBadge(true,"接続済み");
   } catch(e){
-    setBadge(false,"接続エラー");
-    showToast("データの読み込みに失敗しました。時間をおいて再読み込みしてください","error");
-    state.facilities=SAMPLE_FACILITIES.map(function(f){return Object.assign({},f);});
-    state.records=SAMPLE_RECORDS.map(function(r){return Object.assign({},r);});
+    state._saveDisabled=true;
+    setBadge(false,"接続エラー — 保存不可");
+    showToast("⚠️ サーバーへの接続に失敗しました。表示はサンプルデータです。実データへの変更は保存されません。ページを再読み込みしてください","error");
+    // 接続エラー時はJSONBinを絶対に上書きしない。stateはデフォルト値のまま。
   }
 }
 
 async function persist(){
+  if(state._saveDisabled){
+    showToast("⚠️ 接続エラーのため保存できません。ページを再読み込みしてください","error");
+    return;
+  }
   try{
     await apiPut({facilities:state.facilities,records:state.records,categories:state.categories});
+    saveBackup({facilities:state.facilities,records:state.records,categories:state.categories});
     updateMeta();
     setBadge(true,"接続済み");
   } catch(e){
@@ -1084,8 +1127,71 @@ function showAirregiPreview(entries,facility,parentOverlay){
 }
 
 /* =========================================================
-   カテゴリー管理モーダル
+   バックアップ復元モーダル
 ========================================================= */
+function openBackupModal(){
+  var backups=loadBackups();
+  var overlay=document.createElement("div");
+  overlay.className="sm-overlay";
+
+  var listHtml="";
+  if(!backups.length){
+    listHtml='<p style="font-size:13px;color:var(--ink-soft);text-align:center;padding:20px 0;">このブラウザにバックアップがありません。<br/>アプリを開いてデータを正常に読み込んだ端末のバックアップが保存されます。</p>';
+  } else {
+    listHtml=backups.map(function(b,i){
+      var dt=new Date(b.savedAt);
+      var label=dt.getFullYear()+"/"+String(dt.getMonth()+1).padStart(2,"0")+"/"+String(dt.getDate()).padStart(2,"0")+
+        " "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
+      var fCount=Array.isArray(b.data.facilities)?b.data.facilities.length:0;
+      var rCount=Array.isArray(b.data.records)?b.data.records.length:0;
+      return'<div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--paper-line);flex-wrap:wrap;">'+
+        '<div style="flex:1;">'+
+          '<div style="font-family:\'JetBrains Mono\',monospace;font-size:13px;color:var(--pine);font-weight:600;">'+label+'</div>'+
+          '<div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">拠点 '+fCount+'件 · 実績 '+rCount+'件</div>'+
+        '</div>'+
+        '<button class="sm-btn sm-btn--primary" data-restore-idx="'+i+'" style="font-size:12px;padding:6px 12px;">この時点に復元</button>'+
+      '</div>';
+    }).join("");
+  }
+
+  overlay.innerHTML='<div class="sm-modal" style="max-width:500px;">'+
+    '<p class="sm-modal__title">🔄 バックアップから復元</p>'+
+    '<p class="sm-modal__sub">このブラウザに自動保存されたバックアップ（最大5件）から復元できます。復元するとサーバーのデータが上書きされます。</p>'+
+    '<div style="border:1px solid var(--paper-line);border-radius:8px;overflow:hidden;margin-bottom:16px;">'+listHtml+'</div>'+
+    '<div class="sm-modal__footer"><span style="font-size:11px;color:var(--ink-soft);">バックアップはこの端末のブラウザにのみ保存されています</span>'+
+      '<div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="bk-close">閉じる</button></div>'+
+    '</div>'+
+  '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",function(e){if(e.target===overlay)overlay.remove();});
+  overlay.querySelector("#bk-close").addEventListener("click",function(){overlay.remove();});
+
+  overlay.querySelectorAll("[data-restore-idx]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var idx=parseInt(btn.getAttribute("data-restore-idx"));
+      var backup=backups[idx];
+      var dt=new Date(backup.savedAt);
+      var label=dt.getFullYear()+"/"+String(dt.getMonth()+1).padStart(2,"0")+"/"+String(dt.getDate()).padStart(2,"0")+
+        " "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
+      confirmDialog(
+        "この時点のデータに復元しますか？",
+        label+"のバックアップに復元します。現在のサーバーデータは上書きされます。",
+        async function(){
+          state.facilities=backup.data.facilities||[];
+          state.records=backup.data.records||[];
+          if(Array.isArray(backup.data.categories)&&backup.data.categories.length) state.categories=backup.data.categories;
+          recomputeCategories();
+          state._saveDisabled=false;
+          await persist();
+          renderAll();
+          overlay.remove();
+          showToast("バックアップから復元しました（"+label+"）");
+        }
+      );
+    });
+  });
+}
 function openCategoryModal(){
   var overlay=document.createElement("div");
   overlay.className="sm-overlay";
@@ -1426,6 +1532,7 @@ function bindEvents(){
   document.getElementById("sm-tbody").addEventListener("keydown",function(e){if(e.key!=="Enter")return;var row=e.target.closest("tr[data-id]");if(row)selectFacility(row.getAttribute("data-id"),true);});
   document.getElementById("sm-add-btn").addEventListener("click",function(){openModal(null);});
   document.getElementById("sm-cat-manage-btn").addEventListener("click",openCategoryModal);
+  document.getElementById("sm-backup-btn").addEventListener("click",openBackupModal);
   document.getElementById("sm-csv-export-facilities-btn").addEventListener("click",exportFacilitiesCsv);
   document.getElementById("sm-csv-export-records-btn").addEventListener("click",exportRecordsCsv);
   document.getElementById("sm-csv-import-btn").addEventListener("click",function(){document.getElementById("sm-csv-input").click();});
