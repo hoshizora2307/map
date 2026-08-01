@@ -1399,48 +1399,53 @@ async function geocodeAddr(addr){
   return null;
 }
 function importTeleapoRecords(file){
-  Papa.parse(file,{header:true,skipEmptyLines:true,complete:async function(res){
-    var rows=res.data.filter(function(r){return (r["施設名"]||"").trim();});
-    if(!rows.length){showToast("データが見つかりませんでした","error");return;}
-    var groups={};
-    rows.forEach(function(r){var name=(r["施設名"]||"").trim();var k=normVenue(name);if(!groups[k])groups[k]={name:name,pref:(r["都道府県"]||"").trim(),addr:(r["所在地"]||"").trim(),phone:(r["電話番号"]||"").trim(),rows:[]};if(!groups[k].addr&&(r["所在地"]||"").trim())groups[k].addr=(r["所在地"]||"").trim();if(!groups[k].phone&&(r["電話番号"]||"").trim())groups[k].phone=(r["電話番号"]||"").trim();groups[k].rows.push(r);});
-    var gkeys=Object.keys(groups);
-    if(!confirm("約"+gkeys.length+"施設・"+rows.length+"件の実績を取り込みます。\n既存施設は名前で照合し、新規施設は住所から座標を自動取得します（数分かかることがあります）。\nよろしいですか？"))return;
-    var existing={};state.facilities.forEach(function(f){existing[normVenue(f.facilityName)]=f;});
-    var prog=document.createElement("div");prog.className="sm-overlay";
-    prog.innerHTML='<div class="sm-modal" style="max-width:440px;"><p class="sm-modal__title">📥 テレアポ実績を取込中…</p><p class="sm-modal__sub" id="imp-prog">準備中…</p><p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">閉じずにお待ちください。</p></div>';
-    document.body.appendChild(prog);
-    var setP=function(t){var e=document.getElementById("imp-prog");if(e)e.textContent=t;};
-    var newFac=0,matchFac=0,noGeo=0,addRec=0,skipRec=0,phoneSet=0,done=0;
-    for(var gi=0;gi<gkeys.length;gi++){
-      var g=groups[gkeys[gi]];done++;
-      setP(done+" / "+gkeys.length+" 施設　"+g.name);
-      var fac=existing[gkeys[gi]];
-      if(!fac){
-        var co=await geocodeAddr(g.addr||((g.pref||"")+" "+g.name));
-        var lat,lng;
-        if(co){lat=co.lat;lng=co.lng;}else{var cc=PREF_CENTER[g.pref]||[36.2,138.2];lat=cc[0];lng=cc[1];noGeo++;}
-        fac={id:uid(),prefecture:g.pref,facilityName:g.name,category:guessCategory(g.name),phone:g.phone||"",contact:"",lat:lat,lng:lng};if(g.phone)phoneSet++;
-        state.facilities.push(fac);existing[gkeys[gi]]=fac;newFac++;
-        await sleep(280);
-      }else{matchFac++;if(!fac.phone&&g.phone){fac.phone=g.phone;phoneSet++;}}
-      g.rows.forEach(function(r){
-        var date=(r["開催日"]||"").trim();if(!date)return;
-        var yenv=Number(String(r["売上円"]||"").replace(/[^0-9]/g,""))||0;
-        var man=yenv?Math.round(yenv/1000)/10:0;
-        var dup=state.records.some(function(x){return x.facilityId===fac.id&&x.date===date&&Number(x.sales||0)===man;});
-        if(dup){skipRec++;return;}
-        state.records.push({id:uid(),facilityId:fac.id,date:date,sales:man,leader:(r["軸リーダー"]||"").trim(),note:"テレアポ取込"});
-        addRec++;
-      });
-    }
-    setP("保存中…");
-    try{await persist();}catch(e){}
-    renderAll();
-    prog.remove();
-    showToast("取込完了：新規"+newFac+"・照合"+matchFac+"・実績"+addRec+"件・電話"+phoneSet+"件");
-    alert("取込が完了しました。\n\n新規施設："+newFac+"件\n既存に照合："+matchFac+"件\n実績を追加："+addRec+"件\n重複スキップ："+skipRec+"件\n座標が取れず県中心に仮置き："+noGeo+"件\n\n仮置きの施設は、地図で開いて『基本情報を編集』→住所検索で正しい座標に直せます。");
-  },error:function(){showToast("CSVの読み込みに失敗しました","error");}});
+  var box=document.createElement("div");box.className="sm-overlay";
+  box.innerHTML='<div class="sm-modal" style="max-width:470px;"><p class="sm-modal__title">📥 テレアポ実績の取込</p><div id="imp-body"><p class="sm-modal__sub">CSVを解析しています…</p></div></div>';
+  document.body.appendChild(box);
+  var body=function(){return box.querySelector("#imp-body");};
+  Papa.parse(file,{header:true,skipEmptyLines:true,transformHeader:function(h){return String(h).replace(/^\uFEFF/,"").replace(/"/g,"").trim();},
+    complete:function(res){
+      var rows=(res.data||[]).filter(function(r){return (r["施設名"]||"").trim();});
+      if(!rows.length){
+        var cols=(res.meta&&res.meta.fields)?res.meta.fields.join(" / "):"(不明)";
+        body().innerHTML='<p class="sm-modal__sub" style="color:var(--persimmon-deep);">有効なデータが見つかりませんでした。</p><p style="font-size:12px;color:var(--ink-soft);">読み取れた列名：'+escH(cols)+'</p><p style="font-size:12px;color:var(--ink-soft);margin-top:6px;">「施設名」の列が必要です。<b>テレアポ実績_取込用.csv</b> を選んでいるかご確認ください。</p><div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="imp-x" type="button">閉じる</button></div></div>';
+        box.querySelector("#imp-x").addEventListener("click",function(){box.remove();});
+        return;
+      }
+      var groups={};
+      rows.forEach(function(r){var name=(r["施設名"]||"").trim();var k=normVenue(name);if(!groups[k])groups[k]={name:name,pref:(r["都道府県"]||"").trim(),addr:(r["所在地"]||"").trim(),phone:(r["電話番号"]||"").trim(),rows:[]};if(!groups[k].addr&&(r["所在地"]||"").trim())groups[k].addr=(r["所在地"]||"").trim();if(!groups[k].phone&&(r["電話番号"]||"").trim())groups[k].phone=(r["電話番号"]||"").trim();groups[k].rows.push(r);});
+      var gkeys=Object.keys(groups);
+      body().innerHTML='<p class="sm-modal__sub"><b>'+gkeys.length+'施設・'+rows.length+'件</b>の実績を取り込みます。</p><p style="font-size:12px;color:var(--ink-soft);">既存施設は名前で照合、新規施設は住所から座標を自動取得します（数分かかることがあります）。</p><div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="imp-cancel" type="button">やめる</button><button class="sm-btn sm-btn--primary" id="imp-go" type="button">取り込み開始</button></div></div>';
+      box.querySelector("#imp-cancel").addEventListener("click",function(){box.remove();});
+      box.querySelector("#imp-go").addEventListener("click",function(){runTeleImport(groups,gkeys,rows.length,box,body);});
+    },
+    error:function(){body().innerHTML='<p class="sm-modal__sub" style="color:var(--persimmon-deep);">CSVの読み込みに失敗しました。</p><div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="imp-x2" type="button">閉じる</button></div></div>';var b=box.querySelector("#imp-x2");if(b)b.addEventListener("click",function(){box.remove();});}
+  });
+}
+async function runTeleImport(groups,gkeys,rowCount,box,body){
+  body().innerHTML='<p class="sm-modal__sub" id="imp-prog">準備中…</p><p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">閉じずにお待ちください。</p>';
+  var setP=function(t){var e=document.getElementById("imp-prog");if(e)e.textContent=t;};
+  var existing={};state.facilities.forEach(function(f){existing[normVenue(f.facilityName)]=f;});
+  var newFac=0,matchFac=0,noGeo=0,addRec=0,skipRec=0,phoneSet=0,done=0;
+  for(var gi=0;gi<gkeys.length;gi++){
+    var g=groups[gkeys[gi]];done++;
+    setP(done+" / "+gkeys.length+" 施設　"+g.name);
+    var fac=existing[gkeys[gi]];
+    if(!fac){
+      var co=await geocodeAddr(g.addr||((g.pref||"")+" "+g.name));
+      var lat,lng;
+      if(co){lat=co.lat;lng=co.lng;}else{var cc=PREF_CENTER[g.pref]||[36.2,138.2];lat=cc[0];lng=cc[1];noGeo++;}
+      fac={id:uid(),prefecture:g.pref,facilityName:g.name,category:guessCategory(g.name),phone:g.phone||"",contact:"",lat:lat,lng:lng};if(g.phone)phoneSet++;
+      state.facilities.push(fac);existing[gkeys[gi]]=fac;newFac++;
+      await sleep(250);
+    }else{matchFac++;if(!fac.phone&&g.phone){fac.phone=g.phone;phoneSet++;}}
+    g.rows.forEach(function(r){var date=(r["開催日"]||"").trim();if(!date)return;var yenv=Number(String(r["売上円"]||"").replace(/[^0-9]/g,""))||0;var man=yenv?Math.round(yenv/1000)/10:0;var dup=state.records.some(function(x){return x.facilityId===fac.id&&x.date===date&&Number(x.sales||0)===man;});if(dup){skipRec++;return;}state.records.push({id:uid(),facilityId:fac.id,date:date,sales:man,leader:(r["軸リーダー"]||"").trim(),note:"テレアポ取込"});addRec++;});
+  }
+  setP("保存中…");
+  try{await persist();}catch(e){}
+  renderAll();
+  body().innerHTML='<p class="sm-modal__sub">✅ 取込が完了しました。</p><div style="font-size:13px;line-height:1.9;margin-top:4px;">新規施設：<b>'+newFac+'</b>件<br>既存に照合：<b>'+matchFac+'</b>件<br>実績を追加：<b>'+addRec+'</b>件<br>電話番号を設定：<b>'+phoneSet+'</b>件<br>重複スキップ：'+skipRec+'件<br>座標が取れず県中心に仮置き：'+noGeo+'件</div><p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">仮置きの施設は、地図で開いて「基本情報を編集 → 住所検索」で正しい位置に直せます。</p><div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--primary" id="imp-done" type="button">閉じる</button></div></div>';
+  box.querySelector("#imp-done").addEventListener("click",function(){box.remove();});
 }
 
 function importCsv(file){
