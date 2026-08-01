@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>信州マルシェ 拠点管理ボード v1.0</title>
+<title>信州マルシェ 拠点・テレアポ統合ボード v1.02</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
@@ -28,6 +28,7 @@
   .sm-header__row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;max-width:1280px;margin:0 auto;}
   .sm-header__title{font-family:'Shippori Mincho',serif;font-weight:700;font-size:clamp(18px,4vw,26px);letter-spacing:0.06em;margin:0;white-space:nowrap;}
   .sm-header__title span{color:#E7C9A8;}
+  .sm-header__title .sm-header__ver{color:#C9D2C7;background:rgba(255,255,255,0.14);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.02em;padding:2px 9px;border-radius:20px;margin-left:10px;vertical-align:middle;}
   .sm-header__sub{margin:4px 0 0;font-size:12.5px;color:#C9D2C7;letter-spacing:0.04em;}
   .sm-header__meta{font-size:11.5px;color:#AEBBAC;text-align:right;line-height:1.6;}
   .sm-header__actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -209,6 +210,38 @@
     .sm-header{padding:18px 18px 16px;}.sm-main{padding:18px 16px 30px;}
     .sm-header__meta{text-align:left;}.sm-credit{padding:14px 16px;}
   }
+
+  /* === テレアポ統合 === */
+  .sm-call-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;display:inline-block;}
+  .sm-call-seiyaku{background:#DCEFE3;color:#2F8F5B;}
+  .sm-call-positive{background:#E4EEF6;color:#2B6EA3;}
+  .sm-call-consider{background:#EEF0E4;color:#6E7C33;}
+  .sm-call-hold{background:#F3EDDA;color:#A07A1E;}
+  .sm-call-absent{background:#ECEEEC;color:#6F7A71;}
+  .sm-call-reject{background:#F7E1DC;color:#B23A26;}
+  .sm-call-na{background:#ECECEC;color:#8A8A8A;}
+  .sm-tel-section{margin-top:14px;border-top:1px solid var(--paper-line);padding-top:12px;}
+  .sm-tel-title{font-size:12px;font-weight:700;color:var(--ink-soft);margin:0 0 8px;}
+  .sm-tb-section{margin-bottom:18px;}
+  .sm-tb-section h3{font-size:14px;margin:0 0 8px;color:var(--pine);font-family:'Shippori Mincho',serif;}
+  .sm-tb-prefhead{font-weight:700;font-size:13px;border-left:3px solid var(--persimmon);padding-left:8px;margin:12px 0 6px;}
+  .sm-follow-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--paper-line);flex-wrap:wrap;}
+  .sm-follow-row:last-child{border-bottom:none;}
+  .sm-fdate{font-weight:700;font-size:12px;background:#F0E6D2;color:#8B6B1E;border-radius:8px;padding:3px 8px;white-space:nowrap;}
+  .sm-fdate.over{background:#F7DDD5;color:#B23A26;}
+
+  /* === 統合版 追加スタイル === */
+  .sm-record-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(100deg,#FBF3E0,#F6E6C4);border:1px solid var(--gold);border-radius:12px;padding:12px 18px;margin:0 0 14px;box-shadow:var(--shadow);}
+  .sm-rb__crown{font-size:22px;line-height:1;}
+  .sm-rb__label{font-size:11.5px;font-weight:700;color:#8B6B1E;letter-spacing:0.06em;background:rgba(176,141,87,0.16);padding:3px 9px;border-radius:20px;}
+  .sm-rb__name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:19px;color:var(--persimmon-deep);}
+  .sm-rb__detail{font-size:13px;color:var(--ink-soft);}
+  .sm-pinmode{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:9px;font-size:12.5px;}
+  .sm-pinmode__label{font-weight:700;color:var(--ink-soft);}
+  .sm-pinmode label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-weight:600;}
+  .sm-legend-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;}
+  .sm-legend-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);}
+  .sm-legend-chip i{width:12px;height:12px;border-radius:3px;display:inline-block;flex:0 0 auto;}
 </style>
 </head>
 <body>
@@ -249,7 +282,7 @@
 <header class="sm-header">
   <div class="sm-header__row">
     <div>
-      <p class="sm-header__title">信州<span>マルシェ</span> 拠点管理ボード</p>
+      <p class="sm-header__title">信州<span>マルシェ</span> 拠点管理ボード<span class="sm-header__ver">ver.1.02</span></p>
       <p class="sm-header__sub">道の駅・JA野菜直売所・イベント・高速SA — 開催実績マップ &amp; 一覧（社内共有）</p>
     </div>
     <div class="sm-header__actions">
@@ -264,6 +297,8 @@
 
   <div id="sm-app" class="sm-hidden">
 
+    <div id="sm-record-banner" class="sm-record-banner" style="display:none;"></div>
+
     <section class="sm-stats" id="sm-stats"></section>
 
     <div class="sm-catbar-wrap">
@@ -275,14 +310,13 @@
     <div class="sm-map-card">
       <div id="sm-map"></div>
       <div class="sm-legend">
-        <p class="sm-legend__title">累計売上高（万円）でピンの色が変化</p>
-        <div class="sm-legend__grad">
-          <span style="background:var(--indigo)"></span><span style="background:var(--sage)"></span>
-          <span style="background:var(--gold)"></span><span style="background:var(--persimmon)"></span>
-          <span style="background:var(--persimmon-deep)"></span>
+        <div class="sm-pinmode">
+          <span class="sm-pinmode__label">ピンの基準</span>
+          <label><input type="radio" name="pinmode" value="single" checked/> 単回売上</label>
+          <label><input type="radio" name="pinmode" value="cumulative"/> 累計売上</label>
         </div>
-        <div class="sm-legend__range"><span>〜300</span><span>1,500〜</span></div>
-        <p class="sm-legend__note">ピンの大きさは累計売上の相対比較。アイコンは施設カテゴリーです。</p>
+        <div id="sm-legend-body"></div>
+        <p class="sm-legend__note">ピンの大きさは選択中の売上の相対比較。アイコンは施設カテゴリーです。</p>
       </div>
     </div>
 
@@ -296,9 +330,11 @@
         <input type="file" id="sm-csv-input" accept=".csv" class="sm-hidden" />
         <span class="sm-btn sm-btn--ghost" id="sm-csv-import-btn">CSV取込</span>
       </label>
+      <label class="sm-file-label"><input type="file" id="sm-tele-import-input" accept=".csv" class="sm-hidden" /><span class="sm-btn sm-btn--ghost" id="sm-tele-import-btn">📥 テレアポ実績取込</span></label>
       <button class="sm-btn sm-btn--ghost" id="sm-csv-export-facilities-btn">拠点CSV</button>
       <button class="sm-btn sm-btn--ghost" id="sm-csv-export-records-btn">実績ログCSV</button>
       <button class="sm-btn sm-btn--ghost" id="sm-backup-btn" title="このブラウザに保存されたバックアップから復元">🔄 復元</button>
+      <button class="sm-btn sm-btn--ghost" id="sm-teleboard-btn">📞 架電ボード</button>
       <button class="sm-btn sm-btn--ghost" id="sm-cat-manage-btn">カテゴリー管理</button>
       <button class="sm-btn sm-btn--primary" id="sm-add-btn">＋ 拠点を追加</button>
     </div>
@@ -351,7 +387,7 @@
 </main>
 
 <footer class="sm-credit">
-  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span style="display:block;margin-top:4px;">制作・運用管理：MONDOCOLO STUDIO. <span style="opacity:0.6;font-size:10px;">v1.0</span></span>
+  <span><b>© 2026 株式会社MONDOCOLO</b></span><span class="sm-credit__sep">|</span><span style="display:block;margin-top:4px;">制作・運用管理：MONDOCOLO STUDIO. <span style="opacity:0.6;font-size:10px;">v1.02 テレアポ統合</span></span>
 </footer>
 
 <div id="sm-toast-host" class="sm-toast-host"></div>
@@ -428,6 +464,21 @@ var TIERS = [
   {max:1000,color:"#B08D57"},{max:1500,color:"#C8541E"},{max:Infinity,color:"#8B2E1F"}
 ];
 
+/* === 統合版 追加設定：管理者パスワード・単回売上ティア === */
+var ADMIN_PASSWORD = "mondocolo-kanri";
+var _adminUnlocked = false;
+var SINGLE_TIERS = [
+  {max:10, color:"#7C94A8", label:"〜10万"},
+  {max:15, color:"#4E7CA6", label:"〜15万"},
+  {max:20, color:"#34507A", label:"〜20万"},
+  {max:30, color:"#3F7D6B", label:"〜30万"},
+  {max:40, color:"#5B7F66", label:"〜40万"},
+  {max:50, color:"#B08D57", label:"〜50万"},
+  {max:60, color:"#C8801E", label:"〜60万"},
+  {max:70, color:"#C8541E", label:"〜70万"},
+  {max:Infinity, color:"#8B2E1F", label:"70万〜"}
+];
+
 var SAMPLE_FACILITIES = [
   {id:"f1",prefecture:"長野県",facilityName:"道の駅 信州新町",category:"道の駅",phone:"026-262-0188",contact:"小林 直人",lat:36.5919,lng:138.0594},
   {id:"f2",prefecture:"長野県",facilityName:"道の駅 安曇野松川",category:"道の駅",phone:"0263-78-3001",contact:"田中 美咲",lat:36.4115,lng:137.8773},
@@ -481,7 +532,8 @@ var state = {
   facilities:[], records:[],
   categories:DEFAULT_CATEGORIES.map(function(c){return Object.assign({},c);}),
   search:"", prefecture:"all", activeCategories:new Set(DEFAULT_CATEGORIES.map(function(c){return c.name;})),
-  sortKey:"sales", sortDir:"desc", selectedId:null, editingId:null
+  sortKey:"sales", sortDir:"desc", selectedId:null, editingId:null,
+  calls:[], appointers:[], pinMode:"single"
 };
 var map, markersById={};
 
@@ -567,6 +619,8 @@ async function loadData(){
   state._saveDisabled=false;
   try{
     var rec=await apiGet();
+    state.calls=(rec&&Array.isArray(rec.calls))?rec.calls:[];
+    state.appointers=(rec&&Array.isArray(rec.appointers))?rec.appointers:[];
     if(rec&&Array.isArray(rec.facilities)&&rec.facilities.length>0){
       state.facilities=rec.facilities;
       state.records=Array.isArray(rec.records)?rec.records:[];
@@ -579,7 +633,7 @@ async function loadData(){
       // Binが空 → 初回のみサンプルデータで初期化
       state.facilities=SAMPLE_FACILITIES.map(function(f){return Object.assign({},f);});
       state.records=SAMPLE_RECORDS.map(function(r){return Object.assign({},r);});
-      await apiPut({facilities:state.facilities,records:state.records,categories:state.categories});
+      await apiPut({facilities:state.facilities,records:state.records,categories:state.categories,calls:state.calls,appointers:state.appointers});
       setBadge(true,"接続済み（初期データを作成しました）");
     } else {
       // 空配列など正常なデータ
@@ -603,8 +657,8 @@ async function persist(){
     return;
   }
   try{
-    await apiPut({facilities:state.facilities,records:state.records,categories:state.categories});
-    saveBackup({facilities:state.facilities,records:state.records,categories:state.categories});
+    await apiPut({facilities:state.facilities,records:state.records,categories:state.categories,calls:state.calls,appointers:state.appointers});
+    saveBackup({facilities:state.facilities,records:state.records,categories:state.categories,calls:state.calls,appointers:state.appointers});
     updateMeta();
     setBadge(true,"接続済み");
   } catch(e){
@@ -731,14 +785,65 @@ function iconClock(){return'<svg width="14" height="14" viewBox="0 0 24 24" fill
 /* =========================================================
    地図
 ========================================================= */
+
+/* === 統合版 追加関数 === */
+function maxSingleFor(fid){var r=recordsFor(fid);if(!r.length)return 0;return r.reduce(function(m,x){return Math.max(m,Number(x.sales||0));},0);}
+function pinValueFor(f){return state.pinMode==="single"?maxSingleFor(f.id):totalSalesFor(f.id);}
+function singleTierFor(v){for(var i=0;i<SINGLE_TIERS.length;i++){if(v<SINGLE_TIERS[i].max)return SINGLE_TIERS[i];}return SINGLE_TIERS[SINGLE_TIERS.length-1];}
+function pinTierFor(v){return state.pinMode==="single"?singleTierFor(v):tierFor(v);}
+function renderLegend(){
+  var el=document.getElementById("sm-legend-body");if(!el)return;
+  if(state.pinMode==="single"){
+    el.innerHTML='<p class="sm-legend__title">単回売上（最高）でピンの色が変化</p>'+
+      '<div class="sm-legend-chips">'+SINGLE_TIERS.map(function(t){return '<span class="sm-legend-chip"><i style="background:'+t.color+'"></i>'+t.label+'</span>';}).join("")+'</div>';
+  }else{
+    el.innerHTML='<p class="sm-legend__title">累計売上高（万円）でピンの色が変化</p>'+
+      '<div class="sm-legend__grad"><span style="background:var(--indigo)"></span><span style="background:var(--sage)"></span><span style="background:var(--gold)"></span><span style="background:var(--persimmon)"></span><span style="background:var(--persimmon-deep)"></span></div>'+
+      '<div class="sm-legend__range"><span>〜300</span><span>1,500〜</span></div>';
+  }
+}
+function renderRecordBanner(){
+  var el=document.getElementById("sm-record-banner");if(!el)return;
+  if(!state.records.length){el.style.display="none";el.innerHTML="";return;}
+  var top=state.records.reduce(function(a,b){return Number(b.sales||0)>Number(a.sales||0)?b:a;});
+  var f=state.facilities.find(function(x){return x.id===top.facilityId;});
+  var who=top.leader?top.leader:"担当者未記入";
+  el.style.display="";
+  el.innerHTML='<span class="sm-rb__crown">🏅</span>'+
+    '<span class="sm-rb__label">単回売上 記録保持者</span>'+
+    '<span class="sm-rb__name">'+escH(who)+' さん</span>'+
+    '<span class="sm-rb__detail">'+fmtMan(top.sales)+' 万円'+(f?'　＠'+escH(f.facilityName):'')+'（'+escH(top.date)+'）</span>';
+}
+function requireAdmin(fn){
+  if(_adminUnlocked){fn();return;}
+  smOverlay(adminGateHtml(),function(overlay,close){
+    var doTry=function(){
+      if(overlay.querySelector("#adm-pw").value===ADMIN_PASSWORD){_adminUnlocked=true;close();fn();}
+      else{overlay.querySelector("#adm-err").textContent="パスワードが違います";}
+    };
+    overlay.querySelector("#adm-ok").addEventListener("click",doTry);
+    overlay.querySelector("#adm-pw").addEventListener("keydown",function(e){if(e.key==="Enter")doTry();});
+    setTimeout(function(){var i=overlay.querySelector("#adm-pw");if(i)i.focus();},60);
+  });
+}
+function adminGateHtml(){
+  return '<div class="sm-modal" style="max-width:360px;">'+
+    '<p class="sm-modal__title">🔒 管理者パスワード</p>'+
+    '<p class="sm-modal__sub">この操作は管理者のみです。パスワードを入力してください。</p>'+
+    '<div class="sm-field"><input id="adm-pw" type="password" class="sm-input" placeholder="パスワード" autocomplete="off"/></div>'+
+    '<p id="adm-err" style="color:var(--persimmon-deep);font-size:12px;min-height:16px;margin:4px 0 0;"></p>'+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--primary" id="adm-ok" type="button">開く</button></div></div>'+
+  '</div>';
+}
+
 function initMap(){
   map=L.map("sm-map",{scrollWheelZoom:true}).setView([36.4,138.0],7);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:18}).addTo(map);
 }
 function buildIcon(f,isActive){
-  var tot=totalSalesFor(f.id),tier=tierFor(tot),cat=CATEGORY_META[f.category]||CATEGORY_META["道の駅"];
-  var vals=state.facilities.map(function(x){return totalSalesFor(x.id);}),min2=Math.min.apply(null,vals),max2=Math.max.apply(null,vals);
-  var size=30;if(max2>min2){size=26+Math.round((tot-min2)/(max2-min2)*20);}
+  var val=pinValueFor(f),tier=pinTierFor(val),cat=CATEGORY_META[f.category]||CATEGORY_META["道の駅"];
+  var vals=state.facilities.map(function(x){return pinValueFor(x);}),min2=Math.min.apply(null,vals),max2=Math.max.apply(null,vals);
+  var size=30;if(max2>min2){size=26+Math.round((val-min2)/(max2-min2)*20);}
   return L.divIcon({className:"marche-pin",html:'<div class="marche-pin__ring'+(isActive?" is-active":'')+'" style="--c:'+tier.color+';width:'+size+'px;height:'+size+'px;"><span class="marche-pin__glyph">'+cat.glyph+'</span></div>',iconSize:[size,size],iconAnchor:[size/2,size/2]});
 }
 function renderMarkers(){
@@ -756,7 +861,7 @@ function renderMarkers(){
 }
 function buildPopup(f){
   var cat=CATEGORY_META[f.category]||CATEGORY_META["道の駅"],tot=totalSalesFor(f.id),cnt=recordsFor(f.id).length;
-  return'<div class="sm-popup"><span class="sm-popup__cat" style="background:'+cat.hex+'">'+escH(f.category)+'</span><p class="sm-popup__name">'+escH(f.facilityName)+'</p><p class="sm-popup__row">'+escH(f.prefecture)+'</p><p class="sm-popup__row">累計売上: <span class="sm-popup__sales">'+fmtMan(tot)+' 万円</span>（'+cnt+'回開催）</p><p class="sm-popup__row">担当: '+escH(f.contact)+'（'+escH(f.phone)+'）</p><div class="sm-popup__links"><button class="sm-popup__edit" data-history-id="'+f.id+'">実績を記録</button><button class="sm-popup__edit" data-edit-id="'+f.id+'">基本情報を編集</button></div></div>';
+  return'<div class="sm-popup"><span class="sm-popup__cat" style="background:'+cat.hex+'">'+escH(f.category)+'</span><p class="sm-popup__name">'+escH(f.facilityName)+'</p><p class="sm-popup__row">'+escH(f.prefecture)+'</p><p class="sm-popup__row">累計売上: <span class="sm-popup__sales">'+fmtMan(tot)+' 万円</span>（'+cnt+'回開催）</p><p class="sm-popup__row">最高単回: <span class="sm-popup__sales">'+fmtMan(maxSingleFor(f.id))+' 万円</span></p><p class="sm-popup__row">担当: '+escH(f.contact)+'（'+escH(f.phone)+'）</p><div class="sm-popup__links"><button class="sm-popup__edit" data-history-id="'+f.id+'">実績を記録</button><button class="sm-popup__edit" data-edit-id="'+f.id+'">基本情報を編集</button></div></div>';
 }
 function selectFacility(id,panMap){
   state.selectedId=id;renderTable();renderMarkers();
@@ -928,7 +1033,9 @@ function historyViewHtml(facility,recs,openIdx){
       escH(facility.prefecture)+'　累計 <strong>'+fmtMan(tot)+' 万円</strong>（'+recs.length+'回開催）'+
     '</p>'+
     '<div class="sm-hv-list">'+cardsHtml+'</div>'+
+    telSectionHtml(facility)+
     '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right">'+
+      '<button class="sm-btn sm-btn--ghost" id="hv-call" type="button">📞 架電を記録</button>'+
       '<button class="sm-btn sm-btn--ghost" id="hv-add" type="button">＋ 実績を記録</button>'+
       '<button class="sm-btn sm-btn--ghost" id="hv-close" type="button">閉じる</button>'+
     '</div></div>'+
@@ -944,6 +1051,12 @@ function bindHistoryViewEvents(facility,recs,overlay){
     if(overlay._escHandler)document.removeEventListener("keydown",overlay._escHandler);
     overlay.remove();
     openHistoryModal(facility.id);
+  });
+  var _hvCall=overlay.querySelector("#hv-call");
+  if(_hvCall)_hvCall.addEventListener("click",function(){
+    if(overlay._escHandler)document.removeEventListener("keydown",overlay._escHandler);
+    overlay.remove();
+    openCallModal(facility.id);
   });
   overlay.querySelectorAll(".sm-hv-card").forEach(function(card){
     card.addEventListener("click",function(e){
@@ -1337,6 +1450,62 @@ function downloadCsv(rows,filename){
   var url=URL.createObjectURL(blob);var a=document.createElement("a");
   a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
+
+/* === テレアポ実績 一括取込（住所→座標を自動取得） === */
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function guessCategory(name){var n=name||"";if(/SA|サービスエリア|ＳＡ/.test(n))return"高速SA";if(/道の駅/.test(n))return"道の駅";if(/JA|ＪＡ|直売|ファーマーズ|産直|農産物/.test(n))return"JA野菜直売所";if(/マルシェ|祭り|イベント|フェス/.test(n))return"イベント";return"道の駅";}
+var PREF_CENTER={"千葉県":[35.6,140.1],"長野県":[36.2,138.0],"神奈川県":[35.44,139.4],"栃木県":[36.6,139.9],"静岡県":[34.98,138.4],"山梨県":[35.66,138.57],"茨城県":[36.34,140.45],"岐阜県":[35.39,136.72],"新潟県":[37.9,139.02],"埼玉県":[35.9,139.5],"群馬県":[36.39,139.06],"富山県":[36.7,137.21],"東京都":[35.69,139.69],"石川県":[36.59,136.63],"福井県":[35.94,136.19]};
+async function geocodeAddr(addr){
+  if(!addr)return null;
+  try{var r=await fetch("https://msearch.gsi.go.jp/address-search/AddressSearch?q="+encodeURIComponent(addr));var d=await r.json();if(d&&d.length){var c=d[0].geometry.coordinates;return{lat:Number(c[1]),lng:Number(c[0])};}}catch(e){}
+  try{var r2=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=jp&q="+encodeURIComponent(addr),{headers:{"Accept-Language":"ja"}});var d2=await r2.json();if(d2&&d2.length)return{lat:Number(d2[0].lat),lng:Number(d2[0].lon)};}catch(e){}
+  return null;
+}
+function importTeleapoRecords(file){
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete:async function(res){
+    var rows=res.data.filter(function(r){return (r["施設名"]||"").trim();});
+    if(!rows.length){showToast("データが見つかりませんでした","error");return;}
+    var groups={};
+    rows.forEach(function(r){var name=(r["施設名"]||"").trim();var k=normVenue(name);if(!groups[k])groups[k]={name:name,pref:(r["都道府県"]||"").trim(),addr:(r["所在地"]||"").trim(),phone:(r["電話番号"]||"").trim(),rows:[]};if(!groups[k].addr&&(r["所在地"]||"").trim())groups[k].addr=(r["所在地"]||"").trim();if(!groups[k].phone&&(r["電話番号"]||"").trim())groups[k].phone=(r["電話番号"]||"").trim();groups[k].rows.push(r);});
+    var gkeys=Object.keys(groups);
+    if(!confirm("約"+gkeys.length+"施設・"+rows.length+"件の実績を取り込みます。\n既存施設は名前で照合し、新規施設は住所から座標を自動取得します（数分かかることがあります）。\nよろしいですか？"))return;
+    var existing={};state.facilities.forEach(function(f){existing[normVenue(f.facilityName)]=f;});
+    var prog=document.createElement("div");prog.className="sm-overlay";
+    prog.innerHTML='<div class="sm-modal" style="max-width:440px;"><p class="sm-modal__title">📥 テレアポ実績を取込中…</p><p class="sm-modal__sub" id="imp-prog">準備中…</p><p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">閉じずにお待ちください。</p></div>';
+    document.body.appendChild(prog);
+    var setP=function(t){var e=document.getElementById("imp-prog");if(e)e.textContent=t;};
+    var newFac=0,matchFac=0,noGeo=0,addRec=0,skipRec=0,phoneSet=0,done=0;
+    for(var gi=0;gi<gkeys.length;gi++){
+      var g=groups[gkeys[gi]];done++;
+      setP(done+" / "+gkeys.length+" 施設　"+g.name);
+      var fac=existing[gkeys[gi]];
+      if(!fac){
+        var co=await geocodeAddr(g.addr||((g.pref||"")+" "+g.name));
+        var lat,lng;
+        if(co){lat=co.lat;lng=co.lng;}else{var cc=PREF_CENTER[g.pref]||[36.2,138.2];lat=cc[0];lng=cc[1];noGeo++;}
+        fac={id:uid(),prefecture:g.pref,facilityName:g.name,category:guessCategory(g.name),phone:g.phone||"",contact:"",lat:lat,lng:lng};if(g.phone)phoneSet++;
+        state.facilities.push(fac);existing[gkeys[gi]]=fac;newFac++;
+        await sleep(280);
+      }else{matchFac++;if(!fac.phone&&g.phone){fac.phone=g.phone;phoneSet++;}}
+      g.rows.forEach(function(r){
+        var date=(r["開催日"]||"").trim();if(!date)return;
+        var yenv=Number(String(r["売上円"]||"").replace(/[^0-9]/g,""))||0;
+        var man=yenv?Math.round(yenv/1000)/10:0;
+        var dup=state.records.some(function(x){return x.facilityId===fac.id&&x.date===date&&Number(x.sales||0)===man;});
+        if(dup){skipRec++;return;}
+        state.records.push({id:uid(),facilityId:fac.id,date:date,sales:man,leader:(r["軸リーダー"]||"").trim(),note:"テレアポ取込"});
+        addRec++;
+      });
+    }
+    setP("保存中…");
+    try{await persist();}catch(e){}
+    renderAll();
+    prog.remove();
+    showToast("取込完了：新規"+newFac+"・照合"+matchFac+"・実績"+addRec+"件・電話"+phoneSet+"件");
+    alert("取込が完了しました。\n\n新規施設："+newFac+"件\n既存に照合："+matchFac+"件\n実績を追加："+addRec+"件\n重複スキップ："+skipRec+"件\n座標が取れず県中心に仮置き："+noGeo+"件\n\n仮置きの施設は、地図で開いて『基本情報を編集』→住所検索で正しい座標に直せます。");
+  },error:function(){showToast("CSVの読み込みに失敗しました","error");}});
+}
+
 function importCsv(file){
   Papa.parse(file,{header:true,skipEmptyLines:true,complete:async function(results){
     var rows=results.data;if(!rows.length){showToast("CSVにデータが見つかりませんでした","error");return;}
@@ -1358,7 +1527,7 @@ function importCsv(file){
 /* =========================================================
    一括描画 & イベントバインド
 ========================================================= */
-function renderAll(){renderStats();renderFilterControls();renderTable();renderMarkers();renderRanking();updateMeta();}
+function renderAll(){renderRecordBanner();renderStats();renderFilterControls();renderTable();renderMarkers();renderLegend();renderRanking();updateMeta();}
 
 /* =========================================================
    ランキング
@@ -1531,18 +1700,148 @@ function bindEvents(){
   });
   document.getElementById("sm-tbody").addEventListener("keydown",function(e){if(e.key!=="Enter")return;var row=e.target.closest("tr[data-id]");if(row)selectFacility(row.getAttribute("data-id"),true);});
   document.getElementById("sm-add-btn").addEventListener("click",function(){openModal(null);});
-  document.getElementById("sm-cat-manage-btn").addEventListener("click",openCategoryModal);
-  document.getElementById("sm-backup-btn").addEventListener("click",openBackupModal);
+  document.getElementById("sm-cat-manage-btn").addEventListener("click",function(){requireAdmin(openCategoryModal);});
+  document.getElementById("sm-backup-btn").addEventListener("click",function(){requireAdmin(openBackupModal);});
+  document.getElementById("sm-teleboard-btn").addEventListener("click",openTeleboard);
+  document.querySelectorAll('input[name="pinmode"]').forEach(function(r){r.addEventListener("change",function(){if(r.checked){state.pinMode=r.value;renderMarkers();renderLegend();}});});
   document.getElementById("sm-csv-export-facilities-btn").addEventListener("click",exportFacilitiesCsv);
   document.getElementById("sm-csv-export-records-btn").addEventListener("click",exportRecordsCsv);
-  document.getElementById("sm-csv-import-btn").addEventListener("click",function(){document.getElementById("sm-csv-input").click();});
+  document.getElementById("sm-csv-import-btn").addEventListener("click",function(){requireAdmin(function(){document.getElementById("sm-csv-input").click();});});
   document.getElementById("sm-csv-input").addEventListener("change",function(e){var file=e.target.files[0];if(file)importCsv(file);e.target.value="";});
+  document.getElementById("sm-tele-import-btn").addEventListener("click",function(){requireAdmin(function(){document.getElementById("sm-tele-import-input").click();});});
+  document.getElementById("sm-tele-import-input").addEventListener("change",function(e){var file=e.target.files[0];if(file)importTeleapoRecords(file);e.target.value="";});
   bindRankingEvents();
 }
 
 /* =========================================================
    起動
 ========================================================= */
+
+/* =========================================================
+   テレアポ統合レイヤー（架電記録・フォロー・候補・アポインター）
+========================================================= */
+var CALL_RESULTS=[["seiyaku","\u25ce \u30a2\u30dd\u7372\u5f97\uff08\u6210\u7d04\uff09"],["positive","\u25cb \u524d\u5411\u304d\u30fb\u518d\u9023\u7d61"],["consider","\u25b3 \u691c\u8a0e\u4e2d"],["hold","\u4fdd\u7559\uff08\u62c5\u5f53\u8005\u4e0d\u5728\uff09"],["absent","\u4e0d\u5728\u30fb\u3064\u306a\u304c\u3089\u305a"],["reject","\u00d7 \u65ad\u308a"],["na","\u5bfe\u8c61\u5916"]];
+var CALL_REJECTS=["\u30b9\u30da\u30fc\u30b9\u30fb\u4f1a\u5834\u306e\u7a7a\u304d\u304c\u306a\u3044","\u65e2\u306b\u4ed6\u30a4\u30d9\u30f3\u30c8\u3067\u4e88\u5b9a\u304c\u57cb\u307e\u3063\u3066\u3044\u308b","\u51fa\u5e97\u6599\u30fb\u4e88\u7b97\u304c\u5408\u308f\u306a\u3044","\u6c7a\u88c1\u8005\u4e0d\u5728\u30fb\u793e\u5185\u691c\u8a0e\u304c\u5fc5\u8981","\u30a8\u30ea\u30a2\u30fb\u5ba2\u5c64\u304c\u5408\u308f\u306a\u3044","\u904e\u53bb\u5b9f\u65bd\u3067\u52b9\u679c\u304c\u8584\u304b\u3063\u305f","\u62c5\u5f53\u8005\u304c\u95a2\u5fc3\u306a\u3057","\u305d\u306e\u4ed6"];
+function callResultLabel(v){for(var i=0;i<CALL_RESULTS.length;i++){if(CALL_RESULTS[i][0]===v)return CALL_RESULTS[i][1];}return v;}
+function apName(id){var a=state.appointers.find(function(x){return x.id===id;});return a?a.name:"\u2014";}
+function callsForFacility(fid){return state.calls.filter(function(c){return c.facilityId===fid;}).sort(function(a,b){return b.date.localeCompare(a.date);});}
+function appointerStats(){return state.appointers.map(function(a){var cs=state.calls.filter(function(c){return c.appointerId===a.id;});var total=cs.length;var wins=cs.filter(function(c){return c.result==="seiyaku";}).length;var pos=cs.filter(function(c){return c.result==="positive";}).length;var rej=cs.filter(function(c){return c.result==="reject";}).length;return{name:a.name,total:total,wins:wins,pos:pos,rej:rej,rate:total?wins/total*100:0};});}
+function teleCandidates(){var cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-3);var cs=cutoff.getFullYear()+"-"+String(cutoff.getMonth()+1).padStart(2,"0")+"-"+String(cutoff.getDate()).padStart(2,"0");return state.facilities.map(function(f){return{f:f,last:lastDateFor(f.id),sales:totalSalesFor(f.id)};}).filter(function(x){return x.last&&x.last<cs;});}
+
+function smOverlay(html,onBind){
+  var overlay=document.createElement("div");overlay.className="sm-overlay";overlay.innerHTML=html;
+  document.body.appendChild(overlay);
+  function esc(e){if(e.key==="Escape")close();}
+  function close(){document.removeEventListener("keydown",esc);overlay.remove();}
+  overlay.addEventListener("click",function(e){if(e.target===overlay)close();});
+  document.addEventListener("keydown",esc);
+  if(onBind)onBind(overlay,close);
+}
+
+function telSectionHtml(facility){
+  var calls=callsForFacility(facility.id);
+  var body=calls.length?calls.slice(0,6).map(function(c){
+    return '<div class="sm-follow-row"><span class="sm-fdate">'+escH(c.date)+'</span><span class="sm-call-badge sm-call-'+c.result+'">'+callResultLabel(c.result)+'</span><span style="flex:1;min-width:0;font-size:12px;color:var(--ink-soft);">'+escH(apName(c.appointerId))+(c.memo?'\uff5c'+escH(c.memo):'')+'</span></div>';
+  }).join(""):'<p class="sm-hist-empty" style="padding:6px 0;">\u67b6\u96fb\u8a18\u9332\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093\u3002\u300c\ud83d\udcde \u67b6\u96fb\u3092\u8a18\u9332\u300d\u304b\u3089\u8ffd\u52a0\u3067\u304d\u307e\u3059\u3002</p>';
+  return '<div class="sm-tel-section"><p class="sm-tel-title">\ud83d\udcde \u30c6\u30ec\u30a2\u30dd\u5c65\u6b74\uff08'+calls.length+'\u4ef6\uff09</p>'+body+'</div>';
+}
+
+function openCallModal(facilityId){
+  var f=state.facilities.find(function(x){return x.id===facilityId;});if(!f)return;
+  smOverlay(callModalHtml(f),function(overlay,close){bindCallModal(f,overlay,close);});
+}
+function callModalHtml(f){
+  var calls=callsForFacility(f.id);
+  var listHtml=calls.length?calls.map(function(c){
+    return '<div class="sm-hist-row"><span class="sm-hist-date">'+escH(c.date)+'</span><span class="sm-call-badge sm-call-'+c.result+'">'+callResultLabel(c.result)+'</span><span class="sm-hist-note" style="color:var(--indigo);font-size:12px;">'+escH(apName(c.appointerId))+'</span><span class="sm-hist-note">'+escH(c.memo||"")+'</span><button class="sm-icon-btn sm-icon-btn--danger" data-del-call="'+c.id+'" title="\u524a\u9664">'+iconTrash()+'</button>'+(c.rejectReason?'<span class="sm-hist-note" style="flex-basis:100%;color:var(--persimmon-deep);font-size:12px;">\u65ad\u308a\u7406\u7531\uff1a'+escH(c.rejectReason)+'</span>':'')+(c.nextDate?'<span class="sm-hist-note" style="flex-basis:100%;color:var(--gold);font-size:12px;">\u6b21\u56de\u4e88\u5b9a\uff1a'+escH(c.nextDate)+(c.followDone?'\uff08\u5bfe\u5fdc\u6e08\uff09':'')+'</span>':'')+'</div>';
+  }).join(""):'<p class="sm-hist-empty">\u307e\u3060\u67b6\u96fb\u8a18\u9332\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u4e0b\u306e\u30d5\u30a9\u30fc\u30e0\u304b\u3089\u8a18\u9332\u3057\u3066\u304f\u3060\u3055\u3044\u3002</p>';
+  var resOpts=CALL_RESULTS.map(function(r){return '<option value="'+r[0]+'">'+r[1]+'</option>';}).join("");
+  var rejOpts=CALL_REJECTS.map(function(r){return '<option value="'+escA(r)+'">'+escH(r)+'</option>';}).join("");
+  var apOpts=state.appointers.map(function(a){return '<option value="'+a.id+'">'+escH(a.name)+'</option>';}).join("");
+  var formHtml=state.appointers.length?(
+    '<div class="sm-hist-form"><p class="sm-hist-form__title">\u67b6\u96fb\u3092\u8a18\u9332</p>'+
+      '<div class="sm-field"><label>\u30a2\u30dd\u30a4\u30f3\u30bf\u30fc\uff08\u67b6\u96fb\u8005\uff09</label><select id="cl-ap" class="sm-select">'+apOpts+'</select></div>'+
+      '<div class="sm-field-row"><div class="sm-field"><label>\u67b6\u96fb\u65e5</label><input id="cl-date" type="date" value="'+todayStr()+'"/></div>'+
+      '<div class="sm-field"><label>\u7d50\u679c</label><select id="cl-result" class="sm-select">'+resOpts+'</select></div></div>'+
+      '<div class="sm-field sm-hidden" id="cl-reject-wrap"><label>\u65ad\u3089\u308c\u305f\u7406\u7531</label><select id="cl-reject" class="sm-select">'+rejOpts+'</select></div>'+
+      '<div class="sm-field"><label>\u6b21\u56de\u67b6\u96fb\u4e88\u5b9a\u65e5\uff08\u4efb\u610f\uff09</label><input id="cl-next" type="date"/></div>'+
+      '<div class="sm-field"><label>\u30e1\u30e2\uff08\u4efb\u610f\uff09</label><input id="cl-memo" type="text" placeholder="\u62c5\u5f53\u8005\u540d\u30fb\u611f\u89e6\u30fb\u6b21\u30a2\u30af\u30b7\u30e7\u30f3"/></div>'+
+      '<button class="sm-btn sm-btn--primary" id="cl-add" type="button" style="margin-top:6px;width:100%;">\u3053\u306e\u67b6\u96fb\u3092\u8a18\u9332\u3059\u308b</button>'+
+    '</div>'
+  ):'<p class="sm-hist-empty" style="color:var(--persimmon-deep);">\u67b6\u96fb\u3092\u8a18\u9332\u3059\u308b\u306b\u306f\u3001\u5148\u306b\u300c\ud83d\udcde \u67b6\u96fb\u30dc\u30fc\u30c9\u300d\u3067\u30a2\u30dd\u30a4\u30f3\u30bf\u30fc\u3092\u767b\u9332\u3057\u3066\u304f\u3060\u3055\u3044\u3002</p>';
+  return '<div class="sm-modal sm-history" style="max-height:86vh;overflow:auto;">'+
+    '<p class="sm-modal__title">'+escH(f.facilityName)+' \u3078\u306e\u30c6\u30ec\u30a2\u30dd</p>'+
+    '<p class="sm-modal__sub">'+escH(f.prefecture)+(f.phone?'\u3000\u260e '+escH(f.phone):'')+'\u3000\u67b6\u96fb '+calls.length+' \u4ef6</p>'+
+    '<div class="sm-hist-list">'+listHtml+'</div>'+formHtml+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="cl-close" type="button">\u9589\u3058\u308b</button></div></div>'+
+  '</div>';
+}
+function bindCallModal(f,overlay,close){
+  overlay.querySelector("#cl-close").addEventListener("click",close);
+  var resSel=overlay.querySelector("#cl-result");
+  if(resSel)resSel.addEventListener("change",function(){overlay.querySelector("#cl-reject-wrap").classList.toggle("sm-hidden",resSel.value!=="reject");});
+  var addBtn=overlay.querySelector("#cl-add");
+  if(addBtn)addBtn.addEventListener("click",async function(){
+    var apId=overlay.querySelector("#cl-ap").value;
+    var date=overlay.querySelector("#cl-date").value;
+    var result=overlay.querySelector("#cl-result").value;
+    if(!apId){showToast("\u30a2\u30dd\u30a4\u30f3\u30bf\u30fc\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044","error");return;}
+    if(!date){showToast("\u67b6\u96fb\u65e5\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044","error");return;}
+    state.calls.push({id:uid(),facilityId:f.id,appointerId:apId,date:date,result:result,rejectReason:result==="reject"?overlay.querySelector("#cl-reject").value:"",rejectNote:"",nextDate:overlay.querySelector("#cl-next").value,memo:overlay.querySelector("#cl-memo").value.trim(),followDone:false,createdAt:new Date().toISOString()});
+    await persist();renderAll();showToast("\u67b6\u96fb\u3092\u8a18\u9332\u3057\u307e\u3057\u305f");
+    overlay.innerHTML=callModalHtml(f);bindCallModal(f,overlay,close);
+  });
+  overlay.querySelectorAll("[data-del-call]").forEach(function(btn){
+    btn.addEventListener("click",async function(){
+      var cid=btn.getAttribute("data-del-call");
+      state.calls=state.calls.filter(function(c){return c.id!==cid;});
+      await persist();renderAll();showToast("\u67b6\u96fb\u8a18\u9332\u3092\u524a\u9664\u3057\u307e\u3057\u305f");
+      overlay.innerHTML=callModalHtml(f);bindCallModal(f,overlay,close);
+    });
+  });
+}
+
+function openTeleboard(){smOverlay(teleboardHtml(),function(overlay,close){bindTeleboard(overlay,close);});}
+function teleboardHtml(){
+  var today=todayStr();
+  var facName=function(fid){var f=state.facilities.find(function(x){return x.id===fid;});return f?f.facilityName:"\uff08\u524a\u9664\u3055\u308c\u305f\u65bd\u8a2d\uff09";};
+  var follows=state.calls.filter(function(c){return c.nextDate&&!c.followDone&&c.result!=="seiyaku"&&c.result!=="na"&&c.result!=="reject";}).sort(function(a,b){return a.nextDate.localeCompare(b.nextDate);});
+  var followHtml=follows.length?follows.map(function(c){var over=c.nextDate<today;return '<div class="sm-follow-row"><span class="sm-fdate'+(over?' over':'')+'">'+escH(c.nextDate)+'</span><span style="flex:1;font-weight:600;min-width:0;">'+escH(facName(c.facilityId))+'</span><span class="sm-call-badge sm-call-'+c.result+'">'+callResultLabel(c.result)+'</span><button class="sm-btn sm-btn--ghost" data-fdone="'+c.id+'" style="padding:4px 10px;font-size:12px;">\u2713 \u5bfe\u5fdc\u6e08</button>'+(c.memo?'<span style="flex-basis:100%;font-size:12px;color:var(--ink-soft);">'+escH(c.memo)+'</span>':'')+'</div>';}).join(""):'<p class="sm-hist-empty">\u30d5\u30a9\u30ed\u30fc\u4e88\u5b9a\u306f\u3042\u308a\u307e\u305b\u3093\u3002</p>';
+  var cands=teleCandidates();
+  var candHtml;
+  if(!cands.length){candHtml='<p class="sm-hist-empty">3\u304b\u6708\u4ee5\u4e0a\u958b\u50ac\u306e\u306a\u3044\u65bd\u8a2d\u306f\u3042\u308a\u307e\u305b\u3093\u3002</p>';}
+  else{var byPref={};cands.forEach(function(x){(byPref[x.f.prefecture]=byPref[x.f.prefecture]||[]).push(x);});
+    candHtml=Object.keys(byPref).sort().map(function(p){var g=byPref[p].sort(function(a,b){return a.last.localeCompare(b.last);});return '<div class="sm-tb-prefhead">'+escH(p)+'\uff08'+g.length+'\uff09</div>'+g.map(function(x){return '<div class="sm-follow-row"><span style="flex:1;font-weight:600;min-width:0;">'+escH(x.f.facilityName)+'</span><span style="font-size:12px;color:var(--ink-soft);white-space:nowrap;">\u6700\u7d42 '+escH(x.last)+'\u30fb\u7d2f\u8a08'+fmtMan(x.sales)+'\u4e07</span>'+(x.f.phone?'<span style="font-size:12px;color:var(--indigo);">'+escH(x.f.phone)+'</span>':'')+'</div>';}).join("");}).join("");}
+  var stats=appointerStats().sort(function(a,b){return b.wins-a.wins||b.total-a.total;});
+  var apRankHtml=stats.length?stats.map(function(s){return '<div class="sm-follow-row"><span style="flex:1;font-weight:700;">'+escH(s.name)+'</span><span style="font-size:12px;color:var(--ink-soft);">\u67b6\u96fb'+s.total+'\u30fb\u7372\u5f97'+s.wins+'\u30fb\u524d\u5411\u304d'+s.pos+'\u30fb\u65ad\u308a'+s.rej+'\u30fb\u6210\u7d04\u7387'+(Math.round(s.rate*10)/10)+'%</span></div>';}).join(""):'<p class="sm-hist-empty">\u30a2\u30dd\u30a4\u30f3\u30bf\u30fc\u3092\u767b\u9332\u3057\u3066\u304f\u3060\u3055\u3044\u3002</p>';
+  var apListHtml=state.appointers.length?state.appointers.map(function(a){return '<div class="sm-follow-row"><span style="flex:1;font-weight:600;">'+escH(a.name)+'</span><button class="sm-icon-btn sm-icon-btn--danger" data-del-ap="'+a.id+'" title="\u524a\u9664">'+iconTrash()+'</button></div>';}).join(""):'<p class="sm-hist-empty">\u672a\u767b\u9332\u3067\u3059\u3002</p>';
+  return '<div class="sm-modal sm-history" style="max-height:86vh;overflow:auto;">'+
+    '<p class="sm-modal__title">\ud83d\udcde \u67b6\u96fb\u30dc\u30fc\u30c9</p>'+
+    '<p class="sm-modal__sub">\u30c6\u30ec\u30a2\u30dd\u306e\u30d5\u30a9\u30ed\u30fc\u30fb\u5019\u88dc\u30fb\u5b9f\u7e3e\u3092\u307e\u3068\u3081\u3066\u7ba1\u7406</p>'+
+    '<div class="sm-tb-section"><h3>\ud83d\udcc5 \u30d5\u30a9\u30ed\u30fc\u4e88\u5b9a</h3>'+followHtml+'</div>'+
+    '<div class="sm-tb-section"><h3>\ud83c\udfaf \u67b6\u96fb\u5019\u88dc\uff083\u304b\u6708\u958b\u50ac\u306a\u3057\u30fb\u770c\u5225\uff09</h3>'+candHtml+'</div>'+
+    '<div class="sm-tb-section"><h3>\ud83c\udfc6 \u30a2\u30dd\u30a4\u30f3\u30bf\u30fc\u5b9f\u7e3e</h3>'+apRankHtml+'</div>'+
+    '<div class="sm-tb-section"><h3>\ud83d\udc65 \u30a2\u30dd\u30a4\u30f3\u30bf\u30fc\u767b\u9332</h3><div style="display:flex;gap:8px;margin-bottom:8px;"><input id="tb-ap-name" class="sm-input" type="text" placeholder="\u6c0f\u540d" style="flex:1;"/><button class="sm-btn sm-btn--primary" id="tb-ap-add" type="button">\u8ffd\u52a0</button></div>'+apListHtml+'</div>'+
+    '<div class="sm-modal__footer"><span></span><div class="sm-modal__footer-right"><button class="sm-btn sm-btn--ghost" id="tb-close" type="button">\u9589\u3058\u308b</button></div></div>'+
+  '</div>';
+}
+function bindTeleboard(overlay,close){
+  overlay.querySelector("#tb-close").addEventListener("click",close);
+  var refresh=function(){overlay.innerHTML=teleboardHtml();bindTeleboard(overlay,close);};
+  var addAp=overlay.querySelector("#tb-ap-add");
+  if(addAp)addAp.addEventListener("click",async function(){
+    var inp=overlay.querySelector("#tb-ap-name");var name=inp.value.trim();
+    if(!name){showToast("\u6c0f\u540d\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044","error");return;}
+    if(state.appointers.some(function(a){return a.name===name;})){showToast("\u540c\u3058\u540d\u524d\u304c\u65e2\u306b\u3042\u308a\u307e\u3059","error");return;}
+    state.appointers.push({id:uid(),name:name});await persist();refresh();showToast("\u30a2\u30dd\u30a4\u30f3\u30bf\u30fc\u3092\u8ffd\u52a0\u3057\u307e\u3057\u305f");
+  });
+  var tbn=overlay.querySelector("#tb-ap-name");
+  if(tbn)tbn.addEventListener("keydown",function(e){if(e.key==="Enter")addAp.click();});
+  overlay.querySelectorAll("[data-fdone]").forEach(function(b){b.addEventListener("click",async function(){var id=b.getAttribute("data-fdone");var c=state.calls.find(function(x){return x.id===id;});if(c){c.followDone=true;await persist();refresh();showToast("\u5bfe\u5fdc\u6e08\u306b\u3057\u307e\u3057\u305f");}});});
+  overlay.querySelectorAll("[data-del-ap]").forEach(function(b){b.addEventListener("click",async function(){var id=b.getAttribute("data-del-ap");state.appointers=state.appointers.filter(function(a){return a.id!==id;});await persist();refresh();showToast("\u524a\u9664\u3057\u307e\u3057\u305f");});});
+}
+
+
 async function init(){
   await loadData();
   recomputeCategories();
