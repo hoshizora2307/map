@@ -94,7 +94,6 @@
   .sm-file-label{display:inline-block;}
   .sm-result-line{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
 
-  /* ランキング */
   .sm-ranking{background:#fff;border:1px solid var(--paper-line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 14px;margin-bottom:20px;}
   .sm-ranking__header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
   .sm-ranking__title{font-family:'Shippori Mincho',serif;font-size:16px;color:var(--pine);margin:0;font-weight:700;}
@@ -139,7 +138,6 @@
   .sm-name-btn{background:none;border:none;padding:0;font-weight:700;color:var(--pine);font-size:13px;font-family:inherit;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:rgba(31,45,36,0.25);text-underline-offset:3px;}
   .sm-name-btn:hover{color:var(--persimmon-deep);text-decoration-color:var(--persimmon);}
 
-  /* 開催履歴ビューモーダル */
   .sm-hv-list{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;margin-bottom:8px;}
   .sm-hv-card{border:1px solid var(--paper-line);border-radius:8px;background:var(--paper);cursor:pointer;transition:background .1s,border-color .1s;}
   .sm-hv-card:hover{background:#FAF7EF;border-color:var(--gold);}
@@ -211,7 +209,6 @@
     .sm-header__meta{text-align:left;}.sm-credit{padding:14px 16px;}
   }
 
-  /* === テレアポ統合 === */
   .sm-call-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;display:inline-block;}
   .sm-call-seiyaku{background:#DCEFE3;color:#2F8F5B;}
   .sm-call-positive{background:#E4EEF6;color:#2B6EA3;}
@@ -230,7 +227,6 @@
   .sm-fdate{font-weight:700;font-size:12px;background:#F0E6D2;color:#8B6B1E;border-radius:8px;padding:3px 8px;white-space:nowrap;}
   .sm-fdate.over{background:#F7DDD5;color:#B23A26;}
 
-  /* === 統合版 追加スタイル === */
   .sm-record-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(100deg,#FBF3E0,#F6E6C4);border:1px solid var(--gold);border-radius:12px;padding:12px 18px;margin:0 0 14px;box-shadow:var(--shadow);}
   .sm-rb__crown{font-size:22px;line-height:1;}
   .sm-rb__label{font-size:11.5px;font-weight:700;color:#8B6B1E;letter-spacing:0.06em;background:rgba(176,141,87,0.16);padding:3px 9px;border-radius:20px;}
@@ -246,7 +242,6 @@
 </head>
 <body>
 
-<!-- パスワードゲート -->
 <div id="sm-gate" style="
   position:fixed;inset:0;z-index:9999;
   background:#1F2D24;
@@ -339,7 +334,6 @@
       <button class="sm-btn sm-btn--primary" id="sm-add-btn">＋ 拠点を追加</button>
     </div>
 
-    <!-- ランキング -->
     <div class="sm-ranking">
       <div class="sm-ranking__header">
         <p class="sm-ranking__title">🏆 ランキング</p>
@@ -396,7 +390,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
 (function(){
-// パスワードゲート
+
 var PW = "mondocolo2026";
 var SK = "sm-auth-v1";
 function showGate(){
@@ -416,12 +410,8 @@ function showGate(){
 }
 showGate();
 
-/* =========================================================
-   定数
-========================================================= */
-var DATA_ENDPOINT = "/api/data"; // Cloudflare Pages Functions が JSONBin を中継
+var DATA_ENDPOINT = "/api/data";
 
-/* カテゴリーのアイコングリフ（固定）新規カテゴリーはFALLBACK_GLYPHを使用 */
 var CATEGORY_GLYPHS = {
   "道の駅":'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg>',
   "JA野菜直売所":'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-4 7-10 7-10s7 6 7 10a7 7 0 0 1-7 7z"/><path d="M11 20v-6"/></svg>',
@@ -431,10 +421,8 @@ var CATEGORY_GLYPHS = {
 };
 var FALLBACK_GLYPH='<svg viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="0"><circle cx="12" cy="12" r="6"/></svg>';
 
-/* カラーパレット（新規カテゴリー用） */
 var CAT_COLOR_PALETTE=["#8C5A3C","#3F7D6B","#6B5CA5","#3E6B8A","#2E7EA6","#C8541E","#5B7F66","#B08D57","#34507A","#8B2E1F","#2E8A6B","#7A3060","#5A7A30","#A05020","#306090"];
 
-/* デフォルトカテゴリー */
 var DEFAULT_CATEGORIES=[
   {name:"道の駅",hex:"#8C5A3C"},
   {name:"JA野菜直売所",hex:"#3F7D6B"},
@@ -443,7 +431,6 @@ var DEFAULT_CATEGORIES=[
   {name:"星空イベント",hex:"#2E7EA6"}
 ];
 
-/* 動的に更新される変数（recomputeCategories()で再計算） */
 var CATEGORY_META={};
 var CATEGORY_ORDER=[];
 
@@ -454,7 +441,7 @@ function recomputeCategories(){
     CATEGORY_META[c.name]={hex:c.hex, glyph:CATEGORY_GLYPHS[c.name]||FALLBACK_GLYPH};
     CATEGORY_ORDER.push(c.name);
   });
-  // activeCategories に新カテゴリーを追加
+
   CATEGORY_ORDER.forEach(function(n){
     if(!state.activeCategories.has(n)) state.activeCategories.add(n);
   });
@@ -464,7 +451,6 @@ var TIERS = [
   {max:1000,color:"#B08D57"},{max:1500,color:"#C8541E"},{max:Infinity,color:"#8B2E1F"}
 ];
 
-/* === 統合版 追加設定：管理者パスワード・単回売上ティア === */
 var ADMIN_PASSWORD = "mondocolo-kanri";
 var _adminUnlocked = false;
 var SINGLE_TIERS = [
@@ -525,9 +511,6 @@ var SAMPLE_RECORDS = [
   {id:"r33",facilityId:"f24",date:"2025-11-15",sales:980,note:""},{id:"r34",facilityId:"f24",date:"2026-03-28",sales:1000,note:""}
 ];
 
-/* =========================================================
-   状態
-========================================================= */
 var state = {
   facilities:[], records:[],
   categories:DEFAULT_CATEGORIES.map(function(c){return Object.assign({},c);}),
@@ -537,9 +520,6 @@ var state = {
 };
 var map, markersById={};
 
-/* =========================================================
-   ユーティリティ
-========================================================= */
 function tierFor(s){for(var i=0;i<TIERS.length;i++){if(s<=TIERS[i].max)return TIERS[i];}return TIERS[TIERS.length-1];}
 function fmtMan(n){
   var v=Number(n||0);
@@ -564,16 +544,10 @@ function setBadge(ok,msg){
   b.textContent=msg; b.className="sm-header__badge"+(ok?" is-ok":" is-err");
 }
 
-/* =========================================================
-   集計
-========================================================= */
 function recordsFor(fid){return state.records.filter(function(r){return r.facilityId===fid;});}
 function totalSalesFor(fid){return recordsFor(fid).reduce(function(s,r){return s+Number(r.sales||0);},0);}
 function lastDateFor(fid){var recs=recordsFor(fid);if(!recs.length)return null;return recs.reduce(function(a,b){return a.date>b.date?a:b;}).date;}
 
-/* =========================================================
-   データ取得・保存（サーバープロキシ経由。鍵はブラウザに渡らない）
-========================================================= */
 async function apiGet(){
   var resp=await fetch(DATA_ENDPOINT, {credentials:"same-origin"});
   if(!resp.ok)throw new Error("GET "+resp.status);
@@ -590,11 +564,8 @@ async function apiPut(payload){
   return await resp.json();
 }
 
-/* =========================================================
-   ローカルバックアップ（localStorage）
-========================================================= */
 var BACKUP_KEY = "sm-backup-v1";
-var BACKUP_MAX = 5; // 最大保存世代数
+var BACKUP_MAX = 5;
 
 function saveBackup(data){
   try{
@@ -605,7 +576,7 @@ function saveBackup(data){
     });
     if(backups.length>BACKUP_MAX) backups=backups.slice(0,BACKUP_MAX);
     localStorage.setItem(BACKUP_KEY, JSON.stringify(backups));
-  } catch(e){ /* localStorage容量不足などは無視 */ }
+  } catch(e){  }
 }
 
 function loadBackups(){
@@ -626,17 +597,17 @@ async function loadData(){
       state.records=Array.isArray(rec.records)?rec.records:[];
       if(Array.isArray(rec.categories)&&rec.categories.length) state.categories=rec.categories;
       recomputeCategories();
-      // 正常に読み込めたらバックアップを保存
+
       saveBackup({facilities:state.facilities,records:state.records,categories:state.categories});
       setBadge(true,"接続済み");
     } else if(!rec||rec.facilities===undefined||rec.facilities===null){
-      // Binが空 → 初回のみサンプルデータで初期化
+
       state.facilities=SAMPLE_FACILITIES.map(function(f){return Object.assign({},f);});
       state.records=SAMPLE_RECORDS.map(function(r){return Object.assign({},r);});
       await apiPut({facilities:state.facilities,records:state.records,categories:state.categories,calls:state.calls,appointers:state.appointers});
       setBadge(true,"接続済み（初期データを作成しました）");
     } else {
-      // 空配列など正常なデータ
+
       state.facilities=rec.facilities;
       state.records=Array.isArray(rec.records)?rec.records:[];
       if(Array.isArray(rec.categories)&&rec.categories.length) state.categories=rec.categories;
@@ -647,7 +618,7 @@ async function loadData(){
     state._saveDisabled=true;
     setBadge(false,"接続エラー — 保存不可");
     showToast("⚠️ サーバーへの接続に失敗しました。表示はサンプルデータです。実データへの変更は保存されません。ページを再読み込みしてください","error");
-    // 接続エラー時はJSONBinを絶対に上書きしない。stateはデフォルト値のまま。
+
   }
 }
 
@@ -674,9 +645,6 @@ function updateMeta(){
   el.innerHTML="拠点数 "+state.facilities.length+" 件・実績 "+state.records.length+" 件<br/>最終更新 "+s;
 }
 
-/* =========================================================
-   フィルタ・ソート
-========================================================= */
 function getFiltered(){
   var q=state.search.trim().toLowerCase();
   var allCats=state.activeCategories.size===0||state.activeCategories.size===CATEGORY_ORDER.length;
@@ -698,9 +666,6 @@ function getSorted(list){
   });
 }
 
-/* =========================================================
-   統計
-========================================================= */
 function renderStats(){
   var list=state.facilities;
   var totalSales=state.records.reduce(function(s,r){return s+Number(r.sales||0);},0);
@@ -732,9 +697,6 @@ function statCard(label,value,sub,accent){
   return '<div class="sm-stat"><p class="sm-stat__label">'+label+'</p><p class="sm-stat__value'+(accent?' sm-stat__value--accent':'')+'">'+value+'</p>'+(sub?'<p class="sm-stat__sub">'+sub+'</p>':'')+'</div>';
 }
 
-/* =========================================================
-   フィルタUI
-========================================================= */
 function renderFilterControls(){
   var prefSel=document.getElementById("sm-pref-filter");
   var prefs=Array.from(new Set(state.facilities.map(function(f){return f.prefecture;}))).sort(function(a,b){return a.localeCompare(b,"ja");});
@@ -746,9 +708,6 @@ function renderFilterControls(){
   }).join("");
 }
 
-/* =========================================================
-   テーブル
-========================================================= */
 function renderTable(){
   var filtered=getSorted(getFiltered());
   document.getElementById("sm-result-line").textContent=filtered.length+" / "+state.facilities.length+" 拠点を表示中";
@@ -782,11 +741,6 @@ function iconPencil(){return'<svg width="14" height="14" viewBox="0 0 24 24" fil
 function iconTrash(){return'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';}
 function iconClock(){return'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';}
 
-/* =========================================================
-   地図
-========================================================= */
-
-/* === 統合版 追加関数 === */
 function maxSingleFor(fid){var r=recordsFor(fid);if(!r.length)return 0;return r.reduce(function(m,x){return Math.max(m,Number(x.sales||0));},0);}
 function pinValueFor(f){return state.pinMode==="single"?maxSingleFor(f.id):totalSalesFor(f.id);}
 function singleTierFor(v){for(var i=0;i<SINGLE_TIERS.length;i++){if(v<SINGLE_TIERS[i].max)return SINGLE_TIERS[i];}return SINGLE_TIERS[SINGLE_TIERS.length-1];}
@@ -874,9 +828,6 @@ document.addEventListener("click",function(e){
   var hb=e.target.closest("[data-history-id]");if(hb){openHistoryModal(hb.getAttribute("data-history-id"));return;}
 });
 
-/* =========================================================
-   モーダル: 拠点追加・編集
-========================================================= */
 function openModal(id){
   state.editingId=id||null;
   var f=id?state.facilities.find(function(x){return x.id===id;}):null;
@@ -929,7 +880,7 @@ async function doGeocode(){
   var btn=document.getElementById("mf-geocode"),orig=btn.textContent;
   btn.textContent="検索中…";btn.disabled=true;
   try{
-    // 国土地理院 住所検索API（日本の住所に最適）
+
     var gsiUrl="https://msearch.gsi.go.jp/address-search/AddressSearch?q="+encodeURIComponent(addr);
     var gsiResp=await fetch(gsiUrl);
     var gsiData=await gsiResp.json();
@@ -940,7 +891,7 @@ async function doGeocode(){
       showToast("座標を取得しました（"+gsiData[0].properties.title+"）");
       return;
     }
-    // フォールバック: Nominatim
+
     var nomUrl="https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=jp&q="+encodeURIComponent(addr);
     var nomResp=await fetch(nomUrl,{headers:{"Accept-Language":"ja","User-Agent":"ShinshuMarche/1.0"}});
     var nomData=await nomResp.json();
@@ -983,9 +934,6 @@ async function deleteFacility(id){
   await persist();renderAll();showToast("拠点を削除しました");
 }
 
-/* =========================================================
-   モーダル: 開催履歴ビュー（施設名タップで開く）
-========================================================= */
 function openHistoryViewModal(facilityId){
   var facility=state.facilities.find(function(f){return f.id===facilityId;});
   if(!facility)return;
@@ -1072,7 +1020,6 @@ function bindHistoryViewEvents(facility,recs,overlay){
   });
 }
 
-
 function openHistoryModal(facilityId){
   var facility=state.facilities.find(function(f){return f.id===facilityId;});if(!facility)return;
   var overlay=document.createElement("div");
@@ -1157,26 +1104,23 @@ function bindHistoryModalEvents(facility,overlay){
   });
 }
 
-/* =========================================================
-   Airレジ CSV 取込
-========================================================= */
 function parseAirregiCsv(file){
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
     reader.onload=function(e){
       try{
-        // Shift-JISデコード
+
         var decoder=new TextDecoder("shift-jis");
         var text=decoder.decode(e.target.result);
         var result=Papa.parse(text,{header:false,skipEmptyLines:false});
         var rows=result.data;
         var salesByDate={};
-        // 1行目はヘッダーなのでスキップ。日付(col[1])がある行のみ集計
+
         rows.slice(1).forEach(function(row){
           var date=(row[1]||"").trim();
           var totalStr=(row[6]||"").trim();
           var total=parseInt(totalStr,10);
-          // 日付形式 YYYY/MM/DD かつ正の合計金額の行のみ
+
           if(/^\d{4}\/\d{2}\/\d{2}$/.test(date)&&!isNaN(total)&&total>0){
             var dateKey=date.replace(/\//g,"-");
             salesByDate[dateKey]=(salesByDate[dateKey]||0)+total;
@@ -1231,7 +1175,7 @@ function showAirregiPreview(entries,facility,parentOverlay){
       await persist();
       renderAll();
       ov.remove();
-      // 親モーダルを更新
+
       parentOverlay.innerHTML=historyModalHtml(facility);
       bindHistoryModalEvents(facility,parentOverlay);
       showToast("Airレジのデータを取り込みました（"+date+"）");
@@ -1239,9 +1183,6 @@ function showAirregiPreview(entries,facility,parentOverlay){
   });
 }
 
-/* =========================================================
-   バックアップ復元モーダル
-========================================================= */
 function openBackupModal(){
   var backups=loadBackups();
   var overlay=document.createElement("div");
@@ -1354,7 +1295,7 @@ function bindCategoryModalEvents(overlay){
     if(overlay._escKey)document.removeEventListener("keydown",overlay._escKey);
     overlay.remove();
   });
-  // カラーパレット選択
+
   overlay.querySelectorAll("[data-color]").forEach(function(btn){
     btn.addEventListener("click",function(){
       overlay.querySelectorAll("[data-color]").forEach(function(b){b.style.border="2px solid transparent";b.style.transform="";});
@@ -1364,7 +1305,7 @@ function bindCategoryModalEvents(overlay){
   });
   var firstBtn=overlay.querySelector("[data-color]");
   if(firstBtn){firstBtn.style.border="2px solid var(--pine)";firstBtn.style.transform="scale(1.2)";}
-  // 追加
+
   overlay.querySelector("#nc-add").addEventListener("click",async function(){
     var name=overlay.querySelector("#nc-name").value.trim();
     var hex=overlay.querySelector("#nc-color").value;
@@ -1378,7 +1319,7 @@ function bindCategoryModalEvents(overlay){
     bindCategoryModalEvents(overlay);
     showToast("「"+name+"」を追加しました");
   });
-  // 削除（パスワード確認付き）
+
   overlay.querySelectorAll("[data-del-cat]").forEach(function(btn){
     btn.addEventListener("click",function(){
       var idx=parseInt(btn.getAttribute("data-del-cat"));
@@ -1428,9 +1369,6 @@ function confirmDialog(title,message,onConfirm){
   setTimeout(function(){var el=document.getElementById("cf-pw");if(el)el.focus();},50);
 }
 
-/* =========================================================
-   CSV
-========================================================= */
 function exportFacilitiesCsv(){
   var headers=["都道府県","施設名","カテゴリー","累計売上高(万円)","開催回数","直近開催日","施設電話番号","担当者名","緯度","経度"];
   var rows=[headers].concat(state.facilities.map(function(f){return[f.prefecture,f.facilityName,f.category,totalSalesFor(f.id),recordsFor(f.id).length,lastDateFor(f.id)||"",f.phone,f.contact,f.lat,f.lng];}));
@@ -1451,7 +1389,6 @@ function downloadCsv(rows,filename){
   a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
 
-/* === テレアポ実績 一括取込（住所→座標を自動取得） === */
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
 function guessCategory(name){var n=name||"";if(/SA|サービスエリア|ＳＡ/.test(n))return"高速SA";if(/道の駅/.test(n))return"道の駅";if(/JA|ＪＡ|直売|ファーマーズ|産直|農産物/.test(n))return"JA野菜直売所";if(/マルシェ|祭り|イベント|フェス/.test(n))return"イベント";return"道の駅";}
 var PREF_CENTER={"千葉県":[35.6,140.1],"長野県":[36.2,138.0],"神奈川県":[35.44,139.4],"栃木県":[36.6,139.9],"静岡県":[34.98,138.4],"山梨県":[35.66,138.57],"茨城県":[36.34,140.45],"岐阜県":[35.39,136.72],"新潟県":[37.9,139.02],"埼玉県":[35.9,139.5],"群馬県":[36.39,139.06],"富山県":[36.7,137.21],"東京都":[35.69,139.69],"石川県":[36.59,136.63],"福井県":[35.94,136.19]};
@@ -1524,14 +1461,8 @@ function importCsv(file){
   },error:function(){showToast("CSVの読み込みに失敗しました","error");}});
 }
 
-/* =========================================================
-   一括描画 & イベントバインド
-========================================================= */
 function renderAll(){renderRecordBanner();renderStats();renderFilterControls();renderTable();renderMarkers();renderLegend();renderRanking();updateMeta();}
 
-/* =========================================================
-   ランキング
-========================================================= */
 var rkMode="single";
 
 function renderRanking(){
@@ -1542,13 +1473,11 @@ function renderRanking(){
   var selYear=yearSel.value;
   var selMonth=monthSel.value;
 
-  // 年の選択肢
   var years=Array.from(new Set(state.records.map(function(r){return r.date.slice(0,4);}))).sort().reverse();
   var curYear=yearSel.value;
   yearSel.innerHTML='<option value="all">全期間</option>'+years.map(function(y){return'<option value="'+y+'"'+(y===curYear?' selected':'')+'>'+y+'年</option>';}).join("");
   yearSel.value=curYear;
 
-  // 月の選択肢
   if(selYear!=="all"){
     var months=Array.from(new Set(state.records.filter(function(r){return r.date.slice(0,4)===selYear;}).map(function(r){return r.date.slice(5,7);}))).sort();
     var curMonth=monthSel.value;
@@ -1563,7 +1492,6 @@ function renderRanking(){
     selMonth="all";
   }
 
-  // 期間で絞り込んだレコード
   var filtered=state.records.filter(function(r){
     if(selYear!=="all"&&r.date.slice(0,4)!==selYear)return false;
     if(selMonth!=="all"&&r.date.slice(5,7)!==selMonth)return false;
@@ -1573,13 +1501,13 @@ function renderRanking(){
   var items=[];
 
   if(rkMode==="single"){
-    // 単回売上高
+
     items=filtered.slice().sort(function(a,b){return Number(b.sales)-Number(a.sales);}).map(function(r){
       var f=state.facilities.find(function(x){return x.id===r.facilityId;});
       return{name:f?f.facilityName:"(削除済み)",sub:r.date+(r.leader?" · "+r.leader:""),sales:Number(r.sales),fid:r.facilityId,cat:f?f.category:""};
     });
   } else if(rkMode==="cumul"){
-    // 拠点累積売上高
+
     var byFac={};
     filtered.forEach(function(r){byFac[r.facilityId]=(byFac[r.facilityId]||0)+Number(r.sales);});
     items=Object.keys(byFac).map(function(fid){
@@ -1587,13 +1515,13 @@ function renderRanking(){
       return{name:f?f.facilityName:"(削除済み)",sub:recordsFor(fid).length+"回開催",sales:byFac[fid],fid:fid,cat:f?f.category:""};
     }).sort(function(a,b){return b.sales-a.sales;});
   } else if(rkMode==="leader-single"){
-    // 軸リーダー単回売上高
+
     items=filtered.filter(function(r){return r.leader;}).slice().sort(function(a,b){return Number(b.sales)-Number(a.sales);}).map(function(r){
       var f=state.facilities.find(function(x){return x.id===r.facilityId;});
       return{name:r.leader,sub:(f?f.facilityName:"")+" · "+r.date,sales:Number(r.sales),fid:r.facilityId,cat:f?f.category:""};
     });
   } else if(rkMode==="leader-cumul"){
-    // 軸リーダー累積売上高
+
     var byLeader={};
     filtered.filter(function(r){return r.leader;}).forEach(function(r){
       byLeader[r.leader]=(byLeader[r.leader]||0)+Number(r.sales);
@@ -1605,7 +1533,6 @@ function renderRanking(){
     }).sort(function(a,b){return b.sales-a.sales;});
   }
 
-  // トップ3ポディウム
   var podium=document.getElementById("sm-rk-podium");
   var medals=["🥇","🥈","🥉"];
   var cls=["sm-rk-card--1","sm-rk-card--2","sm-rk-card--3"];
@@ -1622,7 +1549,6 @@ function renderRanking(){
     podium.innerHTML='';
   }
 
-  // 4位以下のリスト
   var rest=items.slice(3);
   var list=document.getElementById("sm-ranking-list");
   if(!rest.length){
@@ -1713,13 +1639,6 @@ function bindEvents(){
   bindRankingEvents();
 }
 
-/* =========================================================
-   起動
-========================================================= */
-
-/* =========================================================
-   テレアポ統合レイヤー（架電記録・フォロー・候補・アポインター）
-========================================================= */
 var CALL_RESULTS=[["seiyaku","\u25ce \u30a2\u30dd\u7372\u5f97\uff08\u6210\u7d04\uff09"],["positive","\u25cb \u524d\u5411\u304d\u30fb\u518d\u9023\u7d61"],["consider","\u25b3 \u691c\u8a0e\u4e2d"],["hold","\u4fdd\u7559\uff08\u62c5\u5f53\u8005\u4e0d\u5728\uff09"],["absent","\u4e0d\u5728\u30fb\u3064\u306a\u304c\u3089\u305a"],["reject","\u00d7 \u65ad\u308a"],["na","\u5bfe\u8c61\u5916"]];
 var CALL_REJECTS=["\u30b9\u30da\u30fc\u30b9\u30fb\u4f1a\u5834\u306e\u7a7a\u304d\u304c\u306a\u3044","\u65e2\u306b\u4ed6\u30a4\u30d9\u30f3\u30c8\u3067\u4e88\u5b9a\u304c\u57cb\u307e\u3063\u3066\u3044\u308b","\u51fa\u5e97\u6599\u30fb\u4e88\u7b97\u304c\u5408\u308f\u306a\u3044","\u6c7a\u88c1\u8005\u4e0d\u5728\u30fb\u793e\u5185\u691c\u8a0e\u304c\u5fc5\u8981","\u30a8\u30ea\u30a2\u30fb\u5ba2\u5c64\u304c\u5408\u308f\u306a\u3044","\u904e\u53bb\u5b9f\u65bd\u3067\u52b9\u679c\u304c\u8584\u304b\u3063\u305f","\u62c5\u5f53\u8005\u304c\u95a2\u5fc3\u306a\u3057","\u305d\u306e\u4ed6"];
 function callResultLabel(v){for(var i=0;i<CALL_RESULTS.length;i++){if(CALL_RESULTS[i][0]===v)return CALL_RESULTS[i][1];}return v;}
@@ -1840,7 +1759,6 @@ function bindTeleboard(overlay,close){
   overlay.querySelectorAll("[data-fdone]").forEach(function(b){b.addEventListener("click",async function(){var id=b.getAttribute("data-fdone");var c=state.calls.find(function(x){return x.id===id;});if(c){c.followDone=true;await persist();refresh();showToast("\u5bfe\u5fdc\u6e08\u306b\u3057\u307e\u3057\u305f");}});});
   overlay.querySelectorAll("[data-del-ap]").forEach(function(b){b.addEventListener("click",async function(){var id=b.getAttribute("data-del-ap");state.appointers=state.appointers.filter(function(a){return a.id!==id;});await persist();refresh();showToast("\u524a\u9664\u3057\u307e\u3057\u305f");});});
 }
-
 
 async function init(){
   await loadData();
