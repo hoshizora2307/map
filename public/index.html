@@ -321,11 +321,10 @@
       <div class="sm-chip-group" id="sm-cat-filter"></div>
       <div class="sm-toolbar__spacer"></div>
       <button class="sm-btn--text" id="sm-clear-filters">条件をクリア</button>
-      <label class="sm-file-label">
-        <input type="file" id="sm-csv-input" accept=".csv" class="sm-hidden" />
-        <span class="sm-btn sm-btn--ghost" id="sm-csv-import-btn">CSV取込</span>
-      </label>
-      <label class="sm-file-label"><input type="file" id="sm-tele-import-input" accept=".csv" class="sm-hidden" /><span class="sm-btn sm-btn--ghost" id="sm-tele-import-btn">📥 テレアポ実績取込</span></label>
+      <button class="sm-btn sm-btn--ghost" id="sm-csv-import-btn" type="button">CSV取込</button>
+      <input type="file" id="sm-csv-input" accept=".csv" class="sm-hidden" />
+      <button class="sm-btn sm-btn--ghost" id="sm-tele-import-btn" type="button">📥 テレアポ実績取込</button>
+      <input type="file" id="sm-tele-import-input" accept=".csv" class="sm-hidden" />
       <button class="sm-btn sm-btn--ghost" id="sm-csv-export-facilities-btn">拠点CSV</button>
       <button class="sm-btn sm-btn--ghost" id="sm-csv-export-records-btn">実績ログCSV</button>
       <button class="sm-btn sm-btn--ghost" id="sm-backup-btn" title="このブラウザに保存されたバックアップから復元">🔄 復元</button>
@@ -1437,7 +1436,7 @@ async function runTeleImport(groups,gkeys,rowCount,box,body){
       if(co){lat=co.lat;lng=co.lng;}else{var cc=PREF_CENTER[g.pref]||[36.2,138.2];lat=cc[0];lng=cc[1];noGeo++;}
       fac={id:uid(),prefecture:g.pref,facilityName:g.name,category:guessCategory(g.name),phone:g.phone||"",contact:"",lat:lat,lng:lng};if(g.phone)phoneSet++;
       state.facilities.push(fac);existing[gkeys[gi]]=fac;newFac++;
-      await sleep(250);
+      await sleep(120);
     }else{matchFac++;if(!fac.phone&&g.phone){fac.phone=g.phone;phoneSet++;}}
     g.rows.forEach(function(r){var date=(r["開催日"]||"").trim();if(!date)return;var yenv=Number(String(r["売上円"]||"").replace(/[^0-9]/g,""))||0;var man=yenv?Math.round(yenv/1000)/10:0;var dup=state.records.some(function(x){return x.facilityId===fac.id&&x.date===date&&Number(x.sales||0)===man;});if(dup){skipRec++;return;}state.records.push({id:uid(),facilityId:fac.id,date:date,sales:man,leader:(r["軸リーダー"]||"").trim(),note:"テレアポ取込"});addRec++;});
   }
