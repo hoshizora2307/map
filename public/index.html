@@ -241,7 +241,6 @@
   .sm-legend-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);}
   .sm-legend-chip i{width:12px;height:12px;border-radius:3px;display:inline-block;flex:0 0 auto;}
 
-  /* === 現地情報（写真） === */
   .sm-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;}
   .sm-photo-thumb{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:4/3;cursor:pointer;border:1px solid var(--paper-line);background:var(--paper-dim);}
   .sm-photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -255,7 +254,6 @@
   .sm-lightbox img{max-width:92vw;max-height:78vh;object-fit:contain;border-radius:10px;background:#000;}
   .sm-lb-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;font-size:13px;flex-wrap:wrap;}
 
-  /* === 開催予定・ランキングもっと見る === */
   .sm-sc-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;background:var(--paper);border:1px solid transparent;cursor:pointer;margin-bottom:6px;flex-wrap:wrap;}
   .sm-sc-row:hover{background:#FAF7EF;border-color:var(--paper-line);}
   .sm-sc-date{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:#8B6B1E;background:#F0E6D2;border-radius:8px;padding:3px 8px;white-space:nowrap;}
@@ -1932,10 +1930,6 @@ function bindTeleboard(overlay,close){
   overlay.querySelectorAll("[data-del-ap]").forEach(function(b){b.addEventListener("click",function(){confirmDialog("アポインターの削除","このアポインターを削除します（過去の架電記録は残ります）。",async function(){var id=b.getAttribute("data-del-ap");state.appointers=state.appointers.filter(function(a){return a.id!==id;});await persist();refresh();showToast("削除しました");});});});
 }
 
-
-/* =========================================================
-   Airレジ会計明細 取込 & 売上分析
-========================================================= */
 function readFileSJIS(file){
   return new Promise(function(resolve,reject){
     var r=new FileReader();
@@ -2079,10 +2073,6 @@ function bindPosAnalysis(overlay,close){
   var st=overlay.querySelector("#pa-staff");if(st)st.addEventListener("change",refresh);
 }
 
-
-/* =========================================================
-   催事準備（持ち込み数量）管理
-========================================================= */
 var PREP_PRESET=[["たまご２０玉",660,"",1,10],["カップデザート単品",370,"1番重 60個入",1,210],["カップデザートよりどり４点",370,"",0,0],["濃厚バスクチーズケーキ",1200,"1番重 24個入",1,48],["りんごチーズケーキ",1380,"1番重 24個入",1,24],["ブルーベリーケーキ",1380,"",0,0],["抹茶チーズケーキ",1380,"",0,0],["チーズケーキシャインマスカット",1380,"",0,0],["ももチーズケーキ",1380,"",0,0],["白馬豚まん３個入り",1080,"番重陳列してください",1,40],["白馬豚まん1個入り",480,"1番重 33個入",0,0],["レアチーズデザート❶",370,"",0,0],["レアチーズデザート❷",370,"",0,0],["レアチーズノーマル",333,"",0,0],["チーズカレーパイ",380,"",0,0],["りんごあめ",500,"",0,0],["和風パフェ",480,"",0,0],["スコーンミックス",1000,"",1,15],["季節のパイ",380,"",1,60],["季節のパイさつま、チョコ",380,"",0,0],["黒にんにく250ｇ",660,"",1,5],["干し芋 225ｇ",660,"",0,0],["干し柿 500ｇ",1200,"",1,5],["ブラウニー450g",1000,"",0,0],["丸型ブラウニー",1000,"",0,0],["スイポテ8個",660,"",0,0],["よりどり5点",750,"",0,0],["トマトジュース",500,"",0,0],["おやき6個",1800,"",0,0],["おやき 4個",1200,"",1,64],["ハードアイチョリソー3本入り",1300,"",1,6],["ハーブ畑のポークフランク3本入り",1300,"",1,6],["あらびきポークウィンナー230g",1300,"",1,6],["お米5ｋｇ",3700,"",1,2],["お米詰め放題",660,"12kg目安",1,12],["ピザ 野沢菜",660,"",0,0],["りんごジュース",1000,"",1,6],["野沢菜きざみ",500,"",1,30],["野沢菜ラー油ビン詰め",500,"",1,4],["わさび椎茸",880,"",1,4],["信州牛そぼろ",700,"",1,4],["辛子小茄子",600,"",1,10],["青唐辛子味噌",500,"",1,5],["新蕎麦 2人前",800,"",1,15],["十割蕎麦 1人前",400,"",1,10],["もち丸",1000,"",0,0],["中華めん詰め放題",1200,"",1,25],["プレゼント首かけ扇風機",0,"プレゼント品",1,25],["プレゼント米",0,"プレゼント品",1,25],["りんご15ｋｇ",1500,"",0,0],["りんご12ｋｇ",1500,"",0,0],["箱みかん10キロ",1500,"",0,0],["りんご10ｋｇ箱",4800,"",0,0],["クイーンルージュ1房",700,"",0,0],["なしサン南水",600,"",0,0]];
 function prepSeedIfEmpty(){
   var seeded=false;
@@ -2336,10 +2326,6 @@ function bindPrepBoard(overlay,close,view,sheetId){
   }
 }
 
-
-/* =========================================================
-   現地情報（写真・引き継ぎメモ）ver.2.9.1
-========================================================= */
 var PHOTO_MAX=8;
 function facPhotos(f){return Array.isArray(f.photos)?f.photos:[];}
 function prunePhotoWarn(){
@@ -2449,10 +2435,6 @@ function openPhotoLightbox(facility,idx){
   document.body.appendChild(ov);render();
 }
 
-
-/* =========================================================
-   今後の開催予定（テレアポで獲得した案件）
-========================================================= */
 function schedSorted(){return state.schedule.slice().sort(function(a,b){return (a.date||"9999").localeCompare(b.date||"9999");});}
 function schedStatusChips(ev){
   var chip=function(on,label){return '<span class="sm-sc-chip'+(on?' on':'')+'">'+label+'</span>';};
@@ -2571,7 +2553,7 @@ function openSchedEditor(id){
       var v=function(i){var e=overlay.querySelector("#se-"+i);return e?e.value.trim():"";};
       var c=function(i){var e=overlay.querySelector("#se-"+i);return !!(e&&e.checked);};
       var data={date:v("date"),facilityId:overlay.querySelector("#se-fac").value,facilityName:v("name"),pref:v("pref"),time:v("time"),spot:v("spot"),fee:v("fee"),leader:v("leader"),getter:v("getter"),eigyo:c("eigyo"),shinsei:c("shinsei"),chirashi:c("chirashi"),tsume:c("tsume"),tamago:c("tamago"),kome:c("kome"),note:overlay.querySelector("#se-note").value.trim()};
-      // 日付未定OK：未定案件は「開催候補地ストック」に入ります
+
       if(!data.facilityId&&!data.facilityName){showToast("施設を選ぶか施設名を入力してください","error");return;}
       schedPwGate(function(){
         if(isNew){delete ev._new;Object.assign(ev,data);state.schedule.push(ev);ensurePrepSheetForSched(ev);}
@@ -2617,9 +2599,6 @@ function openSchedList(){
     overlay.querySelectorAll("[data-sc2-edit]").forEach(function(r){r.addEventListener("click",function(){close();openSchedEditor(r.getAttribute("data-sc2-edit"));});});
   });
 }
-
-
-/* === 軸リーダー マスタ === */
 
 var PREP_STAFF_SEED=["かなえ","みみ","ゆかり"];
 function prepStaffEnsure(){
